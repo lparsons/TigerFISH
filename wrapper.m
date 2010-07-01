@@ -8,7 +8,7 @@ if isempty( Path ), Path = 1; end
 if isnumeric( Path )
     switch Path
         case{ 1, 'nslavov' }
-            Path = '/Genomics/fafner/grid/users/nslavov/fish_img/';  t = cputime;
+            Path = '/Genomics/grid/users/nslavov/locSpot/fish_img/';  t = cputime;
             Path = [Path 'new/nslavov/' ];
             nm = 'my'; 
             FirstLetter = 'N';
