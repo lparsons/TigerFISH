@@ -29,22 +29,26 @@ if numel( rna ) > N
 	
 	%The simplest approach is to assume that the spots with the highest intensities are mRNAs and apply the algorithm 
 	% only to the N dimmest spots above a threshold
-	vals = sort( rna, 'descend' );
+	vals = sort( rna, 'ascend' );
 	Start_Index = numel( rna )-N+1; 
 	rna = vals( 1:N );
 end
 
+% Vector of probabilities that the spots are not mRNAs
 no_rna = 1 - rna;
 
 
 allInds = 1:length(rna); 
 
-%Zero RNAs
+%Probability that the cell has zero RNAs
 prob(1) = prod( no_rna );
 
 
-% N RNAs
+% Adds path to the combinator function used in the loop below 
+addpath combinator
 addpath bin/combinator
+
+%Probabilities that the cell has i RNAs
 for i = 1:length(rna) 	%max(2, length(rna)-10)
 	
 	 ind = combinator( length(rna), i, 'c' );
@@ -59,7 +63,7 @@ for i = 1:length(rna) 	%max(2, length(rna)-10)
 end
 
 
-
+% Visualizes the result and checks for accuracy. It should be commented when the function is used for work beyond the development stage 
 plot( prob )
 fprintf( '%1.5f\n',  sum( prob ) )
 
