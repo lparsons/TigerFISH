@@ -5,18 +5,38 @@ function prob = spotProb( rna )
 
 if nargin < 1, rna =  [ .9, .8, .7, .88, .65, .75 ]; end 
 
+
+Start_Index = 1;
+%Initialize the vector of probabilities for different number of mRNAs
+prob = zeros( 1, length(rna)+1 );
+
 % If the number of spots is large, computing the full Multinomial becomes rather expensive. 
 % To avoid combinatoril increase in complexity, the spots are grouped into N number of grous
 N = 12;
 if numel( rna ) > N
-	rna1 = rna;
-	[IDX, rna] = kmeans(rna, N)
+	%rna1 = rna;
+	% One approach is to use k-mean clusters which is very natural but since the size of each cluster 
+	% can be different that requires tracking indecies which is rather complicated 
+	%[IDX, rna] = kmeans(rna, N);
+	
+	%Another, (simpler) approximation is to make the clusters the same size
+	%ClusterSize = floor( numel( rna ) / N );
+	%Mod =  numel( rna ) - N*ClusterSize;
+	%Start_Index = 2+ Mod;
+	%if ClusterSize>1
+	%	rna = zeros( N+Mod, 1 );	
+	%end
+	
+	%The simplest approach is to assume that the spots with the highest intensities are mRNAs and apply the algorithm 
+	% only to the N dimmest spots above a threshold
+	vals = sort( rna, 'descend' );
+	Start_Index = numel( rna )-N+1; 
+	rna = vals( 1:N );
 end
 
 no_rna = 1 - rna;
 
-%Initialize the vector of probabilities for different number of mRNAs
-prob = zeros( 1, length(rna)+1 );
+
 allInds = 1:length(rna); 
 
 %Zero RNAs
@@ -25,17 +45,29 @@ prob(1) = prod( no_rna );
 
 % N RNAs
 addpath bin/combinator
-for i = max(2, length(rna)-10):length(rna)
+for i = 1:length(rna) 	%max(2, length(rna)-10)
 	
 	 ind = combinator( length(rna), i, 'c' );
 	 
 	 for j = 1:size( ind, 1)
 
-			prob(1+i) = prob(1+i) +  prod( rna( ind(j,:) ) ) * prod( no_rna(  setdiff( allInds, ind(j,:) ) ) );
+			prob(Start_Index+i) = ...
+			prob(Start_Index+i) +  prod( rna( ind(j,:) ) ) * prod( no_rna(  setdiff( allInds, ind(j,:) ) ) );
 	end		
 
 
 end
 
+
+
 plot( prob )
 fprintf( '%1.5f\n',  sum( prob ) )
+
+
+
+
+
+
+
+
+
