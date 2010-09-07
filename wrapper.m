@@ -1,8 +1,29 @@
-function wrapper( Path, Experiment_Numbers )
-
+function wrapper( Path, Experiment_Numbers, varargin )
+% wrapper Identifies images in Path and creates .csv files to use when
+% processing
+%
+%   [IMAGES, EXPERIMENTS] = wrapper(path, experiment_numbers, filemask, output_dir) 
+%       Examines 'path' for experiments listed in 'experiment_numbers' and
+%       categorizes them into CY3, CY3.5, CY5, and DAPI images
+%
+%       IMAGES - cell array of images files.  Each row represents one
+%       region.  Columns are: CY3, CY3.5, CY5, DAPI
+%
+%       EXPERIMENTS - list of experiments, and which genes are represented
+%       by each dye
 
 warning off
 addpath bin/ % /Genomics/fafner  % /Genomics/fafner/grid/users/nslavov/
+
+%% Parse Arguments
+
+i_p = inputParser;
+i_p.FunctionName = 'wrapper';
+i_p.addOptional('filemask','*',@ischar);
+i_p.addOptional('output_dir','.',@ischar);
+i_p.parse(varargin{:});
+nm = i_p.Results.output_dir;
+filemask = i_p.Results.filemask;
 
 if isempty( Path ), Path = 1; end
 if isnumeric( Path )
@@ -11,34 +32,30 @@ if isnumeric( Path )
             Path = '/Genomics/grid/users/nslavov/locSpot/fish_img/';  t = cputime;
             Path = [Path 'new/nslavov/' ];
             nm = 'my'; 
-            FirstLetter = 'N';
+            filemask = 'N*';
         case{ 2, 'sandy' }
             Path = 'fish_img/'; 
             Path = [Path 'new/' ];   
             nm = 'all'; 
-            FirstLetter = 'E';
+            filemask = 'E*';
     end
 end
 
 
 
-Folder.Output = nm;                           mkdir( Folder.Output );
-Folder.spOut = [nm '/out'];                  mkdir( Folder.spOut );
-Folder.img =   [nm '.imgs'];                mkdir( Folder.img );
-Folder.hist =  [nm '.hist'];                    mkdir( Folder.hist );
-Folder.PMF =   [nm '.jdis'];                 mkdir( Folder.PMF );
+Folder.Output = nm;          mkdir( Folder.Output );
+Folder.spOut = [nm '/out'];  mkdir( Folder.spOut );
+Folder.img =   [nm '.imgs']; mkdir( Folder.img );
+Folder.hist =  [nm '.hist']; mkdir( Folder.hist );
+Folder.PMF =   [nm '.jdis']; mkdir( Folder.PMF );
 
 
 
-
-main_dir_list = dir( Path );
-
-
-
+%% Loop through files in directory
+main_dir_list = dir( [Path filesep filemask] );
 for I = 1: size(main_dir_list,1)
 
-    if   strcmp( main_dir_list(I).name(1),  '.' ) ||...
-       ~strcmp( main_dir_list(I).name(1),  FirstLetter ) 
+    if   strcmp( main_dir_list(I).name(1),  '.' )  
          continue
     end
     
@@ -49,11 +66,6 @@ for I = 1: size(main_dir_list,1)
     if ~ismember( Experiment_Number, Experiment_Numbers  ) % sum( Experiment_Number == Experiment_Numbers  ) 
         continue
     end
-    
-    
-    
-    
-    
     
     Set = main_dir_list(I).name;
 	subDir_list = dir( [Path Set filesep] );
@@ -137,11 +149,5 @@ for I = 1: size(main_dir_list,1)
    fprintf( '%s\tCCY3.5\n', Segments{3} )
    fprintf( '%s\tCCY5\n', Segments{4} )
    fprintf( '%s\tCDAPI\n', 'DNA' )
-   
-    
-
-        
-   
-   
    
 end   

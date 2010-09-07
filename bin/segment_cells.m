@@ -4,9 +4,11 @@
 % http://blogs.mathworks.com/steve/2006/06/02/cell-segmentation/ and in
 % Cohen et al. http://www.sciencemag.org/cgi/content/abstract/322/5907/1511
 
-function Maps = segment_cells(image_input, outputdir)
+function cellMap = segment_cells(image_input)
 
 %% Configuration
+% Number of layers above a below the best infocus layer to use
+layers_around_focus = 3;
 
 % Morphological open structure
 morphOpenStruct = ones(5,5);
@@ -17,14 +19,6 @@ minCellSize = 40;
 % Cell border thickening (pixels)
 cellBorderThicken = 5;
 
-%% Read in image file
-% filename = 'images/raw/E50_sur4_nop1_yef3/E50_R1_sur4_nop1_yef3/dapi_001.tif';
-% filename = 'images/E50_R5_sur4_nop1_yef3_dapi.tif';
-% filename = 'images/E10_R2_sur4_ygp1_yef3_DAPI.tif';
-% filename = 'E12_R1_yor285w_utr2_yef3_DAPI.tif';
-% filename = 'E12_R2_yor285w_utr2_yef3_DAPI.tif';
-
-% I = imread(filename);
 
 %% Load image file if not already loaded
 if (ischar(image_input)) 
@@ -36,16 +30,21 @@ end
 % Parse filename
 [pathstr, name, ext, versn] = fileparts(image.filename);
 
+%% Find best focus layer and use a few layers around that
+num_stacks = length(image.info);
+in_focus_layer = best_focus_layer(image.layers);
+bottom_layer = max(1,in_focus_layer-layers_around_focus);
+top_layer = min(num_stacks,in_focus_layer+layers_around_focus);
+max_image = max(image.layers(:,:,bottom_layer:top_layer),[],3);
+
 
 %% Scale image values
-I_sc = mat2gray(image.max);
+I_sc = mat2gray(max_image);
 
 %% Adaptive contrast enhancement 
-% adapthisteq implements a technique called contrast-limited adaptive histogram equalization, or CLAHE.
+% adapthisteq implements a technique called contrast-limited adaptive
+% histogram equalization, or CLAHE.
 I_eq = adapthisteq(I_sc);
-%I_eq = imadjust(I);
-%figure, imshow(I_eq);
-
 
 %% Separate cells from background
 %
@@ -71,10 +70,13 @@ bw3 = imopen(bw2, morphOpenStruct);
 %   Remove those below specified value
 bw4 = bwareaopen(bw3, minCellSize);
 
+% Morphological closing (dilation followed by erosion).
+bw5 = bwmorph(bw4, 'close');
+
 % With n = Inf, thickens objects by adding pixels to the exterior of
 % objects until doing so would result in previously unconnected objects
 % being 8-connected. This option preserves the Euler number.
-bw5 = bwmorph(bw4, 'thicken', cellBorderThicken);
+bw6 = bwmorph(bw5, 'thicken', cellBorderThicken);
 
 % Get a binary image containing only the perimeter pixels of objects in
 % the input image BW1. A pixel is part of the perimeter if it is nonzero
@@ -108,7 +110,6 @@ mask_em = imfill(mask_em, 'holes');
 % Remove small objects
 mask_em = bwareaopen(mask_em, 40);
 
-Maps.nuc = bwlabel( mask_em );
 % Create an overlay to view
 %overlay2 = imoverlay(I_eq, bw5_perim | mask_em, [.3 1 .3]);
 %figure, imshow(overlay2);
@@ -120,7 +121,7 @@ I_sc_c = imcomplement(I_sc);
 
 % modify the image so that the background pixels and the extended maxima
 % pixels are forced to be the only local minima in the image. 
-I_mod = imimposemin(I_sc_c, ~bw5 | mask_em);
+I_mod = imimposemin(I_sc_c, ~bw6 | mask_em);
 
 % Compute the watershed transform
 L = watershed(I_mod);
@@ -131,29 +132,20 @@ S = regionprops(L, 'Area');
 % Discard background (largest)
 cellMap = ismember(L, find([S.Area] < max([S.Area])));
 
-%[Maps.cells Maps.CellNum] = bwlabel( cellMap );
-[Maps.cellsPerim Maps.cells Maps.CellNum] = bwboundaries(cellMap);
-
-
-
-
-
-
-
+% Remove spur pixels
+cellMap = bwmorph(cellMap, 'spur', Inf);
 
 % Output
-if 0 & nargin > 1
-    [s,mess,messid] = mkdir(outputdir);
-    % Cell Map
-    imwrite(cellMap, [outputdir filesep name '_cellmap.tif']);
-    % Cell Map Colored
-    cellMapRgb = label2rgb(bwlabel(cellMap), 'jet', 'k');
-    imwrite(cellMapRgb, [outputdir filesep name '_cellmap_rgb.tif']);
-    % Cell Perimeter
-    cell_perim = bwperim(cellMap);
-    cell_overlay = imoverlay(I_sc, cell_perim, [.3 .3 1]);
-    imwrite(cell_overlay, [outputdir filesep name '_cellmap_overlay.tif']);
-end
+%[s,mess,messid] = mkdir(outputdir);
+% Cell Map
+%imwrite(cellMap, [outputdir filesep name '_cellmap.tif']);
+% Cell Map Colored
+%cellMapRgb = label2rgb(bwlabel(cellMap), 'jet', 'k');
+%imwrite(cellMapRgb, [outputdir filesep name '_cellmap_rgb.tif']);
+% Cell Perimeter
+%cell_perim = bwperim(cellMap);
+%cell_overlay = imoverlay(I_sc, cell_perim, [.3 .3 1]);
+%imwrite(cell_overlay, [outputdir filesep name '_cellmap_overlay.tif']);
 %figure, imshow(I), hold on
 %himage = imshow(Lrgb);
 %set(himage, 'AlphaData', 0.3);

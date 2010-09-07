@@ -4,10 +4,13 @@ image.filename = filename;
 
 % Read image layers
 image.info = imfinfo( filename );
-image.layers = zeros(image.info(1).Height, image.info(1).Width, max(size(image.info)) );
-for i=1:1:size( image.info, 1 )
-    image.layers(:,:,i) = imread( filename, i );
-	%image.layers_grey(:,:,i) = mat2gray( image.layers(:,:,i) ); 
+image.layers = zeros(image.info(1).Height, image.info(1).Width, numel(image.info));
+for i=1:1:numel(image.info);
+    try
+        image.layers(:,:,i) = imread( filename, i, 'Info', image.info );
+    catch e
+        image.layers(:,:,i) = imread( filename, i);
+    end
 end
 
 % Compute 16-bit max and std projections
