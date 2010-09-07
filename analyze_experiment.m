@@ -10,7 +10,7 @@ addpath bin/
 %% Parse Arguments
 
 i_p = inputParser;
-i_p.FunctionName = 'analyze_region';
+i_p.FunctionName = 'analyze_experiment';
 i_p.addRequired('region_file_list',@iscellstr);
 i_p.addRequired('output_dir',@ischar);
 i_p.parse(varargin{:});

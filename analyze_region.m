@@ -3,14 +3,21 @@ function [cell_map spot_data] = analyze_region( varargin )
 %   intensities
 %
 %   [CELL_MAP, SPOT_DATA] = analyze_region( cy3file, cy3_5file, cy5file,
-%       dapifile, output_dir )
+%       dapifile )
 %
 %       CELL_MAP = logical matrix that identifies cells
 %       SPOT_DATA = data structure with fields for cy3, cy3.5, cy5
 %           each field contains a matrix with spot locations and intenties
-%           Columns: x, y, z, intensity
+%           Columns: x, y, z, intensity, cell_number, cell_type    
+%               cell_types: 0 - normal, 1 - edge, 2 - background
 %   
 %
+%   [CELL_MAP, SPOT_DATA] = analyze_region( cy3file, cy3_5file, cy5file,
+%       dapifile, output_dir )
+%
+%       If output_dir is specified, transparent, enchanced projections are
+%           written to the directory for each dye.
+
 addpath bin/
 
 %% Parse Arguments
@@ -47,6 +54,22 @@ spot_data.cy3 = measure_spots(spot_locations.cy3, cy3_image);
 spot_data.cy3_5 = measure_spots(spot_locations.cy3_5, cy3_5_image);
 spot_data.cy5 = measure_spots(spot_locations.cy5, cy5_image);
 
+% Merge spots
+duplicate_threshold = 5;
+spot_data.cy3 = merge_spots(spot_data.cy3, duplicate_threshold);
+spot_data.cy3_5 = merge_spots(spot_data.cy3_5, duplicate_threshold);
+spot_data.cy5 = merge_spots(spot_data.cy5, duplicate_threshold);
+
+% Spot to cell mapping
+if (~isempty(spot_data.cy3)) 
+    spot_data.cy3(:,5:6) = map_spots_to_cells(cell_map, spot_data.cy3(:,1:3), []);
+end
+if (~isempty(spot_data.cy3_5))
+    spot_data.cy3_5(:,5:6) = map_spots_to_cells(cell_map, spot_data.cy3_5(:,1:3), []);
+end
+if (~isempty(spot_data.cy5))
+    spot_data.cy5(:,5:6) = map_spots_to_cells(cell_map, spot_data.cy5(:,1:3), []);
+end
 
 %% Write colorized, transparent spot enhanced images
 if (~ strcmp(ip.Results.output_dir, ''))
@@ -73,6 +96,8 @@ if (~ strcmp(ip.Results.output_dir, ''))
     imwrite(ones(size(max_cy5_image_adj)), [ip.Results.output_dir filesep  NAME '_projection.png'], 'png', 'Alpha', max_cy5_image_adj);
 end
 
+end
+
 %% Subfunctions
 
 function max_image_adj = projected_image(image_max_project, image_layers, num_layers)
@@ -86,3 +111,4 @@ top_layer = min(size(image_layers,3),in_focus_layer+num_layers);
 max_image = max(image_layers(:,:,bottom_layer:top_layer),[],3);
 max_image = mat2gray(max_image, [b(10), b(end-10)]);
 max_image_adj = imadjust(max_image,[],[0, .8],3);
+end
