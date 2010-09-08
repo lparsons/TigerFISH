@@ -77,23 +77,23 @@ if (~ strcmp(ip.Results.output_dir, ''))
     layers_around_focus = 3;
 
     max_dapi_image_adj = projected_image(dapi_image.max, dapi_image.layers, layers_around_focus);
-    [PATHSTR,NAME,EXT,VERSN] = fileparts(ip.Results.dapifile);
+    %[PATHSTR,NAME,EXT,VERSN] = fileparts(ip.Results.dapifile);
     B = cat(3,zeros(size(max_dapi_image_adj)),zeros(size(max_dapi_image_adj)),ones(size(max_dapi_image_adj)));
-    imwrite(B, [ip.Results.output_dir filesep  NAME '_projection.png'], 'png', 'Alpha', max_dapi_image_adj);
+    imwrite(B, [ip.Results.output_dir filesep  'dapi_projection.png'], 'png', 'Alpha', max_dapi_image_adj);
 
     max_cy3_image_adj = projected_image(cy3_image.max, cy3_image.layers, layers_around_focus);
-    [PATHSTR,NAME,EXT,VERSN] = fileparts(ip.Results.cy3file);
+    %[PATHSTR,NAME,EXT,VERSN] = fileparts(ip.Results.cy3file);
     G = cat(3,zeros(size(max_cy3_image_adj)),ones(size(max_cy3_image_adj)),zeros(size(max_cy3_image_adj)));
-    imwrite(G, [ip.Results.output_dir filesep  NAME '_projection.png'], 'png', 'Alpha', max_cy3_image_adj);
+    imwrite(G, [ip.Results.output_dir filesep 'cy3_projection.png'], 'png', 'Alpha', max_cy3_image_adj);
 
     max_cy3_5_image_adj = projected_image(cy3_5_image.max, cy3_5_image.layers, layers_around_focus);
-    [PATHSTR,NAME,EXT,VERSN] = fileparts(ip.Results.cy3_5file);
+    %[PATHSTR,NAME,EXT,VERSN] = fileparts(ip.Results.cy3_5file);
     R = cat(3,ones(size(max_cy3_5_image_adj)),zeros(size(max_cy3_5_image_adj)),zeros(size(max_cy3_5_image_adj)));
-    imwrite(R, [ip.Results.output_dir filesep  NAME '_projection.png'], 'png', 'Alpha', max_cy3_5_image_adj);
+    imwrite(R, [ip.Results.output_dir filesep 'cy3_5_projection.png'], 'png', 'Alpha', max_cy3_5_image_adj);
 
     max_cy5_image_adj = projected_image(cy5_image.max, cy5_image.layers, layers_around_focus);
-    [PATHSTR,NAME,EXT,VERSN] = fileparts(ip.Results.cy5file);
-    imwrite(ones(size(max_cy5_image_adj)), [ip.Results.output_dir filesep  NAME '_projection.png'], 'png', 'Alpha', max_cy5_image_adj);
+    %[PATHSTR,NAME,EXT,VERSN] = fileparts(ip.Results.cy5file);
+    imwrite(ones(size(max_cy5_image_adj)), [ip.Results.output_dir filesep 'cy5_projection.png'], 'png', 'Alpha', max_cy5_image_adj);
 end
 
 end
