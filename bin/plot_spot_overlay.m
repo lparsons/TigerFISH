@@ -6,10 +6,11 @@ ip.addRequired('spot_data',@isnumeric);
 ip.addRequired('threshold',@isnumeric);
 ip.addRequired('plot_size',@isnumeric);
 ip.addOptional('fgcolor',[1 1 1], @isnumeric);
-ip.addOptional('bgcolor',[.2 .2 .2], @isnumeric);
+ip.addOptional('bgcolor',[.4 .4 .4], @isnumeric);
+ip.addOptional('N',1, @isnumeric);
 ip.parse(varargin{:});
 
-N = 2;  % Divider for size until the picture has a "good" size on screen
+N = ip.Results.N;  % Divider for size until the picture has a "good" size on screen
 
 % Threshold spots
 xx0 = ip.Results.spot_data(ip.Results.spot_data(:,4)<=ip.Results.threshold,1);
@@ -31,8 +32,8 @@ set(gca, 'Units', 'normalized', 'Position', [0,0,1,1]);
 set(gca, 'Units', 'points');
 
 hold on;
-plot(xx0,yy0,'o','MarkerSize',4, 'Color',ip.Results.bgcolor);
-plot(xx1,yy1,'o','MarkerSize',4, 'Color',ip.Results.fgcolor);
+plot(xx0,yy0,'o','MarkerSize',10/N, 'Color',ip.Results.bgcolor);
+plot(xx1,yy1,'o','MarkerSize',10/N, 'Color',ip.Results.fgcolor);
 %plot(xx2,yy2,'o','MarkerSize',4, 'MarkerColor',ip.Results.bgcolor);
 axis image; set(gca,'YDir','reverse');
 xlim([1 ip.Results.plot_size(2)]); ylim([1 ip.Results.plot_size(1)]);

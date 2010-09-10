@@ -10,3 +10,6 @@ Quick usage guide
 
 2) Analyze experiment set (currently only Lance's method implemented)
 	a) experiment_set_data = analyze_experiment_set(experiment_set, 'output')
+
+3) Run generateFishView.py to generate HTML viewing pages
+    a) pythong generateFishView.py path/to/results -n 'Experiment Set Name'
