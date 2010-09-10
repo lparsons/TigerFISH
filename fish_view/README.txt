@@ -7,6 +7,7 @@ Requirements
 ------------
 Python (tested in 2.6)
 Mako template engine (http://www.makotemplates.org/)
+Ghostscript (gs) available in the PATH (for PDF to PNG conversion)
 
 Usage
 -----

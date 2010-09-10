@@ -58,6 +58,18 @@ class Experiment(object):
     
     def abs_directory(self):
         return os.path.join(self.root_directory, self.directory)
+    
+    def histogram(self, dye, format='png'):
+        filename = ''
+        if format == 'pdf':
+            filename = '%s_spot_intensity_histogram.pdf' % dye
+        elif format == 'png':
+            filename = '%s_spot_intensity_histogram.png' % dye
+            if not os.path.exists(os.path.join(self.abs_directory(), filename)):
+                cmd = "gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=png16m -dGraphicsAlphaBits=4 -dTextAlphaBits=4 -sOutputFile='%s' '%s'" % (os.path.join(self.abs_directory(), filename), os.path.join(self.abs_directory(), self.histogram(dye, 'pdf')))
+                print cmd
+                os.system(cmd)
+        return filename
                 
                 
 class Region(object):

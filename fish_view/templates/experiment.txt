@@ -1,16 +1,36 @@
 <html>
 <head>
+<style type="text/css">
+div#histograms {
+	width: 100%;
+}
+ul#histogram_list {
+	padding: 0px;
+}
+ul#histogram_list li {
+	display: inline;
+	list-style-type: none;
+	padding: 0px;
+}
+ul#histogram_list li img {
+	width: 33%;
+	border: none;
+	
+}
+</style>
 </head>
 <body>
 
 <h1>${experiment.name}</h1>
 
-<h3>Spot Intensity Histograms</h3>
-<ul>
-<li><a href="cy3_spot_intensity_histogram.pdf">Cy3 Histogram (PDF)</a></li>
-<li><a href="cy3_5_spot_intensity_histogram.pdf">Cy3.5 Histogram (PDF)</a></li>
-<li><a href="cy5_spot_intensity_histogram.pdf">Cy5 Histogram (PDF)</a></li>
-</ul>
+<div id='histograms'>
+	<h3>Spot Intensity Histograms</h3>
+	<ul id='histogram_list'>
+		<li><a href="${experiment.histogram('cy3', 'pdf')}"><img src="${experiment.histogram('cy3', 'png')}" alt="Cy3 Histogram" /></a></li>
+		<li><a href="${experiment.histogram('cy3_5', 'pdf')}"><img src="${experiment.histogram('cy3_5', 'png')}" alt="Cy3.5 Histogram" /></a></li>
+		<li><a href="${experiment.histogram('cy5', 'pdf')}"><img src="${experiment.histogram('cy5', 'png')}" alt="Cy5 Histogram" /></a></li>
+	</ul>
+</div>
 
 <h3>Regions</h3>
 <ul>
