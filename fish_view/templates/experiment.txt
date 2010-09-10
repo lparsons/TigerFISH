@@ -1,0 +1,20 @@
+<html>
+<head>
+</head>
+<body>
+
+<h1>${experiment.name}</h1>
+
+<h3>Spot Intensity Histograms</h3>
+<ul>
+<li><a href="cy3_spot_intensity_histogram.pdf">Cy3 Histogram (PDF)</a></li>
+<li><a href="cy3_5_spot_intensity_histogram.pdf">Cy3.5 Histogram (PDF)</a></li>
+<li><a href="cy5_spot_intensity_histogram.pdf">Cy5 Histogram (PDF)</a></li>
+</ul>
+
+<h3>Regions</h3>
+<ul>
+% for r in experiment.regions:
+    <li><a href="${r.index_file()}">${r.name}</a></li>
+% endfor
+</ul>

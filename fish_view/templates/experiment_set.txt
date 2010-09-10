@@ -1,0 +1,13 @@
+<html>
+<head>
+</head>
+<body>
+<h1>${experiment_set.name}</h1>
+<h3>Spot Counts</h3>
+<a href="spot_counts.csv">spot_counts.csv</a>
+<h3>Experiments</h3>
+<ul>
+% for e in experiment_set.experiments:
+    <li><a href="${e.directory}/index.html">${e.name}</a></li>
+% endfor
+</ul>

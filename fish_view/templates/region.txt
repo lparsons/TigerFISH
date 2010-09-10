@@ -1,0 +1,132 @@
+<html>
+<head>
+
+<script type="text/javascript">
+    function toggle_visibility(id,link) {
+       var e = document.getElementById(id);
+       if(e.style.display == 'block')
+          e.style.display = 'none';
+       else
+          e.style.display = 'block';
+       var e2 = document.getElementById(link);
+       if(e2.getAttribute("class") == "on")
+    	   e2.setAttribute("class", "off");
+        else
+        	e2.setAttribute("class", "on");
+    }
+
+</script>
+
+<style type="text/css">
+.on {background: #FF0; }
+.off {background: #FFF; }
+</style>
+
+
+</head>
+<body>
+
+<div id="region_header" style="position: fixed; z-index: 10000; background: white">
+<h1>${experiment.name} - ${region.name}</h1>
+<table>
+	<tr>
+		<td><a id="cy3_dye_switch"
+			class="on" href="#"
+			onclick="toggle_visibility('cy3_image','cy3_dye_switch');return false;">Cy3</a>
+		</td>
+		<td><a id="cy3_5_dye_switch"
+			class="on" href="#"
+			onclick="toggle_visibility('cy3_5_image','cy3_5_dye_switch');return false;">Cy3.5</a>
+		</td>
+		<td><a id="cy5_dye_switch"
+			class="on" href="#"
+			onclick="toggle_visibility('cy5_image','cy5_dye_switch');return false;">Cy5</a>
+		</td>
+		<td><a id="dapi_dye_switch"
+			class="on" href="#"
+			onclick="toggle_visibility('dapi_image','dapi_dye_switch');return false;">DAPI</a>
+		</td>
+	</tr>
+	<tr>
+		<td><a id="cy3_spots_switch"
+			class="off" href="#"
+			onclick="toggle_visibility('cy3_spots','cy3_spots_switch');return false;">Spots</a>
+		</td>
+		<td><a id="cy3_5_spots_switch"
+			class="off" href="#"
+			onclick="toggle_visibility('cy3_5_spots','cy3_5_spots_switch');return false;">Spots</a>
+		</td>
+		<td><a id="cy5_spots_switch"
+			class="off" href="#"
+			onclick="toggle_visibility('cy5_spots','cy5_spots_switch');return false;">Spots</a>
+		</td>
+		<td><a id="cell_outline_switch"
+			class="off" href="#"
+			onclick="toggle_visibility('cell_outline','cell_outline_switch');return false;">Cells</a>
+		</td>
+	</tr>
+</table>
+</div>
+
+<div id="image-container" style="background: black; display: inline-block; position: relative; top: 120px">
+	<div id="dapi_image" style="position: absolute; z-index: 1000; display: block"><img src="dapi_projection.png" /></div>
+	<div id="cy3_image" style="position: absolute; z-index: 1100; display: block"><img src="cy3_projection.png" /></div>
+	<div id="cy3_5_image" style="position: absolute; z-index: 1200; display: block"><img src="cy3_5_projection.png" /></div>
+	<div id="cy5_image" style="position: absolute; z-index: 1300; display: block"><img src="cy5_projection.png" /></div>
+	
+	<div id="cell_outline" style="position: absolute; z-index: 2000; display: none"><img src="cell_map.png" /></div>
+	<div id="cy3_spots" style="position: absolute; z-index: 2100; display: none"><img src="cy3_spot_image.png" /></div>
+	<div id="cy3_5_spots" style="position: absolute; z-index: 2200; display: none"><img src="cy3_5_spot_image.png" /></div>
+	<div id="cy5_spots" style="position: absolute; z-index: 2300; display: none"><img src="cy5_spot_image.png" /></div>
+	
+	<div id="bg_placeholder" style="position: relative; z-index: 0; display: block; visibility: hidden"><img src="cy5_projection.png" /></div>
+
+</div>
+
+<!--
+<div id="dapi_image_bright"
+	style="position: absolute; z-index: 1000; display: none"><img
+	src="/nslavov_experiments//experiment_images//NS1_POL30_SUR4_OM45/region_data/region_2.03_dapi_bright.png" /></div>
+<div id="cy3_image"
+	style="position: absolute; z-index: 2000; display: block"><img
+	src="/nslavov_experiments//experiment_images//NS1_POL30_SUR4_OM45/region_data/region_2.03_cy3_maxproject.png" /></div>
+<div id="cy3_image_bright"
+	style="position: absolute; z-index: 2500; display: none"><img
+	src="/nslavov_experiments//experiment_images//NS1_POL30_SUR4_OM45/region_data/region_2.03_cy3_maxproject_bright.png" /></div>
+<div id="cy3p5_image"
+	style="position: absolute; z-index: 3000; display: block"><img
+	src="/nslavov_experiments//experiment_images//NS1_POL30_SUR4_OM45/region_data/region_2.03_cy3p5_maxproject.png" /></div>
+
+<div id="cy3p5_image_bright"
+	style="position: absolute; z-index: 3005; display: none"><img
+	src="/nslavov_experiments//experiment_images//NS1_POL30_SUR4_OM45/region_data/region_2.03_cy3p5_maxproject_bright.png" /></div>
+<div id="cy5_image"
+	style="position: absolute; z-index: 4000; display: none"><img
+	src="/nslavov_experiments//experiment_images//NS1_POL30_SUR4_OM45/region_data/region_2.03_cy5_maxproject.png" /></div>
+<div id="cy5_image_bright"
+	style="position: absolute; z-index: 4005; display: none"><img
+	src="/nslavov_experiments//experiment_images//NS1_POL30_SUR4_OM45/region_data/region_2.03_cy5_maxproject_bright.png" /></div>
+<div id="cell_map"
+	style="position: absolute; z-index: 5000; display: block"><img
+	src="/nslavov_experiments//experiment_images//NS1_POL30_SUR4_OM45/region_data/region_2.03_cell_map.png" /></div>
+
+	<div id="lance_cy3_map"
+	style="position: absolute; z-index: 6000; display: none"><img
+	src="/nslavov_experiments//spot_data/lance/NS1_POL30_SUR4_OM45/region_data/region_2.03_cy3_spot_image.png" /></div>
+<div id="lance_cy3p5_map"
+	style="position: absolute; z-index: 6000; display: none"><img
+	src="/nslavov_experiments//spot_data/lance/NS1_POL30_SUR4_OM45/region_data/region_2.03_cy3p5_spot_image.png" /></div>
+<div id="lance_cy5_map"
+	style="position: absolute; z-index: 6000; display: none"><img
+	src="/nslavov_experiments//spot_data/lance/NS1_POL30_SUR4_OM45/region_data/region_2.03_cy5_spot_image.png" /></div>
+	<div id="nikolai_cy3_map"
+	style="position: absolute; z-index: 6000; display: none"><img
+	src="/nslavov_experiments//spot_data/nikolai/NS1_POL30_SUR4_OM45/region_data/region_2.03_cy3_spot_image.png" /></div>
+<div id="nikolai_cy3p5_map"
+	style="position: absolute; z-index: 6000; display: none"><img
+	src="/nslavov_experiments//spot_data/nikolai/NS1_POL30_SUR4_OM45/region_data/region_2.03_cy3p5_spot_image.png" /></div>
+<div id="nikolai_cy5_map"
+	style="position: absolute; z-index: 6000; display: none"><img
+	src="/nslavov_experiments//spot_data/nikolai/NS1_POL30_SUR4_OM45/region_data/region_2.03_cy5_spot_image.png" /></div>
+	</div>
+-->
