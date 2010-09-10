@@ -26,6 +26,8 @@ for r=1:size(regions,1)
                 dye_count(c+1) = sum(region_spot_data(:,5)==c & region_spot_data(:,4)>ip.Results.threshold.(dye) );
             end
             r_counts = horzcat(r_counts, dye_count);
+        else
+            r_counts = horzcat(r_counts, repmat(0,size(r_counts,1),1));
         end
     end
     counts = vertcat(counts, r_counts);

@@ -37,6 +37,10 @@ end
 %% Determine Thresholds
 
 dyes = fields(experiment_spot_data);
+dye_color.cy3 = [0 1 0];
+dye_color.cy3_5 = [1 0 0];
+dye_color.cy5 = [.8 .8 .8];
+
 for d=1:size(dyes,1)
     % Determine Thresholds - 90% outside spots threshold
     dye = dyes{d};
@@ -59,7 +63,7 @@ for d=1:size(dyes,1)
         for r=1:regions
             %if (~isempty(experiment_spot_data.(dye)))
             region_spot_data = experiment_spot_data.(dye)(experiment_spot_data.(dye)(:,1)==r,2:7);
-            spot_overlay = plot_spot_overlay(region_spot_data, threshold.(dye), size(experiment_cell_maps{r}));
+            spot_overlay = plot_spot_overlay(region_spot_data, threshold.(dye), size(experiment_cell_maps{r}), 'fgcolor', dye_color.(dye));
             % Print figure
             reg_output_dir = [ip.Results.output_dir filesep 'region_' num2str(r)];
             spot_overlay_filename = [reg_output_dir filesep dye '_spot_image.png'];
@@ -76,3 +80,7 @@ end
 %% Spot Count Summary
 % Summary report
 experiment_counts = spot_count_summary(experiment_spot_data, experiment_cell_maps, threshold);
+
+%% Save Results
+%csvwrite([ip.Results.output_dir filesep 'spot_counts.csv'], experiment_counts)
+%save([exp_output_dir filesep 'experiment.mat'], 'experiment')

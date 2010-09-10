@@ -5,8 +5,8 @@ ip.FunctionName = 'plot_spot_overlay';
 ip.addRequired('spot_data',@isnumeric);
 ip.addRequired('threshold',@isnumeric);
 ip.addRequired('plot_size',@isnumeric);
-ip.addOptional('bgcolor',[.2 .2 .2], @isnumeric);
 ip.addOptional('fgcolor',[1 1 1], @isnumeric);
+ip.addOptional('bgcolor',[.2 .2 .2], @isnumeric);
 ip.parse(varargin{:});
 
 N = 2;  % Divider for size until the picture has a "good" size on screen

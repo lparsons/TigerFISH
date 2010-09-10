@@ -1,5 +1,16 @@
-function experiment_list = parse_experiment_dir( input_dir, filemask, region_marker )
+function experiment_list = parse_experiment_dir( varargin )
 % Generate list of experiments, regions, and input image files
+
+%% Parse Arguments
+ip = inputParser;
+ip.addRequired('input_dir',@isdir);
+ip.addOptional('filemask','*',@ischar);
+ip.addOptional('region_marker','Position', @ischar);
+ip.parse(varargin{:});
+
+input_dir = ip.Results.input_dir;
+filemask = ip.Results.filemask;
+region_marker = ip.Results.region_marker;
 
 % Get unique experiment list
 exp_re = ['^(?<experiment>.+?)[\s-_]+' region_marker '[\s]+(?<region>[\d]+).+DAPI\.tiff$'];
@@ -21,19 +32,18 @@ exp_name_list = unique(exp_name_list, 'rows');
 experiment_list = [];
 for i=1:size(exp_name_list,2)
     experiment.name = exp_name_list{i};
-    experiment.regions = [];
+    experiment.regions = [];    
     exp_file_list = dir([input_dir filesep exp_name_list{i} '*DAPI.tiff']);
     for r=1:size(exp_file_list,1)
         renames = regexp(exp_file_list(r).name, exp_re, 'names');
         if ~isempty(renames)
             experiment.regions = [experiment.regions, {renames.region}];
-
          end
     end
-    experiment.regions = unique(experiment.regions);
+    experiment.regions = unique(experiment.regions)';
     experiment.region_files = [];
     % For each region, get files
-    for r=1:size(experiment.regions,2)
+    for r=1:size(experiment.regions,1)
         %fprintf('Exp: %s\tRegion: %s\n', experiment.name, experiment.regions{r});
         exp_reg_file_list = dir([input_dir filesep exp_name_list{i} '*' region_marker ' ' experiment.regions{r} '*.tiff']);
         region_files = [];
