@@ -11,6 +11,7 @@ fid = fopen(filename);
 data = textscan(fid, '%s\t%s\t%s\t%s\t%s\t%s', 'Delimiter', '\t');
 exp_names = unique(data{1}, 'rows');
 for e=1:size(exp_names,1)
+    clear experiment
     experiment.name = exp_names{e};
     exp_rows = strcmp(data{1},experiment.name);
     experiment.regions = data{2}(exp_rows);
