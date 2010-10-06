@@ -34,7 +34,7 @@ if isnumeric( Path )
             nm = 'my';
             filemask = 'N*';
         case{ 2, 'sandy' }
-            Path = 'fish_img/';
+            Path = '/Genomics/grid/users/nslavov/locSpot/fish_img/';
             Path = [Path 'new/' ];
             nm = 'all';
             filemask = 'E*';
