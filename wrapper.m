@@ -1,19 +1,25 @@
-function wrapper( Path, Experiment_Numbers, varargin )
-% wrapper Identifies images in Path and creates .csv files to use when
-% processing
+function experiment_set = wrapper( Path, Experiment_Numbers, varargin )
+% wrapper function identifies images in Path with specified experiment 
+%    numbers and outputs a list of data structures to use when processing.
+%    Used when experiments are in separate directories and numbered.
+%    For situations where all experiments are in same directory, use 
+%       'parse_experiment_dir' function instead.
 %
-%   [IMAGES, EXPERIMENTS] = wrapper(path, experiment_numbers, filemask, output_dir)
+%   [EXPERIMENT_SET] = wrapper(path, experiment_numbers, filemask, output_dir)
 %       Examines 'path' for experiments listed in 'experiment_numbers' and
 %       categorizes them into CY3, CY3.5, CY5, and DAPI images
 %
-%       IMAGES - cell array of images files.  Each row represents one
-%       region.  Columns are: CY3, CY3.5, CY5, DAPI
+%       EXPERIMENT_SET - list experiment data structures
+%           experiment.name - name of experiment
+%           experiment.regions - list of experiment regions
+%           experiment.region_files - list of files used for each region
+%               (,1) = Cy3_file
+%               (,2) = Cy3.5_file
+%               (,3) = Cy5_file
+%               (,4) = DAPI_file
 %
-%       EXPERIMENTS - list of experiments, and which genes are represented
-%       by each dye
 
-%warning off
-addpath bin/ % /Genomics/fafner  % /Genomics/fafner/grid/users/nslavov/
+addpath bin/
 
 %% Parse Arguments
 
@@ -51,7 +57,8 @@ Folder.PMF =   [nm '.jdis']; mkdir( Folder.PMF );
 
 
 %% Open output file
-output_file = fopen([Folder.Output filesep 'experiment_list.txt'], 'w');
+output_filename = [Folder.Output filesep 'experiment_list.txt'];
+output_file = fopen(output_filename, 'w');
 
 
 %% Loop through files in directory
@@ -155,4 +162,11 @@ for I = 1: size(main_dir_list,1)
     fprintf( '%s\tCCY5\n', Segments{4} );
     fprintf( '%s\tCDAPI\n', 'DNA' );
     
+end
+fclose(output_file);
+
+% Read output_file and parse into experiment_set datastructure
+% TODO Refactor this to create data structure directly
+experiment_set = parse_experiment_list_file(output_filename);
+
 end
