@@ -49,16 +49,34 @@ spot_locations.cy3_5 = find_spots(cy3_5_image);
 cy5_image = load_image(ip.Results.cy5file);
 spot_locations.cy5 = find_spots(cy5_image);
 
+
+% Quick Fix for running both algorithms on the same spots. It has to be cleaned
+spot_locations.cy3 = filter_border_spots( spot_locations.cy3 );
+spot_locations.cy3_5 = filter_border_spots( spot_locations.cy3_5 );
+spot_locations.cy5 = filter_border_spots( spot_locations.cy5 );
+
+
 % Measure spots
-spot_data.cy3 = measure_spots(spot_locations.cy3, cy3_image);
-spot_data.cy3_5 = measure_spots(spot_locations.cy3_5, cy3_5_image);
-spot_data.cy5 = measure_spots(spot_locations.cy5, cy5_image);
+% spot_data.cy3 = measure_spots(spot_locations.cy3, cy3_image);
+% spot_data.cy3_5 = measure_spots(spot_locations.cy3_5, cy3_5_image);
+% spot_data.cy5 = measure_spots(spot_locations.cy5, cy5_image);
+
+
+%keyboard
+% Measure spots using Nikolai's Non-Parametric method 
+[spot_data.cy3 sb.cy3] = measure_spots_np(spot_locations.cy3, cy3_image);
+[spot_data.cy3_5 sb.cy3_5] = measure_spots_np(spot_locations.cy3_5, cy3_5_image);
+[spot_data.cy5 sb.cy5] = measure_spots_np(spot_locations.cy5, cy5_image);
+
+
 
 % Merge spots
 duplicate_threshold = 5;
 spot_data.cy3 = merge_spots(spot_data.cy3, duplicate_threshold);
 spot_data.cy3_5 = merge_spots(spot_data.cy3_5, duplicate_threshold);
 spot_data.cy5 = merge_spots(spot_data.cy5, duplicate_threshold);
+
+
 
 % Spot to cell mapping
 if (~isempty(spot_data.cy3)) 
