@@ -57,9 +57,9 @@ spot_locations.cy5 = filter_border_spots( spot_locations.cy5 );
 
 
 % Measure spots
-% spot_data.cy3 = measure_spots(spot_locations.cy3, cy3_image);
-% spot_data.cy3_5 = measure_spots(spot_locations.cy3_5, cy3_5_image);
-% spot_data.cy5 = measure_spots(spot_locations.cy5, cy5_image);
+%spot_data.cy3 = measure_spots(spot_locations.cy3, cy3_image);
+%spot_data.cy3_5 = measure_spots(spot_locations.cy3_5, cy3_5_image);
+%spot_data.cy5 = measure_spots(spot_locations.cy5, cy5_image);
 
 
 %keyboard
@@ -71,11 +71,12 @@ spot_locations.cy5 = filter_border_spots( spot_locations.cy5 );
 
 
 % Merge spots
+% Use original (not modified) spot locations for consistency between
+% algorithms
 duplicate_threshold = 5;
-spot_data.cy3 = merge_spots(spot_data.cy3, duplicate_threshold);
-spot_data.cy3_5 = merge_spots(spot_data.cy3_5, duplicate_threshold);
-spot_data.cy5 = merge_spots(spot_data.cy5, duplicate_threshold);
-
+spot_data.cy3 = merge_spots(replace_locations(spot_locations.cy3, spot_data.cy3), duplicate_threshold);
+spot_data.cy3_5 = merge_spots(replace_locations(spot_locations.cy3_5, spot_data.cy3_5), duplicate_threshold);
+spot_data.cy5 = merge_spots(replace_locations(spot_locations.cy5, spot_data.cy5), duplicate_threshold);
 
 
 % Spot to cell mapping
@@ -117,6 +118,12 @@ end
 end
 
 %% Subfunctions
+
+function original_spot_locs = replace_locations(spot_locations, spot_data)
+    % Replace spot locations in spot_data with original locations
+    [x y z] = ind2sub( size(spot_locations), find( spot_locations ) );
+    original_spot_locs = [y x z spot_data(:,4:end)];
+end
 
 function max_image_adj = projected_image(image_max_project, image_layers, num_layers)
 % max_image_adj - Return projection of infocus region of image, enhanced to

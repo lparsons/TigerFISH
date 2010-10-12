@@ -23,11 +23,11 @@ def main():
     parser.add_option("-n", "--name", dest="set_name", type="string", help="Name of the Experiment Set")
     (opts, args) = parser.parse_args()
     
-    if len(sys.argv) < 2:
+    if len(args) < 1:
         parser.print_help()
         sys.exit()
         
-    results_directory = sys.argv[1]
+    results_directory = args[0]
     
     if (opts.set_name):
         set_name = opts.set_name
