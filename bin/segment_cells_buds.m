@@ -64,6 +64,10 @@ mask_em = imfill(mask_em, 'holes');
 mask_em = bwareaopen(mask_em, 20);
 
 [Maps.nuc Maps.nucNum]  = bwlabeln( mask_em );
+Maps.nucMaxproj = cell( Maps.nucNum, 1 ); 
+for i=1:Maps.nucNum
+	Maps.nucMaxproj{i} = Maps.MaxProj( Maps.nuc==i ); 
+end
 
 
 
