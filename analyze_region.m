@@ -56,27 +56,27 @@ spot_locations.cy3_5 = filter_border_spots( spot_locations.cy3_5 );
 spot_locations.cy5 = filter_border_spots( spot_locations.cy5 );
 
 
-% Measure spots
-%spot_data.cy3 = measure_spots(spot_locations.cy3, cy3_image);
-%spot_data.cy3_5 = measure_spots(spot_locations.cy3_5, cy3_5_image);
-%spot_data.cy5 = measure_spots(spot_locations.cy5, cy5_image);
+% Measure spots using D Larson's 2D Gaussian Mask algorithm
+spot_data.cy3 = measure_spots(spot_locations.cy3, cy3_image, 'local');
+spot_data.cy3_5 = measure_spots(spot_locations.cy3_5, cy3_5_image, 'local');
+spot_data.cy5 = measure_spots(spot_locations.cy5, cy5_image, 'local');
 
 
 %keyboard
-% Measure spots using Nikolai's Non-Parametric method 
-[spot_data.cy3 sb.cy3] = measure_spots_np(spot_locations.cy3, cy3_image);
-[spot_data.cy3_5 sb.cy3_5] = measure_spots_np(spot_locations.cy3_5, cy3_5_image);
-[spot_data.cy5 sb.cy5] = measure_spots_np(spot_locations.cy5, cy5_image);
+% Measure spots using Nikolai's 3D Non-Parametric method 
+%[spot_data.cy3 sb.cy3] = measure_spots_np(spot_locations.cy3, cy3_image);
+%[spot_data.cy3_5 sb.cy3_5] = measure_spots_np(spot_locations.cy3_5, cy3_5_image);
+%[spot_data.cy5 sb.cy5] = measure_spots_np(spot_locations.cy5, cy5_image);
 
 
 
 % Merge spots
 % Use original (not modified) spot locations for consistency between
 % algorithms
-duplicate_threshold = 5;
-spot_data.cy3 = merge_spots(replace_locations(spot_locations.cy3, spot_data.cy3), duplicate_threshold);
-spot_data.cy3_5 = merge_spots(replace_locations(spot_locations.cy3_5, spot_data.cy3_5), duplicate_threshold);
-spot_data.cy5 = merge_spots(replace_locations(spot_locations.cy5, spot_data.cy5), duplicate_threshold);
+%duplicate_threshold = 5;
+%spot_data.cy3 = merge_spots(replace_locations(spot_locations.cy3, spot_data.cy3), duplicate_threshold);
+%spot_data.cy3_5 = merge_spots(replace_locations(spot_locations.cy3_5, spot_data.cy3_5), duplicate_threshold);
+%spot_data.cy5 = merge_spots(replace_locations(spot_locations.cy5, spot_data.cy5), duplicate_threshold);
 
 
 % Spot to cell mapping

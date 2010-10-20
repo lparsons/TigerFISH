@@ -71,7 +71,7 @@ for d=1:size(dyes,1)
         
         % Histogram
         histogram.(dye) = spot_intensity_histogram(experiment_spot_data.(dye)(out_spots,5), experiment_spot_data.(dye)(in_spots,5), threshold.(dye));
-        title([dye ' Spot Intensity Histogram']);
+        title([strrep(dye, '_', '.') ' Spot Intensity Histogram'], 'FontSize', 22);
         set(histogram.(dye),'PaperPositionMode','auto', 'PaperSize', [10 5], 'Units', 'inches')
         set(histogram.(dye), 'Position',  [.25 .25 9.5 4.5] );
         print(histogram.(dye), '-dpdf', [ip.Results.output_dir filesep dye '_spot_intensity_histogram.pdf'], '-r0');

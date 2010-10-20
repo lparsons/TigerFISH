@@ -23,7 +23,7 @@ for i=1:layers
 end
 
 %% Test each spot
-spot_radius = 4;
+spot_radius = 6;
 rg = cell(1,spot_radius); rr = zeros(1,spot_radius); i_num = zeros(1, spot_radius);
 for r=1:spot_radius
     rg{r} = -r:r;

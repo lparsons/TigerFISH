@@ -18,18 +18,20 @@ i_f = i_n/sum(i_n);
 o_f = o_n/sum(o_n);
 
 f = figure('Visible', 'off');
-plot(bins, i_f, '-or', 'MarkerFaceColor', 'r', 'LineWidth',2, 'MarkerSize',10);
+plot(bins, i_f, '-or', 'MarkerFaceColor', 'r', 'LineWidth',3, 'MarkerSize',12);
 hold all
-plot(bins, o_f, '--xb', 'MarkerFaceColor', 'b', 'LineWidth',2, 'MarkerSize',10);
+plot(bins, o_f, '--xb', 'MarkerFaceColor', 'b', 'LineWidth',3, 'MarkerSize',12);
 if ip.Results.threshold > 0
     ylims = get(gca, 'YLim');
     line([ip.Results.threshold, ip.Results.threshold], ylims, 'Color', [.3 .3 .3], 'LineStyle', '--', 'LineWidth', 2);
 end
 
 hold off
-xlabel('Spot Intensity','FontSize', 18)
-ylabel('Fraction','FontSize', 18)
-title('Spot Intensity Histogram','FontSize', 20);
-legend('Inside Cells', 'Outside Cells');
+xlabel('Spot Intensity','FontSize', 20,'FontWeight', 'Bold')
+ylabel('Fraction','FontSize', 20,'FontWeight', 'Bold')
+title('Spot Intensity Histogram','FontSize', 22);
+set( gca, 'FontSize', 14, 'FontWeight', 'Bold' ); 
+lh = legend('Inside Cells', 'Outside Cells');
+set (lh, 'FontSize', 20,'FontWeight', 'Bold');
     
 end
