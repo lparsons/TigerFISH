@@ -46,8 +46,8 @@ prob(1) = prod( no_rna );
 
 
 % Adds path to the combinator function used in the loop below 
-addpath combinator
-addpath bin/combinator
+%addpath combinator
+%addpath bin/combinator
 
 %Probabilities that the cell has i RNAs
 for i = 1:length(rna) 	%max(2, length(rna)-10)
