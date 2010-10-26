@@ -6,7 +6,7 @@ function prob = spotProb( rna_j, rna_k )
 prob_j = spotProb_1D( rna_j );
 prob_k = spotProb_1D( rna_k );
 
-prob = 
+prob = prob_j(:) * prob_k; 
 
 
 
