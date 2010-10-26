@@ -32,14 +32,16 @@ end
 [pathstr, name, ext, versn] = fileparts(image.filename);
 
 
-Std = zeros(size(image.layers,3), 1);  
+Var = zeros(size(image.layers,3), 1);  
 for i=1:size(image.layers,3)   
     layer = image.layers(:,:,i); 
-    Std(i) = std(  layer(:) ); 
+    Var(i) = var(  layer(:) ); 
 end
-[val ind] = max( Std ); 
+[val ind] = max( Var ); % ind = 10; 
+Maps.Best_Focus_Ind = ind;
 
-Layers = image.layers(:,:,   (max(1,ind-2) : min( size(image.layers,3), ind+2) ) );
+z_inds = (max(1,ind-4) : min( size(image.layers,3), ind+4) );
+Layers = image.layers(:,:,  z_inds  );
 MaxProj = max(  Layers, [], 3 );
 %% Scale image values
 I_sc = mat2gray( MaxProj );
@@ -51,22 +53,24 @@ Maps.MaxProj = MaxProj;
 
 % Find nuclei - extended maxima operator can be used to identify groups of
 % pixels that are significantly higher than their immediate surrounding. 
-mask_em = imextendedmax( I_sc, .14);
+mask_em = imextendedmax( I_sc, .12);
 % Cleanup nuclei using morphological close, fill,  remove small objects
 % The morphological close operation is a dilation followed by an erosion,
 % using the same structuring element for both operations.
-mask_em = imclose(mask_em,  strel('disk', 5) );
+mask_em = imclose(mask_em,  strel('disk', 6) );
 
 % Fill in holes
 mask_em = imfill(mask_em, 'holes');
 
 % Remove small objects
-mask_em = bwareaopen(mask_em, 20);
+mask_em = bwareaopen(mask_em, 25);
 
 [Maps.nuc Maps.nucNum]  = bwlabeln( mask_em );
 Maps.nucMaxproj = cell( Maps.nucNum, 1 ); 
 for i=1:Maps.nucNum
-	Maps.nucMaxproj{i} = Maps.MaxProj( Maps.nuc==i ); 
+	Maps.nucMaxproj{i} = Maps.MaxProj( Maps.nuc==i );
+	[x y] = find( Maps.nuc==i );
+	Maps.nucPix{i} = Layers( x, y, : ); 
 end
 
 
@@ -132,6 +136,11 @@ cellMap = ismember(L, find([S.Area] < max([S.Area])));
 
 %[Maps.cells Maps.CellNum] = bwlabel( cellMap );
 [Maps.cellsPerim Maps.cells Maps.CellNum] = bwboundaries(cellMap);
+for i=1:Maps.CellNum
+	[x y] = find( Maps.cells == i );
+	Cytoplasm = Layers( x, y, : );
+	Maps.CytoMedian = median(  Cytoplasm(:) );
+end
 if 	max( Maps.cells(:) )>Maps.CellNum, 
 	Maps.cells( Maps.cells>Maps.CellNum ) = 0; 
 	Area = regionprops( Maps.cells, 'Area' );
@@ -144,7 +153,7 @@ end
 %save( 'Maps_3', 'Maps' );
 
 
-
+%return 
 %%===========================================================================================================%
 % Computes probability of a cell to be budded  %=============================================================%
 	
