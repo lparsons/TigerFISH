@@ -40,7 +40,7 @@ end
 [val ind] = max( Var ); % ind = 10; 
 Maps.Best_Focus_Ind = ind;
 
-z_inds = (max(1,ind-4) : min( size(image.layers,3), ind+4) );
+z_inds = (max(1,ind-2) : min( size(image.layers,3), ind+2) );
 Layers = image.layers(:,:,  z_inds  );
 MaxProj = max(  Layers, [], 3 );
 %% Scale image values
@@ -66,12 +66,14 @@ mask_em = imfill(mask_em, 'holes');
 mask_em = bwareaopen(mask_em, 25);
 
 [Maps.nuc Maps.nucNum]  = bwlabeln( mask_em );
-Maps.nucMaxproj = cell( Maps.nucNum, 1 ); 
+Maps.nucMaxproj = cell( Maps.nucNum, 1 );
+tic
 for i=1:Maps.nucNum
 	Maps.nucMaxproj{i} = Maps.MaxProj( Maps.nuc==i );
 	[x y] = find( Maps.nuc==i );
 	Maps.nucPix{i} = Layers( x, y, : ); 
 end
+toc
 
 
 
@@ -136,11 +138,14 @@ cellMap = ismember(L, find([S.Area] < max([S.Area])));
 
 %[Maps.cells Maps.CellNum] = bwlabel( cellMap );
 [Maps.cellsPerim Maps.cells Maps.CellNum] = bwboundaries(cellMap);
+tic
+Maps.CytoMedian = zeros( Maps.CellNum, 1 ); 
 for i=1:Maps.CellNum
 	[x y] = find( Maps.cells == i );
 	Cytoplasm = Layers( x, y, : );
-	Maps.CytoMedian = median(  Cytoplasm(:) );
+	Maps.CytoMedian(i) = median(  Cytoplasm(:) );
 end
+tic
 if 	max( Maps.cells(:) )>Maps.CellNum, 
 	Maps.cells( Maps.cells>Maps.CellNum ) = 0; 
 	Area = regionprops( Maps.cells, 'Area' );

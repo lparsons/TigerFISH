@@ -37,6 +37,10 @@ bottom_layer = max(1,in_focus_layer-layers_around_focus);
 top_layer = min(num_stacks,in_focus_layer+layers_around_focus);
 max_image = max(image.layers(:,:,bottom_layer:top_layer),[],3);
 
+% Gets the Layers closest to the best focus layer to be used for estimating
+% DNA content
+Layers = image.layers(:,:,  bottom_layer:top_layer  );
+
 
 %% Scale image values
 I_sc = mat2gray(max_image);
@@ -110,6 +114,17 @@ mask_em = imfill(mask_em, 'holes');
 % Remove small objects
 mask_em = bwareaopen(mask_em, 40);
 
+% Gets Coordinates and number of nuclei 
+[cellMap.nuc cellMap.nucNum]  = bwlabeln( mask_em );
+cellMap.nucMaxproj = cell( cellMap.nucNum, 1 );
+
+% Gets Pixels of and around the nuclei that will be used for estimating DNA content  
+for i=1:cellMap.nucNum
+	cellMap.nucMaxproj{i} = cellMap.MaxProj( cellMap.nuc==i );
+	[x y] = find( cellMap.nuc==i );
+	cellMap.nucPix{i} = Layers( x, y, : ); 
+end
+
 % Create an overlay to view
 %overlay2 = imoverlay(I_eq, bw5_perim | mask_em, [.3 1 .3]);
 %figure, imshow(overlay2);
@@ -134,6 +149,23 @@ cellMap = ismember(L, find([S.Area] < max([S.Area])));
 
 % Remove spur pixels
 cellMap = bwmorph(cellMap, 'spur', Inf);
+
+
+% Gets cell perimeter
+[cellMap.cellsPerim cellMap.cells Maps.CellNum] = bwboundaries(cellMap);
+
+%Computes DNA contents based on DAPI intensity
+cellMap.CytoMedian = zeros( cellMap.CellNum, 1 ); 
+cellMap.DNA_content = zeros( cellMap.CellNum, 1 ); 
+for i=1:cellMap.CellNum
+	[x y] = find( cellMap.cells == i );
+	Cytoplasm = Layers( x, y, : );
+	cellMap.CytoMedian(i) = median(  Cytoplasm(:) );
+    
+    cellMap.DNA_content(i) = sum( cellMap{i}.nucPix(:) - cellMap.CytoMedian(i) );
+end
+
+
 
 % Output
 %[s,mess,messid] = mkdir(outputdir);
