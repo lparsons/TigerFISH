@@ -35,6 +35,7 @@ else
     experiment_spot_data.cy3 = [];
     experiment_spot_data.cy3_5 = [];
     experiment_spot_data.cy5 = [];
+	DNA_content = [];
     % Loop through regions
     for p=1:size(ip.Results.region_file_list,1)
         fprintf('Position number %s\n', num2str(p))
@@ -48,10 +49,14 @@ else
         experiment_spot_data.cy3 = vertcat(experiment_spot_data.cy3, horzcat(repmat(p, size(spot_data.cy3, 1),1),spot_data.cy3));
         experiment_spot_data.cy3_5 = vertcat(experiment_spot_data.cy3_5, horzcat(repmat(p, size(spot_data.cy3_5, 1),1),spot_data.cy3_5));
         experiment_spot_data.cy5 = vertcat(experiment_spot_data.cy5, horzcat(repmat(p, size(spot_data.cy5, 1),1),spot_data.cy5));
+		DNA_content = [DNA_content; cell_map.DNA_content]; %MatLab is going to call vertcat anyway so I prefrer the simpler syntax
         experiment_cell_maps{p} = cell_map;
     end
     save(exp_data_file, 'experiment_spot_data', 'experiment_cell_maps')
 end
+
+% Estimates a CDC phase for each cell based on the DNA content inferred from DAPI staining 
+cdc_phases = DNA_2_cdc_phases( DNA_content );
 
 
 %% Determine Thresholds

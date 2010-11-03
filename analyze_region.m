@@ -50,24 +50,24 @@ cy5_image = load_image(ip.Results.cy5file);
 spot_locations.cy5 = find_spots(cy5_image);
 
 
-% Quick Fix for running both algorithms on the same spots. It has to be cleaned
-spot_locations.cy3 = filter_border_spots( spot_locations.cy3 );
-spot_locations.cy3_5 = filter_border_spots( spot_locations.cy3_5 );
-spot_locations.cy5 = filter_border_spots( spot_locations.cy5 );
+% Quick Fix for running both algorithms on the same spots. It has to be cleaned/deleted
+% spot_locations.cy3 = filter_border_spots( spot_locations.cy3 );
+% spot_locations.cy3_5 = filter_border_spots( spot_locations.cy3_5 );
+% spot_locations.cy5 = filter_border_spots( spot_locations.cy5 );
+
+	   Measure_Spots_Intensity = 2
+switch Measure_Spots_Intensity
+	case { 1, 'Measure spots using D Larson 2D Gaussian Mask algorithm' }
+		spot_data.cy3 = measure_spots(spot_locations.cy3, cy3_image, 'local');
+		spot_data.cy3_5 = measure_spots(spot_locations.cy3_5, cy3_5_image, 'local');
+		spot_data.cy5 = measure_spots(spot_locations.cy5, cy5_image, 'local');
 
 
-% Measure spots using D Larson's 2D Gaussian Mask algorithm
-spot_data.cy3 = measure_spots(spot_locations.cy3, cy3_image, 'local');
-spot_data.cy3_5 = measure_spots(spot_locations.cy3_5, cy3_5_image, 'local');
-spot_data.cy5 = measure_spots(spot_locations.cy5, cy5_image, 'local');
-
-
-%keyboard
-% Measure spots using Nikolai's 3D Non-Parametric method 
-%[spot_data.cy3 sb.cy3] = measure_spots_np(spot_locations.cy3, cy3_image);
-%[spot_data.cy3_5 sb.cy3_5] = measure_spots_np(spot_locations.cy3_5, cy3_5_image);
-%[spot_data.cy5 sb.cy5] = measure_spots_np(spot_locations.cy5, cy5_image);
-
+	case { 2, 'Measure spots using 3D Non-Parametric method' }
+		[spot_data.cy3 sb.cy3] = measure_spots_np(spot_locations.cy3, cy3_image);
+		[spot_data.cy3_5 sb.cy3_5] = measure_spots_np(spot_locations.cy3_5, cy3_5_image);
+		[spot_data.cy5 sb.cy5] = measure_spots_np(spot_locations.cy5, cy5_image);
+end
 
 
 % Merge spots
