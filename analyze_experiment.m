@@ -73,13 +73,33 @@ dye_color.cy3 = [0 1 0];
 dye_color.cy3_5 = [1 0 0];
 dye_color.cy5 = [.8 .8 .8];
 
+%Sets a threshold of FDR
+if ~exist( 'FDR_Treshold', 'var' )
+    FDR_Treshold = 0.05; 
+end
+
 for d=1:size(dyes,1)
     % Determine Thresholds - 90% outside spots threshold
     dye = dyes{d};
     if (~isempty(experiment_spot_data.(dye)))
         out_spots = experiment_spot_data.(dye)(:,7)==2;
         in_spots = experiment_spot_data.(dye)(:,7)==0;
-        threshold.(dye) = determine_threshold(experiment_spot_data.(dye)(out_spots,5), experiment_spot_data.(dye)(in_spots,5));
+        
+        %Removes very bright spots outside of the cells that are likley to be artifacts and mRNAs  
+        out_spots = out_spots( out_spots < 3* midian(out_spots) ); 
+        %Computes the CDF for spots outside of cells
+        Num = numel(out_spots);
+        OUT_CDF.x = sort( out_spots );
+        OUT_CDF.y = (1:Num) * (1/Num);      
+        %Computes p values for spots inside of cells
+        prob_2be_mRNA = interp1( OUT_CDF.x, OUT_CDF.y, in_spots );
+        pvals = 1 - prob_2be_mRNA;
+        qvals = mafdr( pvals );
+        [val ind] = min( abs( qvals - FDR_Treshold )  );
+        threshold.(dye) = in_spots( ind ); 
+
+        %The old method
+        %threshold.(dye) = determine_threshold(experiment_spot_data.(dye)(out_spots,5), experiment_spot_data.(dye)(in_spots,5));
         
         % Histogram
         histogram.(dye) = spot_intensity_histogram(experiment_spot_data.(dye)(out_spots,5), experiment_spot_data.(dye)(in_spots,5), threshold.(dye));
