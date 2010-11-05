@@ -52,11 +52,18 @@ else
 		DNA_content = [DNA_content; cell_map.DNA_content]; %MatLab is going to call vertcat anyway so I prefrer the simpler syntax
         experiment_cell_maps{p} = cell_map;
     end
-    save(exp_data_file, 'experiment_spot_data', 'experiment_cell_maps')
+    % Estimates a CDC phase for each cell based on the DNA content inferred from DAPI staining 
+       %Directory and name for the plot of DNA content
+       PathFileName  = [ip.Results.output_dir filesep 'DNA_Content.pdf']; 
+    [cdc.phases cdc.probs] = DNA_2_cdc_phases( DNA_Content, MaxIter, PathFileName );
+
+    %Lance, 
+    %   1) give the proper value to PathFileName
+    %   2) if necessary, correct my saving of cdc
+       
+    save(exp_data_file, 'experiment_spot_data', 'experiment_cell_maps', 'cdc' );
 end
 
-% Estimates a CDC phase for each cell based on the DNA content inferred from DAPI staining 
-cdc_phases = DNA_2_cdc_phases( DNA_content );
 
 
 %% Determine Thresholds
