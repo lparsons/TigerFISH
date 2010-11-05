@@ -90,13 +90,16 @@ for d=1:size(dyes,1)
         %Computes the CDF for spots outside of cells
         Num = numel(out_spots);
         OUT_CDF.x = sort( out_spots );
-        OUT_CDF.y = (1:Num) * (1/Num);      
+        OUT_CDF.y = (0:1:(Num-1)) * (1/Num);      
         %Computes p values for spots inside of cells
-        prob_2be_mRNA = interp1( OUT_CDF.x, OUT_CDF.y, in_spots );
+		prob_2be_mRNA = zeros( size(prob_2be_mRNA) );
+		prob_2be_mRNA( in_spots >= OUT_CDF.x(end) ) = (1 - 1/Num);
+		indDimmer = find( in_spots <  OUT_CDF.x(end) );
+        prob_2be_mRNA(indDimmer) = interp1( OUT_CDF.x, OUT_CDF.y, in_spots(indDimmer) );
         pvals = 1 - prob_2be_mRNA;
         qvals = mafdr( pvals );
-        [val ind] = min( abs( qvals - FDR_Treshold )  );
-        threshold.(dye) = in_spots( ind ); 
+        [val indT] = min( abs( qvals - FDR_Treshold )  );
+        threshold.(dye) = in_spots( indT ); 
 
         %The old method
         %threshold.(dye) = determine_threshold(experiment_spot_data.(dye)(out_spots,5), experiment_spot_data.(dye)(in_spots,5));
