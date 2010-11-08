@@ -5,7 +5,6 @@
 % Cohen et al. http://www.sciencemag.org/cgi/content/abstract/322/5907/1511
 
 function cellMap = segment_cells(image_input)
-
 %% Configuration
 % Number of layers above a below the best infocus layer to use
 layers_around_focus = 3;
@@ -30,7 +29,10 @@ end
 % Parse filename
 [pathstr, name, ext, versn] = fileparts(image.filename);
 
+
 %% Find best focus layer and use a few layers around that
+fprintf('DAPI Searching Best focus\n');
+tic
 num_stacks = length(image.info);
 in_focus_layer = best_focus_layer(image.layers);
 bottom_layer = max(1,in_focus_layer-layers_around_focus);
@@ -40,9 +42,12 @@ max_image = max(image.layers(:,:,bottom_layer:top_layer),[],3);
 % Gets the Layers closest to the best focus layer to be used for estimating
 % DNA content
 Layers = image.layers(:,:,  bottom_layer:top_layer  );
+toc
 
 
 %% Scale image values
+fprintf ('Searching for nuclei\n');
+tic
 I_sc = mat2gray(max_image);
 
 %% Adaptive contrast enhancement 
@@ -113,22 +118,30 @@ mask_em = imfill(mask_em, 'holes');
 
 % Remove small objects
 mask_em = bwareaopen(mask_em, 40);
+toc
 
-% Gets Coordinates and number of nuclei 
+
+% Gets Coordinates and number of nuclei
+fprintf('Finding nuclear pixels\n')
+tic
 [cellMap.nuc cellMap.nucNum]  = bwlabeln( mask_em );
-cellMap.nucMaxproj = cell( cellMap.nucNum, 1 );
+%cellMap.nucMaxproj = cell( cellMap.nucNum, 1 );
 
 % Gets Pixels of and around the nuclei that will be used for estimating DNA content  
 for i=1:cellMap.nucNum
-	cellMap.nucMaxproj{i} = cellMap.MaxProj( cellMap.nuc==i );
+	%cellMap.nucMaxproj{i} = cellMap.MaxProj( cellMap.nuc==i );
 	[x y] = find( cellMap.nuc==i );
 	cellMap.nucPix{i} = Layers( x, y, : ); 
 end
+toc
+
 
 % Create an overlay to view
 %overlay2 = imoverlay(I_eq, bw5_perim | mask_em, [.3 1 .3]);
 %figure, imshow(overlay2);
 
+fprintf('Finding cell boundaries\n')
+tic
 % complement the image so that the peaks become valleys. We do this because
 % we are about to apply the watershed transform, which identifies low
 % points, not high points. 
@@ -145,25 +158,37 @@ L = watershed(I_mod);
 % Get size of regions from watershed regions (cells)
 S = regionprops(L, 'Area');
 % Discard background (largest)
-cellMap = ismember(L, find([S.Area] < max([S.Area])));
+cellMap.cellMap = ismember(L, find([S.Area] < max([S.Area])));
 
 % Remove spur pixels
-cellMap = bwmorph(cellMap, 'spur', Inf);
+cellMap.cellMap = bwmorph(cellMap.cellMap, 'spur', Inf);
+
+toc
 
 
 % Gets cell perimeter
-[cellMap.cellsPerim cellMap.cells Maps.CellNum] = bwboundaries(cellMap);
+fprintf('Computing DNA content\n')
+tic
+[cellMap.cellsPerim cellMap.cells cellMap.CellNum] = bwboundaries(cellMap.cellMap);
+
+
+Median = median( Layers, 3 );
+Max = max(Layers, [], 3);
+
 
 %Computes DNA contents based on DAPI intensity
 cellMap.CytoMedian = zeros( cellMap.CellNum, 1 ); 
 cellMap.DNA_content = zeros( cellMap.CellNum, 1 ); 
 for i=1:cellMap.CellNum
-	[x y] = find( cellMap.cells == i );
-	Cytoplasm = Layers( x, y, : );
+    fprintf('Cell %d\n', i)
+	%[x y] = find( cellMap.cells == i );
+	Cytoplasm = Median( cellMap.cells == i );
 	cellMap.CytoMedian(i) = median(  Cytoplasm(:) );
-    
-    cellMap.DNA_content(i) = sum( cellMap{i}.nucPix(:) - cellMap.CytoMedian(i) );
+    %TODO Fix this
+    nucPix = Max((cellMap.cells==i) & (cellMap.nuc ~= 0));
+    cellMap.DNA_content(i) = sum( nucPix(:) - cellMap.CytoMedian(i) );
 end
+toc
 
 
 

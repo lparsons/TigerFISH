@@ -1,4 +1,4 @@
-function [cell_map spot_data] = analyze_region( varargin )
+function [cell_map_struct spot_data] = analyze_region( varargin )
 % analyze_region determines cell boundaries and outputs spot locations and
 %   intensities
 %
@@ -50,8 +50,14 @@ end
 %[PATHSTR,NAME,EXT,VERSN] = fileparts(file);
 
 %% Cell Segmentation
+fprintf('Loading DAPI Image\n');
+tic
 dapi_image = load_image(ip.Results.dapifile);
-cell_map = segment_cells(dapi_image);
+toc
+
+fprintf('Segmenting Cells\n');
+cell_map_struct = segment_cells(dapi_image);
+cell_map = cell_map_struct.cellMap;
 imwrite(bwperim(cell_map), [ip.Results.output_dir filesep 'cell_map.png'], 'png', 'Transparency', 0);
 
 %% Spot Identification

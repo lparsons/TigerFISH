@@ -1,4 +1,4 @@
-function experiment_set = wrapper( Path, Experiment_Numbers, varargin )
+function experiment_set_data = wrapper( Path, Experiment_Numbers, varargin )
 % wrapper function identifies images in Path with specified experiment 
 %    numbers and outputs a list of data structures to use when processing.
 %    Used when experiments are in separate directories and numbered.
@@ -27,6 +27,8 @@ i_p = inputParser;
 i_p.FunctionName = 'wrapper';
 i_p.addOptional('filemask','*',@ischar);
 i_p.addOptional('output_dir','output',@ischar);
+i_p.addOptional('algorithm','3D',@ischar);
+i_p.addOptional('load_results',false,@islogical);
 i_p.parse(varargin{:});
 nm = i_p.Results.output_dir;
 filemask = i_p.Results.filemask;
@@ -169,4 +171,6 @@ fclose(output_file);
 % TODO Refactor this to create data structure directly
 experiment_set = parse_experiment_list_file(output_filename);
 
+%% Run analysis
+experiment_set_data = analyze_experiment_set(experiment_set, nm, i_p.Results.algorithm, i_p.Results.load_results);
 end

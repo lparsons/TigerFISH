@@ -62,6 +62,7 @@ else
         experiment_spot_data.cy3 = vertcat(experiment_spot_data.cy3, horzcat(repmat(p, size(spot_data.cy3, 1),1),spot_data.cy3));
         experiment_spot_data.cy3_5 = vertcat(experiment_spot_data.cy3_5, horzcat(repmat(p, size(spot_data.cy3_5, 1),1),spot_data.cy3_5));
         experiment_spot_data.cy5 = vertcat(experiment_spot_data.cy5, horzcat(repmat(p, size(spot_data.cy5, 1),1),spot_data.cy5));
+      
 		DNA_content = [DNA_content; cell_map.DNA_content]; %MatLab is going to call vertcat anyway so I prefrer the simpler syntax
         experiment_cell_maps{p} = cell_map;
     end
@@ -69,7 +70,7 @@ else
        %Directory and name for the plot of DNA content
        PathFileName  = [ip.Results.output_dir filesep 'DNA_Content.pdf']; 
 	   DNA_Content = DNA_Content * (1/var(DNA_Content)); %normalize variance to avoid problems from treating pdf as pmf
-    [cdc.phases cdc.probs] = DNA_2_cdc_phases( DNA_Content, MaxIter, PathFileName );
+    [cdc.phases cdc.probs] = DNA_2_cdc_phases( DNA_Content, [], PathFileName );
 
     %Lance, 
     %   1) give the proper value to PathFileName
