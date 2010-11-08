@@ -17,6 +17,15 @@ function [cell_map spot_data] = analyze_region( varargin )
 %
 %       If output_dir is specified, transparent, enchanced projections are
 %           written to the directory for each dye.
+%
+%   [CELL_MAP, SPOT_DATA] = analyze_region( cy3file, cy3_5file, cy5file,
+%       dapifile, output_dir, algorithm )
+%
+%       algorithm is an optional parameter that determines method of intensity measurement
+%           Must be one of '3D', '2D', or '2D_local'
+%           3D - Non-parametric 3D spot intensity measurement
+%           2D - Uses 2D Gaussian mask with global background per image
+%           2D_local - 2D Gaussian mask with local background around spot
 
 addpath bin/
 
@@ -29,7 +38,14 @@ ip.addRequired('cy3_5file',@ischar);
 ip.addRequired('cy5file',@ischar);
 ip.addRequired('dapifile',@ischar);
 ip.addOptional('output_dir','',@isdir);
+ip.addOptional('algorithm','3D',@ischar);
 ip.parse(varargin{:});
+
+algorithms = {'3D', '2D', '2D_local'};
+if (~strcmpi(ip.Results.algorithm, algorithms))
+    errormsg = ['Algorithm "' ip.Results.algorithm '" not recognized.  Must be one of: ' sprintf('%s, ',algorithms{:});];
+    error(errormsg)
+end
 
 %[PATHSTR,NAME,EXT,VERSN] = fileparts(file);
 
@@ -55,24 +71,31 @@ spot_locations.cy5 = find_spots(cy5_image);
 % spot_locations.cy3_5 = filter_border_spots( spot_locations.cy3_5 );
 % spot_locations.cy5 = filter_border_spots( spot_locations.cy5 );
 
-	   Measure_Spots_Intensity = 2
-switch Measure_Spots_Intensity
-	case { 1, 'Measure spots using D Larson 2D Gaussian Mask algorithm' }
-		spot_data.cy3 = measure_spots(spot_locations.cy3, cy3_image, 'local');
-		spot_data.cy3_5 = measure_spots(spot_locations.cy3_5, cy3_5_image, 'local');
-		spot_data.cy5 = measure_spots(spot_locations.cy5, cy5_image, 'local');
-
-
-	case { 2, 'Measure spots using 3D Non-Parametric method' }
-		[spot_data.cy3 sb.cy3] = measure_spots_np(spot_locations.cy3, cy3_image);
-		[spot_data.cy3_5 sb.cy3_5] = measure_spots_np(spot_locations.cy3_5, cy3_5_image);
-		[spot_data.cy5 sb.cy5] = measure_spots_np(spot_locations.cy5, cy5_image);
+% Measure spot intensities
+if (strcmpi(ip.Results.algorithm, '3D'))
+    % Measure spots using Nikolai's 3D Non-Parametric method 
+    [spot_data.cy3 sb.cy3] = measure_spots_np(spot_locations.cy3, cy3_image);
+    [spot_data.cy3_5 sb.cy3_5] = measure_spots_np(spot_locations.cy3_5, cy3_5_image);
+    [spot_data.cy5 sb.cy5] = measure_spots_np(spot_locations.cy5, cy5_image);
+elseif (strcmpi(ip.Results.algorithm, '2D'))
+    % Measure spots using D Larson's 2D Gaussian Mask algorithm
+    spot_data.cy3 = measure_spots(spot_locations.cy3, cy3_image, 'global');
+    spot_data.cy3_5 = measure_spots(spot_locations.cy3_5, cy3_5_image, 'global');
+    spot_data.cy5 = measure_spots(spot_locations.cy5, cy5_image, 'global');
+elseif (strcmpi(ip.Results.algorithm, '2D_local'))
+    % Measure spots using D Larson's 2D Gaussian Mask algorithm
+    spot_data.cy3 = measure_spots(spot_locations.cy3, cy3_image, 'local');
+    spot_data.cy3_5 = measure_spots(spot_locations.cy3_5, cy3_5_image, 'local');
+    spot_data.cy5 = measure_spots(spot_locations.cy5, cy5_image, 'local');
+else 
+    errormsg = ['Algorithm "' ip.Results.algorithm '" not recognized.  Must be one of: ' sprintf('%s, ',algorithms{:});];
+    error(errormsg)
 end
-
 
 % Merge spots
 % Use original (not modified) spot locations for consistency between
 % algorithms
+% TODO Consider reimplementing?
 %duplicate_threshold = 5;
 %spot_data.cy3 = merge_spots(replace_locations(spot_locations.cy3, spot_data.cy3), duplicate_threshold);
 %spot_data.cy3_5 = merge_spots(replace_locations(spot_locations.cy3_5, spot_data.cy3_5), duplicate_threshold);

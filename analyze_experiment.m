@@ -6,11 +6,17 @@ function [experiment_spot_data experiment_cell_maps experiment_counts] = analyze
 %
 %
 %   [experiment_spot_data experiment_cell_maps experiment_counts] =
-%       analyze_experiment( region_file_list, output_dir )
+%       analyze_experiment( region_file_list, output_dir, [algorithm], [load_results] )
 %
 %       region_file_list - list of files cy3file, cy3_5file, cy5file, dapifile
 %       output_dir - directory to output experiment data, histograms, etc.
-%   
+%
+%   algorithm is an optional parameter that determines method of intensity measurement
+%       Must be one of '3D', '2D', or '2D_local'
+%       3D - Non-parametric 3D spot intensity measurement
+%       2D - Uses 2D Gaussian mask with global background per image
+%       2D_local - 2D Gaussian mask with local background around spot
+%
 %   load_results is optional parameter, if true load previous cell map and
 %       spot intensity data (if it exists).  Off be default
 
@@ -22,8 +28,15 @@ ip = inputParser;
 ip.FunctionName = 'analyze_experiment';
 ip.addRequired('region_file_list',@iscell);
 ip.addRequired('output_dir',@isdir);
+ip.addOptional('algorithm','3D',@ischar);
 ip.addOptional('load_results',false,@islogical);
 ip.parse(varargin{:});
+
+algorithms = {'3D', '2D', '2D_local'};
+if (~strcmpi(ip.Results.algorithm, algorithms))
+    errormsg = ['Algorithm "' ip.Results.algorithm '" not recognized.  Must be one of: ' sprintf('%s, ',algorithms{:});];
+    error(errormsg)
+end
 
 %% Calculate or load results
 exp_data_file = [ip.Results.output_dir filesep 'experiment_data.mat'];
@@ -85,7 +98,14 @@ for d=1:size(dyes,1)
     if (~isempty(experiment_spot_data.(dye)))
         out_spots = experiment_spot_data.(dye)(:,7)==2;
         in_spots = experiment_spot_data.(dye)(:,7)==0;
-        
+        % TODO Implement FDR calc here (need p-vals, q-vals)
+        % Estimate p-values based on spots outside cells
+        % - Get median, toss outliers beyond 3 sd
+        %- [ycdf, xcdf] = cdfstats(int_out)
+        %- p_val = interp1(x, y, intensities_in) % default is cubic
+        %- [fdr q] = mafdr(p_val)
+        %- threshold q values
+
         %Removes very bright spots outside of the cells that are likley to be artifacts and mRNAs  
         out_spots = out_spots( out_spots < 3* midian(out_spots) ); 
         %Computes the CDF for spots outside of cells
