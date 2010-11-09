@@ -138,11 +138,12 @@ cellMap = ismember(L, find([S.Area] < max([S.Area])));
 
 %[Maps.cells Maps.CellNum] = bwlabel( cellMap );
 [Maps.cellsPerim Maps.cells Maps.CellNum] = bwboundaries(cellMap);
-tic
+
+Median = median( Layers, 3 ); 
 Maps.CytoMedian = zeros( Maps.CellNum, 1 ); 
 for i=1:Maps.CellNum
-	[x y] = find( Maps.cells == i );
-	Cytoplasm = Layers( x, y, : );
+	%[x y] = find( Maps.cells == i );
+	Cytoplasm = Median( Maps.cells == i );
 	Maps.CytoMedian(i) = median(  Cytoplasm(:) );
 end
 tic

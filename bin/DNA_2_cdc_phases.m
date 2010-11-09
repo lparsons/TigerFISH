@@ -5,7 +5,7 @@ function [cdc_phases cdc_phases_p] = DNA_2_cdc_phases( DNA_Content, MaxIter, Pat
 %Sets a Default
 if nargin ==1 || isempty(MaxIter), MaxIter = 1e2; end 
 
-
+%%
 % Generate initial expectations and IC for starting an EM optimization
 Median = median( DNA_Content );
 muG1 = 0.6*Median;
@@ -21,26 +21,45 @@ for i=1:MaxIter
     pG1 = normpdf( DNA_Content,   muG1,   sigG1 ); 
     pG2 = normpdf( DNA_Content, 2*muG1, 2*sigG1 ); 
     
+    %Computes cumulative probability for each cells to be in G1 or G2
+    
+    pcG1 = normcdf( DNA_Content,   muG1,   sigG1 ); 
+    pcG2 = normcdf( DNA_Content, 2*muG1, 2*sigG1 );     
+    
+%     
+%      
+%     % Uses the probabilities to reassign cells into G1 and G2
+%     indG1a = find( pG1> pG2 & pG1 > 0.6 );
+%     indG1b = find( DNA_Content< muG1 & pG1 > 0.2 ); 
+%     indG1 = [indG1a; indG1b];
+%     indG2a = find( pG1< pG2 & pG2 > 0.6 );
+%     indG2b = find( DNA_Content> 2*muG1 & pG2 > 0.2 );
+%     indG2 = [indG2a; indG2b];
+    
      
     % Uses the probabilities to reassign cells into G1 and G2
-    indG1a = find( pG1> pG2 & pG1 > 0.6 );
-    indG1b = find( DNA_Content< muG1 & pG1 > 0.2 ); 
+    indG1b = find( DNA_Content< muG1 & pcG1 > 0.01 );    
+    indG1a = find( DNA_Content> muG1 & pcG1 < 0.8  & pG1> pG2 );
     indG1 = [indG1a; indG1b];
-    indG2a = find( pG1< pG2 & pG2 > 0.6 );
-    indG2b = find( DNA_Content> 2*muG1 & pG2 > 0.2 );
+    indG2b = find( DNA_Content> 2*muG1 & pcG2 < 0.99 );    
+    indG2a = find( DNA_Content< 2*muG1 & pcG2 > 0.2  & pG1< pG2 );
     indG2 = [indG2a; indG2b];
+    
+    
     
     % Updates the expectations muG1 and sigG1 based on 
     muG1 = mean( DNA_Content(indG1) ); 
     muG2 = mean( DNA_Content(indG2) ); 
-    muG1 = mean( muG1 + 0.5*muG2 );
-    if muG1>Median, muG1=muG1/2; end 
+    muG1 = mean( muG1 + 0.5*muG2 );        % fprintf( '%1.2f\n', muG1 );
+    if muG1>Median, muG1=muG1/2; end
+    if muG1<0.1*Median, muG1=2*muG12; end
+    
     
     sigG1 = std( DNA_Content(indG1) ); 
     sigG2 = std( DNA_Content(indG2) ); 
     sigG1 = mean( sigG1 + 0.5*sigG2 );
     
-    if i>1 && norm(pG1_old-pG1)/norm(pG1) < 1e-2
+    if i>1 && norm(pG1_old-pG1)/norm(pG1) < 1e-3
         break
     end
     pG1_old = pG1;
@@ -94,7 +113,7 @@ if nargin >= 3 && ~isempty(PathFileName)
            'interpreter',   'latex'       );  
     
     
-    set( gcf, 'Position', [440  359  692   419] )
+    set( gcf, 'Position', [440  159  692   419] )
     set( gca, 'Position',  [0.14 0.14 0.80  0.78] );
     set( gca, 'FontSize', 14, 'FontWeight', 'Bold' );
     set( gcf, 'PaperSize', [8.5 5],...
