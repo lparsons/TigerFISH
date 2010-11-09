@@ -123,17 +123,10 @@ toc
 
 % Gets Coordinates and number of nuclei
 fprintf('Finding nuclear pixels\n')
-tic
+
 [cellMap.nuc cellMap.nucNum]  = bwlabeln( mask_em );
 %cellMap.nucMaxproj = cell( cellMap.nucNum, 1 );
 
-% Gets Pixels of and around the nuclei that will be used for estimating DNA content  
-for i=1:cellMap.nucNum
-	%cellMap.nucMaxproj{i} = cellMap.MaxProj( cellMap.nuc==i );
-	[x y] = find( cellMap.nuc==i );
-	cellMap.nucPix{i} = Layers( x, y, : ); 
-end
-toc
 
 
 % Create an overlay to view
@@ -172,23 +165,34 @@ tic
 [cellMap.cellsPerim cellMap.cells cellMap.CellNum] = bwboundaries(cellMap.cellMap);
 
 
-Median = median( Layers, 3 );
-Max = max(Layers, [], 3);
+% Median = median( Layers, 3 );
+% Max = max(Layers, [], 3);
+cellMap_Layers_Cells = repmat( cellMap.cells, [1 1 size(Layers,3)] ); 
+cellMap_Layers_Nucs = repmat( cellMap.nuc, [1 1 size(Layers,3)] ); 
 
 
 %Computes DNA contents based on DAPI intensity
-cellMap.CytoMedian = zeros( cellMap.CellNum, 1 ); 
-cellMap.DNA_content = zeros( cellMap.CellNum, 1 ); 
-for i=1:cellMap.CellNum
+if cellMap.CellNum == cellMap.nucNum
+    cellMap.CytoMedian = zeros( cellMap.CellNum, 1 ); 
+    cellMap.DNA_content = zeros( cellMap.CellNum, 1 );
+end
+for i=1:cellMap.nucNum
     fprintf('Cell %d\n', i)
-	%[x y] = find( cellMap.cells == i );
-	Cytoplasm = Median( cellMap.cells == i );
+    
+    if sum( cellMap.cells(cellMap.nuc==i)== i ) < 20 
+       cellMap.cells( cellMap.cells==i ) = 0;
+       continue 
+    end
+    
+    % Gets Pixels of the nucleus that will be used for estimating DNA content  
+    cellMap.nucPix{i} = Layers( cellMap_Layers_Nucs == i );
+    % Gets Pixels of the Cytoplasm (wirthout nucleus) that will be used for estimating DNA content     
+	Cytoplasm = Layers( cellMap_Layers_Cells == i & cellMap_Layers_Nucs ~= i );
 	cellMap.CytoMedian(i) = median(  Cytoplasm(:) );
-    %TODO Fix this
-    nucPix = Max((cellMap.cells==i) & (cellMap.nuc ~= 0));
     cellMap.DNA_content(i) = sum( nucPix(:) - cellMap.CytoMedian(i) );
 end
-toc
+
+
 
 
 
