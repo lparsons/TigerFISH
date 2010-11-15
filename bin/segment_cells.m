@@ -39,7 +39,7 @@ cellMap.Best_Focus_Ind = in_focus_layer;
 bottom_layer = max(1,in_focus_layer-layers_around_focus);
 top_layer = min(num_stacks,in_focus_layer+layers_around_focus);
 max_image = max(image.layers(:,:,bottom_layer:top_layer),[],3);
-
+cellMap.MaxProj = max_image;
 % Gets the Layers closest to the best focus layer to be used for estimating
 % DNA content
 Layers = image.layers(:,:,  bottom_layer:top_layer  );
@@ -180,7 +180,7 @@ end
 for i=1:cellMap.nucNum
     %fprintf('Cell %d\n', i)
     
-    if sum( cellMap.cells(cellMap.nuc==i)== i ) < 20 
+    if sum( cellMap.cells(cellMap.nuc==i)>0 ) < 20  %ideqally should use  sum( cellMap.cells(cellMap.nuc==i)== i ) < 20. However it does not work
        cellMap.cells( cellMap.cells==i ) = 0;
        continue 
     end
