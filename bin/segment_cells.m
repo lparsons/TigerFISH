@@ -190,7 +190,7 @@ for i=1:cellMap.nucNum
     % Gets Pixels of the Cytoplasm (wirthout nucleus) that will be used for estimating DNA content     
 	Cytoplasm = Layers( cellMap_Layers_Cells == i & cellMap_Layers_Nucs ~= i );
 	cellMap.CytoMedian(i) = median(  Cytoplasm(:) );
-    cellMap.DNA_content(i) = sum( nucPix(:) - cellMap.CytoMedian(i) );
+    cellMap.DNA_content(i) = sum( cellMap.nucPix{i}(:) - cellMap.CytoMedian(i) );
 end
 
 
