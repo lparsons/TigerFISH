@@ -4,7 +4,7 @@
 % http://blogs.mathworks.com/steve/2006/06/02/cell-segmentation/ and in
 % Cohen et al. http://www.sciencemag.org/cgi/content/abstract/322/5907/1511
 
-function cellMap = segment_cells(image_input)
+function cellMap = segment_cells(image_input, second_image)
 %% Configuration
 % Number of layers above a below the best infocus layer to use
 layers_around_focus = 3;
@@ -50,6 +50,7 @@ toc
 fprintf ('Searching for nuclei\n');
 tic
 I_sc = mat2gray(max_image);
+
 
 %% Adaptive contrast enhancement 
 % adapthisteq implements a technique called contrast-limited adaptive
@@ -138,7 +139,17 @@ fprintf('Finding cell boundaries\n')
 tic
 % complement the image so that the peaks become valleys. We do this because
 % we are about to apply the watershed transform, which identifies low
-% points, not high points. 
+% points, not high points.
+if nargin >1
+    if (ischar(second_image)) 
+        image_2 = load_image(second_image);
+    else
+        image_2 = second_image;
+    end
+    max_image_2 = max(image_2.layers(:,:,bottom_layer:top_layer),[],3);
+    I_sc_2 = mat2gray(max_image_2);
+    I_sc = ( I_sc*(1/median(I_sc(:))) + I_sc_2*(1/median(I_sc_2(:))) );
+end
 I_sc_c = imcomplement(I_sc);
 
 % modify the image so that the background pixels and the extended maxima

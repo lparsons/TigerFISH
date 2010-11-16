@@ -103,8 +103,8 @@ for d=1:size(dyes,1)
     % Determine Thresholds - 90% outside spots threshold
     dye = dyes{d};
     if (~isempty(experiment_spot_data.(dye)))
-        out_spots = experiment_spot_data.(dye)(:,7)==2;
-        in_spots = experiment_spot_data.(dye)(:,7)==0;
+        out_spots_ind = experiment_spot_data.(dye)(:,7)==2;
+        in_spots_ind = experiment_spot_data.(dye)(:,7)==0;
         % TODO Implement FDR calc here (need p-vals, q-vals)
         % Estimate p-values based on spots outside cells
         % - Get median, toss outliers beyond 3 sd
@@ -113,21 +113,32 @@ for d=1:size(dyes,1)
         %- [fdr q] = mafdr(p_val)
         %- threshold q values
 
-        %Removes very bright spots outside of the cells that are likley to be artifacts and mRNAs  
+        %Removes very bright spots outside of the cells that are likley to be artifacts and mRNAs
+        out_spots =  experiment_spot_data.(dye)(out_spots_ind,5);
+        in_spots =  experiment_spot_data.(dye)(in_spots_ind,5);
         out_spots = out_spots( out_spots < 3* midian(out_spots) ); 
         %Computes the CDF for spots outside of cells
         Num = numel(out_spots);
-        OUT_CDF.x = sort( out_spots );
+        [OUT_CDF.x   OUT_CDF.ind ] = sort( out_spots );
         OUT_CDF.y = (0:1:(Num-1)) * (1/Num);      
         %Computes p values for spots inside of cells
-		prob_2be_mRNA = zeros( size(prob_2be_mRNA) );
-		prob_2be_mRNA( in_spots >= OUT_CDF.x(end) ) = (1 - 1/Num);
+		prob_2be_mRNA.all = zeros( size(experiment_spot_data.(dye),1), 1 );
+        prob_2be_mRNA.out =  OUT_CDF.y(  OUT_CDF.ind );
+        
+        prob_2be_mRNA.in = zeros( size(in_spots,1), 1 );
+		prob_2be_mRNA.in( in_spots >= OUT_CDF.x(end) ) = (1 - 1/Num);
 		indDimmer = find( in_spots <  OUT_CDF.x(end) );
-        prob_2be_mRNA(indDimmer) = interp1( OUT_CDF.x, OUT_CDF.y, in_spots(indDimmer) );
-        pvals = 1 - prob_2be_mRNA;
+        prob_2be_mRNA.in(indDimmer) = interp1( OUT_CDF.x, OUT_CDF.y, in_spots(indDimmer) );
+        prob_2be_mRNA.all( in_spots_ind ) = prob_2be_mRNA.in;
+        prob_2be_mRNA.all( out_spots_ind ) = prob_2be_mRNA.out;
+        pvals = 1 - prob_2be_mRNA.in;
         qvals = mafdr( pvals );
         [val indT] = min( abs( qvals - FDR_Treshold )  );
         threshold.(dye) = in_spots( indT ); 
+        
+        %Appending spot probabilities to the spot data matrix
+        experiment_spot_data.(dye) = [experiment_spot_data.(dye)  prob_2be_mRNA.all];
+       
 
         %The old method
         %threshold.(dye) = determine_threshold(experiment_spot_data.(dye)(out_spots,5), experiment_spot_data.(dye)(in_spots,5));
@@ -163,7 +174,7 @@ end
 
 %% Spot Count Summary
 % Summary report
-experiment_counts = spot_count_summary(experiment_spot_data, experiment_cell_maps, threshold);
+experiment_counts = spot_count_summary(experiment_spot_data, experiment_cell_maps, threshold, cdc);
 
 %% Save Results
 %csvwrite([ip.Results.output_dir filesep 'spot_counts.csv'], experiment_counts)
