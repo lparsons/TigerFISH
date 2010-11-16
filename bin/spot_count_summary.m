@@ -12,26 +12,60 @@ counts = [];
 dyes = fields(ip.Results.spot_data);
 regions = unique(ip.Results.spot_data.(dyes{1})(:,1));
 
+Dye_probs = {};
 for r=1:size(regions,1)
     region_cell_map = ip.Results.cell_maps{r};
     [cell_map_labeled,num_cells] = bwlabel(region_cell_map);
     r_counts = repmat(r,num_cells+1,1);
     r_counts = horzcat(r_counts, (0:num_cells)');
+    dye_probs = cell(num_cells+1,3);
     for d=1:size(dyes,1)
         dye = dyes{d};
         if (~isempty(ip.Results.spot_data.(dye)))
-            region_spot_data = ip.Results.spot_data.(dye)(ip.Results.spot_data.(dye)(:,1)==r,2:7);
-            dye_count = repmat(0,num_cells+1,1);
+            region_spot_data = ip.Results.spot_data.(dye)(ip.Results.spot_data.(dye)(:,1)==r,2:8);
+            dye_count = zeros(num_cells+1,1);
             for c=0:num_cells
-                dye_count(c+1) = sum(region_spot_data(:,5)==c & region_spot_data(:,4)>ip.Results.threshold.(dye) );
+                
+                Is.in_the_cell = region_spot_data(:,5)==c;
+                Is.above_threshold = region_spot_data(:,4)>ip.Results.threshold.(dye); 
+                Is.processed  = Is.in_the_cell & Is.above_threshold;
+                
+                dye_count(c+1) = sum( Is.processed );
+                dye_probs{c+1,d} = spotProb_1D( region_spot_data(Is.processed,7)  );
             end
             r_counts = horzcat(r_counts, dye_count);
         else
-            r_counts = horzcat(r_counts, repmat(0,size(r_counts,1),1));
+            r_counts = horzcat(r_counts, zeros(size(r_counts,1),1));
         end
     end
+    sz = size(Dye_probs,1)+1;
+    Dye_probs((sz):(sz+c),:) = dye_probs;
     counts = vertcat(counts, r_counts);
 end
+
+%% Computes 2D Distributions
+N = 50;
+k=0;
+for d1=1:size(dyes,1)
+  for d2=(d1+1):size(dyes,1), k=k+1;   
+    
+    % Probabilistic
+    Prob2D{k} = zeros( N );
+    for i=size(Dye_probs,1) 
+        Prob = Dye_probs{i,d1}(:) * Dye_probs{i,d2}(:)';
+        
+        [sz1 sz2] = size( Prob );
+        Prob2D{k} = Prob2D{k}(1:min(sz1,N), 1:min(sz2,N))  + Prob(1:min(sz1,N), 1:min(sz2,N));
+    end
+    
+    % Deterministic
+    Path_FileName = 'dumy.pdf';
+    Y = probMassFnc_2D( counts( :, d1 ), counts( :, d2 ), Path_FileName ); 
+    
+    
+  end
+end
+
 
 % thresh_string = '';
 % sep = '';
