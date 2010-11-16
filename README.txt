@@ -1,6 +1,30 @@
-Quick usage guide
------------------
+Usage Guide
+-----------
 
+1) Prepare an tab delimted file listing the experiments an inputfiles
+
+    Coumns: Experiment, Region, Cy3_file, Cy3.5_file, Cy5_file, DAPI_file
+
+    a) This can be generated using the wrapper function for files in a directory structure like:
+        EXPERIMENT_SET/
+            EXPERIMENT/
+                1/
+                    EXPERIMENT_NUMBER-EXPERIMENT_NAME - Position #_CDYE.tiff
+                        DYE should be one of CY3, CY3.5, CY5, DAPI
+                        e.g. NS1-POL30_SUR4_OM45 - Position 1_CCY3.tiff
+
+        experiment_set = wrapper(Path, Experiment_Numbers, [filemask=*], [output_dir=output])
+
+2) Analyze experiment set
+    main( experiment_list_file, output_dir, [algorithm=3D], [load_results=False] )
+
+3) Run generateFishView.py to generate HTML viewing pages
+    a) python generateFishView.py path/to/results -n 'Experiment Set Name'
+
+
+
+OLD METHOD (Deprecated)
+-----------------------
 1) Prepare experiment set data structure
 	a) User wrapper.m to parse 'standard' directory structures produced by Ryan
 		experiment_set = wrapper(Path, Experiment_Numbers, [filemask=*], [output_dir=output])

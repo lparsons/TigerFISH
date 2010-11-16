@@ -63,6 +63,7 @@ save([ip.Results.output_dir filesep 'experiment_set_data.mat'], 'experiment_set_
 counts = [];
 for i=1:size(experiment_set_data,2)
     counts = vertcat(counts, [repmat({experiment_set_data(i).name},size(experiment_set_data(i).counts,1),1), num2cell(experiment_set_data(i).counts)]);
+    %TODO append to file instead of storing in memory
 end
 cellwrite([ip.Results.output_dir filesep 'spot_counts.csv'], counts, '\t', 'wt');
 %csvwrite([ip.Results.output_dir filesep 'spot_counts.csv'], counts);

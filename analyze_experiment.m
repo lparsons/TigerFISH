@@ -77,6 +77,12 @@ else
     %   2) if necessary, correct my saving of cdc
        
     save(exp_data_file, 'experiment_spot_data', 'experiment_cell_maps', 'cdc' );
+    % Experiment_spot_data.(dye) is matrix with 7 columns:
+    %   Region, X, Y, Z, Intensity, Cell, Cell_Type
+    %
+    %       Cell_Type is 0 - Normal Cell (to be counted)
+    %                    1 - Border Cell (ignored in counting)
+    %                    2 - Background (not a cell)
 end
 
 
@@ -134,7 +140,7 @@ for d=1:size(dyes,1)
         print(histogram.(dye), '-dpdf', [ip.Results.output_dir filesep dye '_spot_intensity_histogram.pdf'], '-r0');
         close(histogram.(dye))
         
-        % Spot overlay images
+        % Spot overlay imagesregion_spot_data
         N = 1;
         regions = unique(experiment_spot_data.(dye)(:,1));
         for r=1:size(regions,1)
