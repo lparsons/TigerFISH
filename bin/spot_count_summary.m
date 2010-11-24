@@ -5,6 +5,8 @@ ip.FunctionName = 'determine_thresholds';
 ip.addRequired('spot_data',@isstruct);
 ip.addRequired('cell_maps',@iscell);
 ip.addRequired('threshold',@isstruct);
+ip.addOptional('genes',{'gene1', 'gene2', 'gene3'},@iscell)
+ip.addOptional('output_path','.',@isdir);
 ip.parse(varargin{:});
 
 counts = [];
@@ -50,9 +52,9 @@ for d1=1:size(dyes,1)
   for d2=(d1+1):size(dyes,1), k=k+1;   
       
     % Gets info for the Joint Distributions and the Plots
-    Path_FileName = 'dumy.pdf';
-    Gene1 = ' ';
-    Gene2 = ' ';  
+    Gene1 = ip.Results.genes{d1};
+    Gene2 = ip.Results.genes{d2};
+    Path_FileName = [ip.Results.output_path filesep 'joint_dist_' Gene1 '_' Gene2 '.pdf'];
     
     % Probabilistic
     Prob2D{k} = zeros( N );

@@ -47,8 +47,8 @@ function experiment_set_data = main( experiment_list_file, output_dir, varargin 
 
 i_p = inputParser;
 i_p.FunctionName = 'main';
-i_p.addOptional('algorithm','3D',@ischar);
-i_p.addOptional('load_results',false,@islogical);
+i_p.addParamValue('algorithm','3D',@ischar);
+i_p.addParamValue('load_results',false,@islogical);
 i_p.parse(varargin{:});
 
 

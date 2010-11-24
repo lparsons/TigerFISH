@@ -169,8 +169,8 @@ fclose(output_file);
 
 % Read output_file and parse into experiment_set datastructure
 % TODO Refactor this to create data structure directly
-experiment_set = parse_experiment_list_file(output_filename);
+% experiment_set = parse_experiment_list_file(output_filename);
 
 %% Run analysis
-experiment_set_data = analyze_experiment_set(experiment_set, nm, i_p.Results.algorithm, i_p.Results.load_results);
+% experiment_set_data = analyze_experiment_set(experiment_set, nm, i_p.Results.algorithm, i_p.Results.load_results);
 end

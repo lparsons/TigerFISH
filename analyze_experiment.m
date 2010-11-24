@@ -48,7 +48,7 @@ else
     experiment_spot_data.cy3 = [];
     experiment_spot_data.cy3_5 = [];
     experiment_spot_data.cy5 = [];
-	DNA_content = [];
+    DNA_content = [];
     % Loop through regions
     for p=1:size(ip.Results.region_file_list,1)
         fprintf('Position number %s\n', num2str(p))
@@ -62,20 +62,20 @@ else
         experiment_spot_data.cy3 = vertcat(experiment_spot_data.cy3, horzcat(repmat(p, size(spot_data.cy3, 1),1),spot_data.cy3));
         experiment_spot_data.cy3_5 = vertcat(experiment_spot_data.cy3_5, horzcat(repmat(p, size(spot_data.cy3_5, 1),1),spot_data.cy3_5));
         experiment_spot_data.cy5 = vertcat(experiment_spot_data.cy5, horzcat(repmat(p, size(spot_data.cy5, 1),1),spot_data.cy5));
-      
-		DNA_content = [DNA_content; cell_map.DNA_content]; %MatLab is going to call vertcat anyway so I prefrer the simpler syntax
+        
+        DNA_content = [DNA_content; cell_map.DNA_content]; %MatLab is going to call vertcat anyway so I prefrer the simpler syntax
         experiment_cell_maps{p} = cell_map;
     end
-    % Estimates a CDC phase for each cell based on the DNA content inferred from DAPI staining 
-       %Directory and name for the plot of DNA content
-       PathFileName  = [ip.Results.output_dir filesep 'DNA_Content.pdf']; 
-	   DNA_Content = DNA_Content * (1/var(DNA_Content)); %normalize variance to avoid problems from treating pdf as pmf
-    [cdc.phases cdc.probs] = DNA_2_cdc_phases( DNA_Content, [], PathFileName );
-
-    %Lance, 
+    % Estimates a CDC phase for each cell based on the DNA content inferred from DAPI staining
+    %Directory and name for the plot of DNA content
+    PathFileName  = [ip.Results.output_dir filesep 'DNA_content.pdf'];
+    DNA_content = DNA_content * (1/var(DNA_content)); %normalize variance to avoid problems from treating pdf as pmf
+    [cdc.phases cdc.probs] = DNA_2_cdc_phases( DNA_content, [], PathFileName );
+    
+    %Lance,
     %   1) give the proper value to PathFileName
     %   2) if necessary, correct my saving of cdc
-       
+    
     save(exp_data_file, 'experiment_spot_data', 'experiment_cell_maps', 'cdc' );
     % Experiment_spot_data.(dye) is matrix with 7 columns:
     %   Region, X, Y, Z, Intensity, Cell, Cell_Type
@@ -96,7 +96,7 @@ dye_color.cy5 = [.8 .8 .8];
 
 %Sets a threshold of FDR
 if ~exist( 'FDR_Treshold', 'var' )
-    FDR_Treshold = 0.05; 
+    FDR_Treshold = 0.05;
 end
 
 for d=1:size(dyes,1)
@@ -112,36 +112,36 @@ for d=1:size(dyes,1)
         %- p_val = interp1(x, y, intensities_in) % default is cubic
         %- [fdr q] = mafdr(p_val)
         %- threshold q values
-
+        
         %Removes very bright spots outside of the cells that are likley to be artifacts and mRNAs
         out_spots =  experiment_spot_data.(dye)(out_spots_ind,5);
         in_spots =  experiment_spot_data.(dye)(in_spots_ind,5);
-        out_spots_to_keep = out_spots < 3* midian(out_spots);
+        out_spots_to_keep = out_spots < 3* median(out_spots);
         out_spots = out_spots( out_spots_to_keep );
         out_spots_ind = out_spots_ind( out_spots_to_keep );
         %Computes the CDF for spots outside of cells
         Num = numel(out_spots);
         [OUT_CDF.x   OUT_CDF.ind ] = sort( out_spots );
-        OUT_CDF.y = (0:1:(Num-1)) * (1/Num);      
+        OUT_CDF.y = (0:1:(Num-1)) * (1/Num);
         %Computes p values for spots inside of cells
-		prob_2be_mRNA.all = zeros( size(experiment_spot_data.(dye),1), 1 );
+        prob_2be_mRNA.all = zeros( size(experiment_spot_data.(dye),1), 1 );
         prob_2be_mRNA.out =  OUT_CDF.y(  OUT_CDF.ind );
         
         prob_2be_mRNA.in = zeros( size(in_spots,1), 1 );
-		prob_2be_mRNA.in( in_spots >= OUT_CDF.x(end) ) = (1 - 1/Num);
-		indDimmer = find( in_spots <  OUT_CDF.x(end) );
+        prob_2be_mRNA.in( in_spots >= OUT_CDF.x(end) ) = (1 - 1/Num);
+        indDimmer = find( in_spots <  OUT_CDF.x(end) );
         prob_2be_mRNA.in(indDimmer) = interp1( OUT_CDF.x, OUT_CDF.y, in_spots(indDimmer) );
         prob_2be_mRNA.all( in_spots_ind ) = prob_2be_mRNA.in;
         prob_2be_mRNA.all( out_spots_ind ) = prob_2be_mRNA.out;
         pvals = 1 - prob_2be_mRNA.in;
         qvals = mafdr( pvals );
         [val indT] = min( abs( qvals - FDR_Treshold )  );
-        threshold.(dye) = in_spots( indT ); 
+        threshold.(dye) = in_spots( indT );
         
         %Appending spot probabilities to the spot data matrix
         experiment_spot_data.(dye) = [experiment_spot_data.(dye)  prob_2be_mRNA.all];
-       
-
+        
+        
         %The old method
         %threshold.(dye) = determine_threshold(experiment_spot_data.(dye)(out_spots,5), experiment_spot_data.(dye)(in_spots,5));
         
