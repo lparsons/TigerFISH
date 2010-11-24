@@ -48,6 +48,11 @@ N = 50;
 k=0;
 for d1=1:size(dyes,1)
   for d2=(d1+1):size(dyes,1), k=k+1;   
+      
+    % Gets info for the Joint Distributions and the Plots
+    Path_FileName = 'dumy.pdf';
+    Gene1 = ' ';
+    Gene2 = ' ';  
     
     % Probabilistic
     Prob2D{k} = zeros( N );
@@ -57,10 +62,10 @@ for d1=1:size(dyes,1)
         [sz1 sz2] = size( Prob );
         Prob2D{k} = Prob2D{k}(1:min(sz1,N), 1:min(sz2,N))  + Prob(1:min(sz1,N), 1:min(sz2,N));
     end
+    % Y.probabilistic = jointDist_probs( Prob2D{k}, Gene1, Gene2, Path_FileName );
     
     % Deterministic
-    Path_FileName = 'dumy.pdf';
-    Y = probMassFnc_2D( counts( :, d1 ), counts( :, d2 ), Path_FileName ); 
+    Y.threshold = jointDist( counts( :, d1 ), counts( :, d2 ), Gene1, Gene2, Path_FileName ); 
     
     
   end
