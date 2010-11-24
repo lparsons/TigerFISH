@@ -118,14 +118,16 @@ for d=1:size(dyes,1)
         in_spots =  experiment_spot_data.(dye)(in_spots_ind,5);
         out_spots_to_keep = out_spots < 3* median(out_spots);
         out_spots = out_spots( out_spots_to_keep );
-        out_spots_ind = out_spots_ind( out_spots_to_keep );
+        %out_spots_ind = out_spots_ind( out_spots_to_keep );
         %Computes the CDF for spots outside of cells
         Num = numel(out_spots);
         [OUT_CDF.x   OUT_CDF.ind ] = sort( out_spots );
         OUT_CDF.y = (0:1:(Num-1)) * (1/Num);
         %Computes p values for spots inside of cells
         prob_2be_mRNA.all = zeros( size(experiment_spot_data.(dye),1), 1 );
-        prob_2be_mRNA.out =  OUT_CDF.y(  OUT_CDF.ind );
+        prob_2be_mRNA.out = zeros( size(out_spots_to_keep,1), 1 );        
+        prob_2be_mRNA.out(out_spots_to_keep) =  OUT_CDF.y(  OUT_CDF.ind );
+        prob_2be_mRNA.out(out_spots_to_keep==0) = Inf;
         
         prob_2be_mRNA.in = zeros( size(in_spots,1), 1 );
         prob_2be_mRNA.in( in_spots >= OUT_CDF.x(end) ) = (1 - 1/Num);
