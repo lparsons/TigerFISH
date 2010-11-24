@@ -148,10 +148,11 @@ for d=1:size(dyes,1)
         %threshold.(dye) = determine_threshold(experiment_spot_data.(dye)(out_spots,5), experiment_spot_data.(dye)(in_spots,5));
         
         % Histogram
-        histogram.(dye) = spot_intensity_histogram(experiment_spot_data.(dye)(out_spots,5), experiment_spot_data.(dye)(in_spots,5), threshold.(dye));
+        histogram.(dye) = spot_intensity_histogram(experiment_spot_data.(dye)(out_spots_ind,5), experiment_spot_data.(dye)(in_spots_ind,5), threshold.(dye));
         title([strrep(dye, '_', '.') ' Spot Intensity Histogram'], 'FontSize', 22);
         set(histogram.(dye),'PaperPositionMode','auto', 'PaperSize', [10 5], 'Units', 'inches')
         set(histogram.(dye), 'Position',  [.25 .25 9.5 4.5] );
+        set(histogram.(dye),'InvertHardCopy','on');
         print(histogram.(dye), '-dpdf', [ip.Results.output_dir filesep dye '_spot_intensity_histogram.pdf'], '-r0');
         close(histogram.(dye))
         
@@ -162,7 +163,7 @@ for d=1:size(dyes,1)
             reg = regions(r);
             %if (~isempty(experiment_spot_data.(dye)))
             region_spot_data = experiment_spot_data.(dye)(experiment_spot_data.(dye)(:,1)==reg,2:7);
-            spot_overlay = plot_spot_overlay(region_spot_data, threshold.(dye), size(experiment_cell_maps{reg}), 'fgcolor', dye_color.(dye), 'N', N);
+            spot_overlay = plot_spot_overlay(region_spot_data, threshold.(dye), size(experiment_cell_maps{reg}.cellMap), 'fgcolor', dye_color.(dye), 'N', N);
             % Print figure
             reg_output_dir = [ip.Results.output_dir filesep 'region_' num2str(reg)];
             spot_overlay_filename = [reg_output_dir filesep dye '_spot_image.png'];

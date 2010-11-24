@@ -5,8 +5,9 @@ ip.FunctionName = 'determine_thresholds';
 ip.addRequired('spot_data',@isstruct);
 ip.addRequired('cell_maps',@iscell);
 ip.addRequired('threshold',@isstruct);
-ip.addOptional('genes',{'gene1', 'gene2', 'gene3'},@iscell)
-ip.addOptional('output_path','.',@isdir);
+ip.addRequired('cdc',@isstruct);
+ip.addParamValue('genes',{'gene1', 'gene2', 'gene3'},@iscell)
+ip.addParamValue('output_path','.',@isdir);
 ip.parse(varargin{:});
 
 counts = [];
@@ -16,7 +17,7 @@ regions = unique(ip.Results.spot_data.(dyes{1})(:,1));
 
 Dye_probs = {};
 for r=1:size(regions,1)
-    region_cell_map = ip.Results.cell_maps{r};
+    region_cell_map = ip.Results.cell_maps{r}.cellMap;
     [cell_map_labeled,num_cells] = bwlabel(region_cell_map);
     r_counts = repmat(r,num_cells+1,1);
     r_counts = horzcat(r_counts, (0:num_cells)');
