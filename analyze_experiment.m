@@ -57,7 +57,7 @@ else
         
         [cell_map spot_data] = analyze_region(ip.Results.region_file_list{p,1}, ...
             ip.Results.region_file_list{p,2}, ip.Results.region_file_list{p,3}, ...
-            ip.Results.region_file_list{p,4}, reg_output_dir);
+            ip.Results.region_file_list{p,4}, reg_output_dir, 'debug', ip.Results.load_results);
         
         experiment_spot_data.cy3 = vertcat(experiment_spot_data.cy3, horzcat(repmat(p, size(spot_data.cy3, 1),1),spot_data.cy3));
         experiment_spot_data.cy3_5 = vertcat(experiment_spot_data.cy3_5, horzcat(repmat(p, size(spot_data.cy3_5, 1),1),spot_data.cy3_5));
