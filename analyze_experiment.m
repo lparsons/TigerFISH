@@ -116,7 +116,9 @@ for d=1:size(dyes,1)
         %Removes very bright spots outside of the cells that are likley to be artifacts and mRNAs
         out_spots =  experiment_spot_data.(dye)(out_spots_ind,5);
         in_spots =  experiment_spot_data.(dye)(in_spots_ind,5);
-        out_spots = out_spots( out_spots < 3* midian(out_spots) ); 
+        out_spots_to_keep = out_spots < 3* midian(out_spots);
+        out_spots = out_spots( out_spots_to_keep );
+        out_spots_ind = out_spots_ind( out_spots_to_keep );
         %Computes the CDF for spots outside of cells
         Num = numel(out_spots);
         [OUT_CDF.x   OUT_CDF.ind ] = sort( out_spots );
