@@ -31,10 +31,10 @@ for r=1:size(regions,1)
                 
                 Is.in_the_cell = region_spot_data(:,5)==c;
                 Is.above_threshold = region_spot_data(:,4)>ip.Results.threshold.(dye); 
-                Is.processed  = Is.in_the_cell & Is.above_threshold;
+                Is.yes  = Is.in_the_cell & Is.above_threshold;
                 
-                dye_count(c+1) = sum( Is.processed );
-                dye_probs{c+1,d} = spotProb_1D( region_spot_data(Is.processed,7)  );
+                dye_count(c+1) = sum( Is.yes );
+                dye_probs{c+1,d} = spotProb_1D( region_spot_data(Is.yes,7)  );
             end
             r_counts = horzcat(r_counts, dye_count);
         else

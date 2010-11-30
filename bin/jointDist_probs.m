@@ -58,10 +58,10 @@ p1 = sum( p_1_2, 1 );
 p2 = sum( p_1_2, 2 );
 
 h2 = axes( 'Position',    [ 0.1       sz+0.11   sz     sz2 ]  );
-bar(1:MAXx, p2(IN.x) ); hold on
+bar(1:MAXy, p2(IN.y) ); hold on
 %errorbar( 0:MAXx, p2(IN.x), Errors2(IN.x), 'r.' );
-ylim( [0 1.02*max( p2(IN.x) )]);
-xlim( [1-0.5  MAXx+0.5]);
+ylim( [0 1.02*max( p2(IN.y) )]);
+xlim( [1-0.5  MAXy+0.5]);
 set(h2, 'Xtick', [] );
 set(h2, 'FontWeight', 'Bold' );
 h(3) = ylabel( 'Density' );
@@ -71,14 +71,15 @@ h(3) = ylabel( 'Density' );
 
 
 h3 = axes( 'Position',    [sz+0.11    0.1       sz2     sz ]  );
-barh(1:MAXy, p1(IN.y) ); hold on
+barh(1:MAXx, p1(IN.x) ); hold on
 %errorbar_x( p1(IN.y), 0:MAXy, Errors1(IN.y), 'r.' );
-xlim( [0 1.02*max( p1(IN.y) )]);
-ylim( [1-0.5  MAXy+0.5]);
+xlim( [0 1.02*max( p1(IN.x) )]);
+ylim( [1-0.5  MAXx+0.5]);
 set(h3, 'Ytick', [] );
 set(h3, 'FontWeight', 'Bold' );
 
-h(4) = xlabel( 'Density' ); sett(h)
+h(4) = xlabel( 'Density' ); 
+set(h, 'fontsize',   24, 'fontWeight', 'Bold' );
 %==========================================================================
 sett( h, 23 ); 
 
