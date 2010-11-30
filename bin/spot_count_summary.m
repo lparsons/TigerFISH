@@ -41,8 +41,8 @@ for r=1:size(regions,1)
             r_counts = horzcat(r_counts, zeros(size(r_counts,1),1));
         end
     end
-    sz = size(Dye_probs,1)+1;
-    Dye_probs((sz):(sz+c),:) = dye_probs;
+    sz = size(Dye_probs,1);
+    Dye_probs((sz+1):(sz+c),:) = dye_probs(2:end,:);
     counts = vertcat(counts, r_counts);
 end
 
@@ -55,20 +55,21 @@ for d1=1:size(dyes,1)
     % Gets info for the Joint Distributions and the Plots
     Gene1 = ip.Results.genes{d1};
     Gene2 = ip.Results.genes{d2};
-    Path_FileName = [ip.Results.output_path filesep 'joint_dist_' Gene1 '_' Gene2 '.pdf'];
+    Prob_FileName = [ip.Results.output_path filesep 'joint_dist_prob_' Gene1 '_' Gene2 '.pdf'];
+    Thresh_FileName = [ip.Results.output_path filesep 'joint_dist_thresh_' Gene1 '_' Gene2 '.pdf'];
     
     % Probabilistic
     Prob2D{k} = zeros( N );
-    for i=size(Dye_probs,1) 
+    for i=1:size(Dye_probs,1) 
         Prob = Dye_probs{i,d1}(:) * Dye_probs{i,d2}(:)';
         
         [sz1 sz2] = size( Prob );
-        Prob2D{k} = Prob2D{k}(1:min(sz1,N), 1:min(sz2,N))  + Prob(1:min(sz1,N), 1:min(sz2,N));
+        Prob2D{k}(1:min(sz1,N), 1:min(sz2,N)) = Prob2D{k}(1:min(sz1,N), 1:min(sz2,N))  + Prob(1:min(sz1,N), 1:min(sz2,N));
     end
-    jointDist_probs( Prob2D{k}, Gene1, Gene2, Path_FileName );
+    jointDist_probs( Prob2D{k}, Gene1, Gene2, Prob_FileName );
     
     % Deterministic
-    Y = jointDist( counts( :, d1+2 ), counts( :, d2+2 ), Gene1, Gene2, Path_FileName ); 
+    Y.threshold = jointDist( counts( :, d1+2 ), counts( :, d2+2 ), Gene1, Gene2, Thresh_FileName ); 
     
     
   end

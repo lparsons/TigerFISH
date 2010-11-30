@@ -9,7 +9,7 @@ addpath bin/
 experiment_list = [];
 fid = fopen(filename);
 data = textscan(fid, '%s\t%s\t%s\t%s\t%s\t%s', 'Delimiter', '\t');
-exp_names = unique(data{1}, 'rows');
+exp_names = unique(data{1});
 for e=1:size(exp_names,1)
     clear experiment
     experiment.name = exp_names{e};

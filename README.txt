@@ -13,13 +13,17 @@ Usage Guide
                         DYE should be one of CY3, CY3.5, CY5, DAPI
                         e.g. NS1-POL30_SUR4_OM45 - Position 1_CCY3.tiff
 
-        experiment_set = wrapper(Path, Experiment_Numbers, [filemask=*], [output_dir=output])
+        experiment_set = genereate_experiment_list(path, 
+                                                   [experiment_mumbers=1:1000],
+                                                   [output_filename='experiment_list.txt'], 
+                                                   [filemask=*])
 
 2) Analyze experiment set
-    main( experiment_list_file, output_dir, [algorithm=3D], [load_results=False] )
+    main( experiment_list_file, output_dir, [algorithm='3D'], [load_results=False] )
 
 3) Run generateFishView.py to generate HTML viewing pages
     a) python generateFishView.py path/to/results -n 'Experiment Set Name'
+
 
 
 

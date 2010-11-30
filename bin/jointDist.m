@@ -139,24 +139,13 @@ set( gcf, 'PaperSize', [7  6.5],...
           'PaperPositionMode', 'auto' );
 %Hhh = gtext( r  ); sett(Hhh, 34 );    
 if nargin >=5
-    print( '-dpdf', [Folder_File_Name '.pdf'] );
+    print( '-dpdf', Folder_File_Name );
     %system( [ 'start ' Folder_File_Name '.pdf'] );
 end 
 
 % Computting Entropy & Mutual Information
 H_1_2 = nansum(nansum(Y.p_1_2.*log2(Y.p_1_2)));
 Y.MI = H_1_2 - ( H_1 + H_2 );       
-
-
-
-
-
-
-
-
-
-
-
 
 
 

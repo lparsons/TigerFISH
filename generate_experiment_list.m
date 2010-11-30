@@ -1,11 +1,11 @@
-function experiment_set_data = wrapper( Path, Experiment_Numbers, varargin )
+function experiment_set_data = generate_experiment_list( path, varargin )
 % wrapper function identifies images in Path with specified experiment 
 %    numbers and outputs a list of data structures to use when processing.
 %    Used when experiments are in separate directories and numbered.
 %    For situations where all experiments are in same directory, use 
 %       'parse_experiment_dir' function instead.
 %
-%   [EXPERIMENT_SET] = wrapper(path, experiment_numbers, filemask, output_dir)
+%   [EXPERIMENT_SET] = wrapper(path, experiment_numbers, output_filename, filemask)
 %       Examines 'path' for experiments listed in 'experiment_numbers' and
 %       categorizes them into CY3, CY3.5, CY5, and DAPI images
 %
@@ -23,64 +23,53 @@ addpath bin/
 
 %% Parse Arguments
 
-i_p = inputParser;
-i_p.FunctionName = 'wrapper';
-i_p.addOptional('filemask','*',@ischar);
-i_p.addOptional('output_dir','output',@ischar);
-i_p.addOptional('algorithm','3D',@ischar);
-i_p.addOptional('load_results',false,@islogical);
-i_p.parse(varargin{:});
-nm = i_p.Results.output_dir;
-filemask = i_p.Results.filemask;
+ip = inputParser;
+ip.FunctionName = 'generate_experiment_list';
+ip.addOptional('experiment_numbers',1:1000,@isnumeric);
+ip.addOptional('output_filename','experiment_list.txt',@ischar);
+ip.addOptional('filemask','*',@ischar);
+ip.addOptional('algorithm','3D',@ischar);
+ip.addOptional('load_results',false,@islogical);
+ip.parse(varargin{:});
 
-if isempty( Path ), Path = 1; end
-if isnumeric( Path )
-    switch Path
+% Convience cases for use during testing
+if isempty( path ), path = 1; end
+if isnumeric( path )
+    switch path
         case{ 1, 'nslavov' }
-            Path = '/Genomics/grid/users/nslavov/locSpot/fish_img/';  % t = cputime;
-            Path = [Path 'new/nslavov/' ];
-            nm = 'my';
+            path = '/Genomics/grid/users/nslavov/locSpot/fish_img/';
+            path = [path 'new/nslavov/' ];
             filemask = 'N*';
         case{ 2, 'sandy' }
-            Path = '/Genomics/grid/users/nslavov/locSpot/fish_img/';
-            Path = [Path 'new/' ];
-            nm = 'all';
+            path = '/Genomics/grid/users/nslavov/locSpot/fish_img/';
+            path = [path 'new/' ];
             filemask = 'E*';
     end
 end
 
 
-
-Folder.Output = nm;          mkdir( Folder.Output );
-Folder.spOut = [nm '/out'];  mkdir( Folder.spOut );
-Folder.img =   [nm '.imgs']; mkdir( Folder.img );
-Folder.hist =  [nm '.hist']; mkdir( Folder.hist );
-Folder.PMF =   [nm '.jdis']; mkdir( Folder.PMF );
-
-
 %% Open output file
-output_filename = [Folder.Output filesep 'experiment_list.txt'];
+output_filename = [ip.Results.output_filename];
 output_file = fopen(output_filename, 'w');
 
 
 %% Loop through files in directory
-main_dir_list = dir( [Path filesep filemask] );
+main_dir_list = dir( [path filesep ip.Results.filemask] );
 for I = 1: size(main_dir_list,1)
     
     if   strcmp( main_dir_list(I).name(1),  '.' )
         continue
     end
     
-    
     seps = strfind( main_dir_list(I).name, '_' );
-    Experiment_Number = str2double( main_dir_list(I).name(3:seps-1) );
+    experiment_number = str2double( main_dir_list(I).name(3:seps-1) );
     
-    if ~ismember( Experiment_Number, Experiment_Numbers  ) % sum( Experiment_Number == Experiment_Numbers  )
+    if ~ismember( experiment_number, ip.Results.experiment_numbers ) % sum( Experiment_Number == Experiment_Numbers  )
         continue
     end
     
     Set = main_dir_list(I).name;
-    subDir_list = dir( [Path Set filesep] );
+    subDir_list = dir( [path Set filesep] );
     Segments = regexp(Set, '_', 'split' );
     
     File_Num = zeros(4,1);
@@ -89,7 +78,7 @@ for I = 1: size(main_dir_list,1)
             continue
         end
         subDir=[subDir_list(ii).name filesep];
-        file_list = dir( [Path Set filesep subDir] );
+        file_list = dir( [path Set filesep subDir] );
         
         
         for i=1:size(file_list,1)
@@ -150,10 +139,10 @@ for I = 1: size(main_dir_list,1)
         
         fprintf( output_file, '%s\t', Set);
         fprintf( output_file, '%s\t', num2str(reg) );
-        fprintf( output_file, '%s\t', [Path filesep Set filesep cy3_file{reg}]  );
-        fprintf( output_file, '%s\t', [Path filesep Set filesep cy4_file{reg}]  );
-        fprintf( output_file, '%s\t', [Path filesep Set filesep cy5_file{reg}]  );
-        fprintf( output_file, '%s\n', [Path filesep Set filesep dapi_file{reg}]  );
+        fprintf( output_file, '%s\t', [path filesep Set filesep cy3_file{reg}]  );
+        fprintf( output_file, '%s\t', [path filesep Set filesep cy4_file{reg}]  );
+        fprintf( output_file, '%s\t', [path filesep Set filesep cy5_file{reg}]  );
+        fprintf( output_file, '%s\n', [path filesep Set filesep dapi_file{reg}]  );
         
         
     end

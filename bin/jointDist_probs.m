@@ -14,7 +14,7 @@ sz2   = 0.22;
 
 
 h1 = axes( 'Position',    [0.1        0.1       sz         sz ]  );
-imagesc( [0 MAXx], [MAXy 0], log2(p_1_2(IN.y,IN.x)+1) ); 
+imagesc( [0 MAXx], [MAXy 0], log2(p_1_2(IN.x,IN.y)+1) ); 
 
 set(h1, 'Ytick', 0:spy:MAXy, 'YtickLabel', MAXy:-spy:0 );
 set(h1, 'Xtick', 0:spx:MAXx, 'XtickLabel', 0:spx:MAXx )
@@ -90,7 +90,7 @@ set( gcf, 'PaperSize', [7  6.5],...
           'PaperPositionMode', 'auto' );
 %Hhh = gtext( r  ); sett(Hhh, 34 );    
 if nargin >=4
-    print( '-dpdf', [Folder_File_Name '.pdf'] );
+    print( '-dpdf', Folder_File_Name );
     %system( [ 'start ' Folder_File_Name '.pdf'] );
 end        
 

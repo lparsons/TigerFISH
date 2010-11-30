@@ -179,7 +179,7 @@ end
 
 %% Spot Count Summary
 % Summary report
-experiment_counts = spot_count_summary(experiment_spot_data, experiment_cell_maps, threshold, cdc);
+experiment_counts = spot_count_summary(experiment_spot_data, experiment_cell_maps, threshold, cdc, 'output_path', ip.Results.output_dir);
 
 %% Save Results
 %csvwrite([ip.Results.output_dir filesep 'spot_counts.csv'], experiment_counts)
