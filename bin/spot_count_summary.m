@@ -65,10 +65,10 @@ for d1=1:size(dyes,1)
         [sz1 sz2] = size( Prob );
         Prob2D{k} = Prob2D{k}(1:min(sz1,N), 1:min(sz2,N))  + Prob(1:min(sz1,N), 1:min(sz2,N));
     end
-    % Y.probabilistic = jointDist_probs( Prob2D{k}, Gene1, Gene2, Path_FileName );
+    jointDist_probs( Prob2D{k}, Gene1, Gene2, Path_FileName );
     
     % Deterministic
-    Y.threshold = jointDist( counts( :, d1 ), counts( :, d2 ), Gene1, Gene2, Path_FileName ); 
+    Y = jointDist( counts( :, d1+2 ), counts( :, d2+2 ), Gene1, Gene2, Path_FileName ); 
     
     
   end
