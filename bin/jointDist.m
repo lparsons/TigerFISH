@@ -60,7 +60,7 @@ MAXy = min( 40, max(x) );  IN.y = 1:MAXy+1;
 MAXx = min( 40, max(y) );  IN.x = 1:MAXx+1;
 spx = round( MAXx/10 );
 spy = round( MAXy/10 );
-close all
+main_fig = figure('Visible', 'off');
 sz = 0.65;
 sz2   = 0.22;   
 
@@ -128,19 +128,19 @@ set(h3, 'Ytick', [] );
 set(h3, 'FontWeight', 'Bold' );
 
 h(4) = xlabel( 'log_2(Cells)' ); 
-set(h, 'fontsize',   24, 'fontWeight', 'Bold' );
+set(h, 'fontsize',   20, 'fontWeight', 'Bold' );
 %==========================================================================
-sett( h, 23 ); 
+%sett( h, 23 ); 
 
 
 set( gcf, 'Position', [357   245   670   571] ) 
 % set( gcf, 'Position', [440  359  692   419] )
 % set( gca, 'Position', [0.14 0.14 0.80  0.78] );
-set( gcf, 'PaperSize', [7  6.5],...
+set( gcf, 'PaperSize', [7.5  6.5],...
           'PaperPositionMode', 'auto' );
 %Hhh = gtext( r  ); sett(Hhh, 34 );    
 if nargin >=5
-    print( '-dpdf', Folder_File_Name );
+    print(main_fig, '-dpdf', Folder_File_Name );
     %system( [ 'start ' Folder_File_Name '.pdf'] );
 end 
 

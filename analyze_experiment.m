@@ -1,4 +1,4 @@
-function [experiment_spot_data experiment_cell_maps experiment_counts] = analyze_experiment( varargin )
+function [experiment_spot_data experiment_cell_maps experiment_counts] = analyze_experiment( region_file_list, output_dir, varargin )
 % analyze_experiment - analyzes each region to determine cell boundaries and spot locations and intensities
 %    - determines experiment wide intensity thresholds
 %    - saves cell map, spot data
@@ -6,10 +6,15 @@ function [experiment_spot_data experiment_cell_maps experiment_counts] = analyze
 %
 %
 %   [experiment_spot_data experiment_cell_maps experiment_counts] =
-%       analyze_experiment( region_file_list, output_dir, [algorithm], [load_results] )
+%       analyze_experiment( region_file_list, output_dir, [dye_labels], 'ParameterName', ParameterValue )
 %
 %       region_file_list - list of files cy3file, cy3_5file, cy5file, dapifile
-%       output_dir - directory to output experiment data, histograms, etc.
+%       output_dir - directory to output experiment data, histograms, etc.'
+%       dye_labels - optional cell array of labels for each dye
+%           defaults to {'gene1', 'gene2', 'gene3', 'DNA'} 
+%   
+%
+%   Properties
 %
 %   algorithm is an optional parameter that determines method of intensity measurement
 %       Must be one of '3D', '2D', or '2D_local'
@@ -28,9 +33,10 @@ ip = inputParser;
 ip.FunctionName = 'analyze_experiment';
 ip.addRequired('region_file_list',@iscell);
 ip.addRequired('output_dir',@isdir);
-ip.addOptional('algorithm','3D',@ischar);
-ip.addOptional('load_results',false,@islogical);
-ip.parse(varargin{:});
+ip.addOptional('dye_labels',{'gene1', 'gene2', 'gene3', 'DNA'},@iscell);
+ip.addParamValue('algorithm','3D',@ischar);
+ip.addParamValue('load_results',false,@islogical);
+ip.parse(region_file_list, output_dir, varargin{:});
 
 algorithms = {'3D', '2D', '2D_local'};
 if (~strcmpi(ip.Results.algorithm, algorithms))
@@ -179,7 +185,11 @@ end
 
 %% Spot Count Summary
 % Summary report
-experiment_counts = spot_count_summary(experiment_spot_data, experiment_cell_maps, threshold, cdc, 'output_path', ip.Results.output_dir);
+experiment_counts = spot_count_summary(experiment_spot_data, ...
+    experiment_cell_maps, threshold, cdc, ...
+    'output_path', ip.Results.output_dir, ...
+    'dye_labels', ip.Results.dye_labels);
+
 
 %% Save Results
 %csvwrite([ip.Results.output_dir filesep 'spot_counts.csv'], experiment_counts)

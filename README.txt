@@ -3,7 +3,7 @@ Usage Guide
 
 1) Prepare an tab delimted file listing the experiments an inputfiles
 
-    Coumns: Experiment, Region, Cy3_file, Cy3.5_file, Cy5_file, DAPI_file
+    Coumns: Experiment, Region, Cy3_label, Cy3_file, Cy3.5_label, Cy3.5_file, Cy5_label, Cy5_file, DAPI_label, DAPI_file
 
     a) This can be generated using the wrapper function for files in a directory structure like:
         EXPERIMENT_SET/

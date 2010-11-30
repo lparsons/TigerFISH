@@ -1,22 +1,15 @@
-function experiment_set_data = generate_experiment_list( path, varargin )
-% wrapper function identifies images in Path with specified experiment 
-%    numbers and outputs a list of data structures to use when processing.
+function generate_experiment_list( path, varargin )
+% wrapper function identifies images in 'path' with specified experiment 
+%    numbers and outputs a tab delimited file of experiment names, dye
+%    labels and file paths.
+%
 %    Used when experiments are in separate directories and numbered.
 %    For situations where all experiments are in same directory, use 
 %       'parse_experiment_dir' function instead.
 %
-%   [EXPERIMENT_SET] = wrapper(path, experiment_numbers, output_filename, filemask)
+%   generate_experiment_list(path, experiment_numbers, output_filename, filemask)
 %       Examines 'path' for experiments listed in 'experiment_numbers' and
 %       categorizes them into CY3, CY3.5, CY5, and DAPI images
-%
-%       EXPERIMENT_SET - list experiment data structures
-%           experiment.name - name of experiment
-%           experiment.regions - list of experiment regions
-%           experiment.region_files - list of files used for each region
-%               (,1) = Cy3_file
-%               (,2) = Cy3.5_file
-%               (,3) = Cy5_file
-%               (,4) = DAPI_file
 %
 
 addpath bin/
@@ -31,6 +24,7 @@ ip.addOptional('filemask','*',@ischar);
 ip.addOptional('algorithm','3D',@ischar);
 ip.addOptional('load_results',false,@islogical);
 ip.parse(varargin{:});
+filemask = ip.Results.filemask;
 
 % Convience cases for use during testing
 if isempty( path ), path = 1; end
@@ -54,7 +48,7 @@ output_file = fopen(output_filename, 'w');
 
 
 %% Loop through files in directory
-main_dir_list = dir( [path filesep ip.Results.filemask] );
+main_dir_list = dir( [path filesep filemask] );
 for I = 1: size(main_dir_list,1)
     
     if   strcmp( main_dir_list(I).name(1),  '.' )
@@ -64,7 +58,7 @@ for I = 1: size(main_dir_list,1)
     seps = strfind( main_dir_list(I).name, '_' );
     experiment_number = str2double( main_dir_list(I).name(3:seps-1) );
     
-    if ~ismember( experiment_number, ip.Results.experiment_numbers ) % sum( Experiment_Number == Experiment_Numbers  )
+    if ~ismember( experiment_number, ip.Results.experiment_numbers )
         continue
     end
     
@@ -139,9 +133,13 @@ for I = 1: size(main_dir_list,1)
         
         fprintf( output_file, '%s\t', Set);
         fprintf( output_file, '%s\t', num2str(reg) );
+        fprintf( output_file, '%s\t', Segments{2}  );
         fprintf( output_file, '%s\t', [path filesep Set filesep cy3_file{reg}]  );
+        fprintf( output_file, '%s\t', Segments{3}  );
         fprintf( output_file, '%s\t', [path filesep Set filesep cy4_file{reg}]  );
+        fprintf( output_file, '%s\t', Segments{4}  );
         fprintf( output_file, '%s\t', [path filesep Set filesep cy5_file{reg}]  );
+        fprintf( output_file, '%s\t', 'DAPI'  );
         fprintf( output_file, '%s\n', [path filesep Set filesep dapi_file{reg}]  );
         
         
