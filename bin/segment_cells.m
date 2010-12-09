@@ -193,8 +193,10 @@ end
 for i=1:cellMap.nucNum
     %fprintf('Cell %d\n', i)
     
-    if sum( cellMap.cells(cellMap.nuc==i)>0 ) < 20  %ideally should use  sum( cellMap.cells(cellMap.nuc==i)== i ) < 20. However it does not work
-       cellMap.cells( cellMap.cells==i ) = 0;
+    Cell_Nuc_Pix = cellMap.cells(cellMap.nuc==i);
+    if sum( Cell_Nuc_Pix>0 ) < 20  %ideally should use  sum( cellMap.cells(cellMap.nuc==i)== i ) < 20. However it does not work
+       Num = mode( Cell_Nuc_Pix );
+       cellMap.cells( cellMap.cells==Num ) = 0;
        continue 
     end
     
