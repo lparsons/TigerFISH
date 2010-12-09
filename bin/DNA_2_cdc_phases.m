@@ -7,8 +7,8 @@ if nargin ==1 || isempty(MaxIter), MaxIter = 1e2; end
 
 %%
 % Normalize variance to avoid problems from treating pdf as pmf
-Var = var(  DNA_content( ~isnan(DNA_content) )  );
-DNA_content = DNA_content * (1/Var ); 
+Var = var(  DNA_Content( ~isnan(DNA_Content) )  );
+DNA_Content = DNA_Content * (1/Var ); 
  
 % Generate initial expectations and IC for starting an EM optimization
 Median = median( DNA_Content );
@@ -111,12 +111,14 @@ if nargin >= 3 && ~isempty(PathFileName)
     end
 
     plot( l, fr, 'LineWidth', 3 )
+    fprintf('CDC Phases xlim %f : %f', l(1), l(end));
+    fprintf(  '%1.2f\t', DNA_Content);
     xlim( [l(1) l(end)] );
     h(1) = xlabel( 'DNA Content' );
     h(2) = ylabel( 'Number of Cells' );
     h(3) = legend( 'All', 'G1', 'S', 'G2'  );
     set(h, 'fontsize',       24,...
-           'interpreter',   'latex'       );  
+           'interpreter',   'tex'       );  
     
     
     set( gcf, 'Position', [440  159  692   419] )
