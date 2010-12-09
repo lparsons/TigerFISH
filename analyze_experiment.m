@@ -75,7 +75,6 @@ else
     % Estimates a CDC phase for each cell based on the DNA content inferred from DAPI staining
     %Directory and name for the plot of DNA content
     PathFileName  = [ip.Results.output_dir filesep 'DNA_content.pdf'];
-    DNA_content = DNA_content * (1/var(DNA_content)); %normalize variance to avoid problems from treating pdf as pmf
     [cdc.phases cdc.probs] = DNA_2_cdc_phases( DNA_content, [], PathFileName );
     
     %Lance,

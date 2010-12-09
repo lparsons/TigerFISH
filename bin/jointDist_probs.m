@@ -1,11 +1,11 @@
-function jointDist_probs( p_1_2,  Gene1, Gene2, Folder_File_Name)  %, Iter
+function Y = jointDist_probs( p_1_2,  Gene1, Gene2, Folder_File_Name)  %, Iter
 %
 % 2) Plots a 2D matrix plot of the PMF and prints it as pdf file
 
 
 % Plotting the 
-MAXy = min( 40, size(p_1_2,2) );  IN.y = 1:MAXy;
-MAXx = min( 40, size(p_1_2,1) );  IN.x = 1:MAXx;
+MAXy = min( 40, size(p_1_2,2) );  IN.y = 1:MAXy; Y.y = MAXy;
+MAXx = min( 40, size(p_1_2,1) );  IN.x = 1:MAXx; Y.x = MAXx;
 spx = round( MAXx/10 );
 spy = round( MAXy/10 );
 

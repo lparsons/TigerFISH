@@ -6,6 +6,10 @@ function [cdc_phases cdc_phases_p] = DNA_2_cdc_phases( DNA_Content, MaxIter, Pat
 if nargin ==1 || isempty(MaxIter), MaxIter = 1e2; end 
 
 %%
+% Normalize variance to avoid problems from treating pdf as pmf
+Var = var(  DNA_content( ~isnan(DNA_content) )  );
+DNA_content = DNA_content * (1/Var ); 
+ 
 % Generate initial expectations and IC for starting an EM optimization
 Median = median( DNA_Content );
 muG1 = 0.6*Median;

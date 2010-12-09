@@ -1,4 +1,4 @@
-function Y = jointDist( x, y,  Gene1, Gene2, Folder_File_Name)  %, Iter
+function Y = jointDist( x, y,  Gene1, Gene2, Folder_File_Name, Ylim)  %, Iter
 %
 % 1) Computes the marginal distributions of x and y
 % as well as thier Probability Mass Function (PMF)
@@ -55,9 +55,14 @@ end
 Y.p_1_2 = p_1_2 * (1/n);
 
 
-% Plotting the 
-MAXy = min( 40, max(x) );  IN.y = 1:MAXy+1;
-MAXx = min( 40, max(y) );  IN.x = 1:MAXx+1;
+% Plotting
+if nargin < 6
+    MAXy = min( 40, max(x) );  IN.y = 1:MAXy+1;
+    MAXx = min( 40, max(y) );  IN.x = 1:MAXx+1;
+else
+    MAXy = Ylim.y;  IN.y = 1:MAXy+1;
+    MAXx = Ylim.x;  IN.x = 1:MAXx+1;    
+end
 spx = round( MAXx/10 );
 spy = round( MAXy/10 );
 main_fig = figure('Visible', 'off');
@@ -78,7 +83,7 @@ colormap( BONE(end:-1:1,:) );
 h_cb = colorbar;
 set( h_cb, 'Position', [ sz+0.15   sz+0.12    0.4*sz2    sz2] )
 p_1_2_sorted = sort( log2(p_1_2(p_1_2>0)) );
-set(h1, 'Clim', [0  1] ); 
+set(h1, 'Clim', [0  min(1, log2(p_1_2(end-2))) ] ); 
 
 
 %Segments = regexp(File_Name, '_', 'split' );
