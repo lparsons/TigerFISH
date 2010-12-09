@@ -83,7 +83,7 @@ colormap( BONE(end:-1:1,:) );
 h_cb = colorbar;
 set( h_cb, 'Position', [ sz+0.15   sz+0.12    0.4*sz2    sz2] )
 p_1_2_sorted = sort( log2(p_1_2(p_1_2>0)) );
-set(h1, 'Clim', [0  min(1, log2(p_1_2(end-2))) ] ); 
+set(h1, 'Clim', [0  min(1, log2(p_1_2_sorted(end-2))) ] ); 
 
 
 %Segments = regexp(File_Name, '_', 'split' );
