@@ -129,6 +129,7 @@ for d=1:size(dyes,1)
         Num = numel(out_spots);
         [OUT_CDF.x   OUT_CDF.ind ] = sort( out_spots );
         OUT_CDF.y = (0:1:(Num-1)) * (1/Num);
+
         %Computes p values for spots inside of cells
         prob_2be_mRNA.all = zeros( size(experiment_spot_data.(dye),1), 1 );
         prob_2be_mRNA.out = zeros( size(out_spots_to_keep,1), 1 );        
@@ -138,7 +139,14 @@ for d=1:size(dyes,1)
         prob_2be_mRNA.in = zeros( size(in_spots,1), 1 );
         prob_2be_mRNA.in( in_spots >= OUT_CDF.x(end) ) = (1 - 1/Num);
         indDimmer = find( in_spots <  OUT_CDF.x(end) );
-        prob_2be_mRNA.in(indDimmer) = interp1( OUT_CDF.x, OUT_CDF.y, in_spots(indDimmer) );
+%         [yCDF,xCDF] = cdfcalc( out_spots );
+%         OUT_CDF.x = xCDF;
+%         OUT_CDF.y = yCDF(2:end);
+        nondup = diff( [OUT_CDF.y; 1] > 0 );
+        
+        prob_2be_mRNA.in(indDimmer) = interp1( OUT_CDF.x(nondup),...
+                                               OUT_CDF.y(nondup),...
+                                               in_spots(indDimmer) );
         prob_2be_mRNA.all( in_spots_ind ) = prob_2be_mRNA.in;
         prob_2be_mRNA.all( out_spots_ind ) = prob_2be_mRNA.out;
         pvals = 1 - prob_2be_mRNA.in;
