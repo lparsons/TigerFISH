@@ -142,7 +142,7 @@ for d=1:size(dyes,1)
 %         [yCDF,xCDF] = cdfcalc( out_spots );
 %         OUT_CDF.x = xCDF;
 %         OUT_CDF.y = yCDF(2:end);
-        nondup = diff( [OUT_CDF.y; 1] > 0 );
+        nondup = [diff(OUT_CDF.x); 1] > 0;
         
         prob_2be_mRNA.in(indDimmer) = interp1( OUT_CDF.x(nondup),...
                                                OUT_CDF.y(nondup),...
