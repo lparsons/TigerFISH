@@ -186,6 +186,7 @@ cellMap_Layers_Nucs = repmat( cellMap.nuc, [1 1 size(Layers,3)] );
 
 
 %Computes DNA contents based on DAPI intensity
+cellMap.DNA_content = []; 
 if cellMap.CellNum == cellMap.nucNum
     cellMap.CytoMedian = zeros( cellMap.CellNum, 1 ); 
     cellMap.DNA_content = zeros( cellMap.CellNum, 1 );
