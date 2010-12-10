@@ -1,6 +1,15 @@
 % Write mixed data to csv file
 % Source: http://francisbarnhart.com/blog/2005/01/19/matlab_pain/
 function cellwrite(filename, cellarray, varargin)
+% Writes mixed data to delimited file
+%
+% cellwrite(filename, cellarray, [delimeter=','], [permission='at'])
+% 
+%	filename - path of the file to write to
+%	cellarray - cellarray of data (typically like {'Text'}, 1, 3)
+%	delimeter - delimeter to use, optional, default is ','
+%	permission - write permission to use, optional
+%		default is 'at' = append, text (see fileopen for more info)
 switch nargin
     case 2
         delimeter = ',';
