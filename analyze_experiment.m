@@ -69,7 +69,7 @@ else
         experiment_spot_data.cy3_5 = vertcat(experiment_spot_data.cy3_5, horzcat(repmat(p, size(spot_data.cy3_5, 1),1),spot_data.cy3_5));
         experiment_spot_data.cy5 = vertcat(experiment_spot_data.cy5, horzcat(repmat(p, size(spot_data.cy5, 1),1),spot_data.cy5));
         
-	fprintf(  '%1.2f\t', DNA_content);
+	fprintf(  '%1.2f\t', cell_map.DNA_content);
         DNA_content = [DNA_content; cell_map.DNA_content]; %MatLab is going to call vertcat anyway so I prefrer the simpler syntax
         experiment_cell_maps{p} = cell_map;
     end
