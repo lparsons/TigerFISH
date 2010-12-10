@@ -25,7 +25,9 @@ spot_data(:,3) = z;
 xyz = xyz( x > 6      & y > 6      & z > 3 &...
            x < sz.x-5 & y < sz.y-5 & z < sz.z-2,   :  );
 
-Num =  size( xyz, 1 );      
+Num =  size( xyz, 1 );    
+
+if Num==0, sp = []; return, end
 
 potSpot.contrast = zeros( Num, 1 );
 potSpot.size = zeros( Num, 1 );
