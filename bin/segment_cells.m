@@ -195,16 +195,16 @@ for i=1:cellMap.nucNum
     %fprintf('Cell %d\n', i)
     
     Cell_Nuc_Pix = cellMap.cells(cellMap.nuc==i);
-    Cel_Num = mode( Cell_Nuc_Pix );
-    if sum( Cell_Nuc_Pix>0 ) < 20  %ideally should use  sum( cellMap.cells(cellMap.nuc==i)== i ) < 20. However it does not work
-       cellMap.cells( cellMap.cells==Cel_Num ) = 0;
+    Cell_Num = mode( Cell_Nuc_Pix );
+    if sum( Cell_Nuc_Pix>0 ) < 20 
+       cellMap.cells( cellMap.cells==Cell_Num ) = 0;
        continue 
     end
     
     % Gets Pixels of the nucleus that will be used for estimating DNA content  
     cellMap.nucPix{i} = Layers( cellMap_Layers_Nucs == i );
     % Gets Pixels of the Cytoplasm (wirthout nucleus) that will be used for estimating DNA content      
-    Cytoplasm = Layers( cellMap_Layers_Cells == Cel_Num & cellMap_Layers_Nucs ~= i );
+    Cytoplasm = Layers( cellMap_Layers_Cells == Cell_Num & cellMap_Layers_Nucs ~= i );
 	cellMap.CytoMedian(i,1) = median(  Cytoplasm(:) );
     cellMap.DNA_content(i,1) = sum( cellMap.nucPix{i}(:) - cellMap.CytoMedian(i) );
 end
