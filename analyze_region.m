@@ -50,114 +50,111 @@ end
 
 %[PATHSTR,NAME,EXT,VERSN] = fileparts(file);
 
-
-if ip.Results.debug
-    reg_data_file = [ip.Results.output_dir filesep 'region_data.mat'];
-    if exist(reg_data_file, 'file')
-        % Load Results
-        load(reg_data_file)
-    else
+reg_data_file = [ip.Results.output_dir filesep 'region_data.mat'];
+if ip.Results.debug && exist(reg_data_file, 'file')
+    % Load Results
+    load(reg_data_file)
+else
+    
+    %% Cell Segmentation
+    fprintf('Loading DAPI Image\n');
+    tic
+    dapi_image = load_image(ip.Results.dapifile);
+    toc
+    
+    fprintf('Segmenting Cells\n');
+    cell_map_struct = segment_cells(dapi_image);
+    cell_map = cell_map_struct.cellMap;
+    imwrite(bwperim(cell_map), [ip.Results.output_dir filesep 'cell_map.png'], 'png', 'Transparency', 0);
+    
+    %% Spot Identification
+    spot_data = [];
+    dyes = {'cy3', 'cy3_5', 'cy5'};
+    for d = 1:size(dyes,2)
+        dye = dyes{d};
         
-        %% Cell Segmentation
-        fprintf('Loading DAPI Image\n');
+        % Locate spots
+        fprintf(['Loading ' dye ' Image\n']);
         tic
-        dapi_image = load_image(ip.Results.dapifile);
+        image.(dye) = load_image(ip.Results.([dye 'file']));
+        toc
+        fprintf(['Locating ' dye ' Spots\n']);
+        tic
+        spot_locations.(dye) = find_spots(image.(dye));
         toc
         
-        fprintf('Segmenting Cells\n');
-        cell_map_struct = segment_cells(dapi_image);
-        cell_map = cell_map_struct.cellMap;
-        imwrite(bwperim(cell_map), [ip.Results.output_dir filesep 'cell_map.png'], 'png', 'Transparency', 0);
         
-        %% Spot Identification
-        spot_data = [];
-        dyes = {'cy3', 'cy3_5', 'cy5'};
-        for d = 1:size(dyes,2)
-            dye = dyes{d};
-            
-            % Locate spots
-            fprintf(['Loading ' dye ' Image\n']);
+        % Quick Fix for running both algorithms on the same spots. It has to be cleaned/deleted
+        % spot_locations.(dye) = filter_border_spots( spot_locations.(dye) );
+        
+        % Measure spot intensities
+        if (strcmpi(ip.Results.algorithm, '3D'))
+            % Measure spots using Nikolai's 3D Non-Parametric method
+            fprintf(['Using 3D algorithm to determine spot intensity for ' dye '\n']);
             tic
-            image.(dye) = load_image(ip.Results.([dye 'file']));
+            [spot_data.(dye) sb.(dye)] = measure_spots_np(spot_locations.(dye), image.(dye));
             toc
-            fprintf(['Locating ' dye ' Spots\n']);
+        elseif (strcmpi(ip.Results.algorithm, '2D'))
+            % Measure spots using D Larson's 2D Gaussian Mask algorithm
+            fprintf(['Using 2D algorithm with global image background to determine spot intensity for ' dye '\n']);
             tic
-            spot_locations.(dye) = find_spots(image.(dye));
+            spot_data.(dye) = measure_spots(spot_locations.(dye), image.(dye), 'global');
             toc
-            
-            
-            % Quick Fix for running both algorithms on the same spots. It has to be cleaned/deleted
-            % spot_locations.(dye) = filter_border_spots( spot_locations.(dye) );
-            
-            % Measure spot intensities
-            if (strcmpi(ip.Results.algorithm, '3D'))
-                % Measure spots using Nikolai's 3D Non-Parametric method
-                fprintf(['Using 3D algorithm to determine spot intensity for ' dye '\n']);
-                tic
-                [spot_data.(dye) sb.(dye)] = measure_spots_np(spot_locations.(dye), image.(dye));
-                toc
-            elseif (strcmpi(ip.Results.algorithm, '2D'))
-                % Measure spots using D Larson's 2D Gaussian Mask algorithm
-                fprintf(['Using 2D algorithm with global image background to determine spot intensity for ' dye '\n']);
-                tic
-                spot_data.(dye) = measure_spots(spot_locations.(dye), image.(dye), 'global');
-                toc
-            elseif (strcmpi(ip.Results.algorithm, '2D_local'))
-                % Measure spots using D Larson's 2D Gaussian Mask algorithm
-                fprintf(['Using 2D algorithm with local background to determine spot intensity for ' dye '\n']);
-                tic
-                spot_data.(dye) = measure_spots(spot_locations.(dye), image.(dye), 'local');
-                toc
-            else
-                errormsg = ['Algorithm "' ip.Results.algorithm '" not recognized.  Must be one of: ' sprintf('%s, ',algorithms{:});];
-                error(errormsg)
-            end
-            
-            % Merge spots
-            % Use original (not modified) spot locations for consistency between
-            % algorithms
-            % TODO Consider reimplementing?
-            %duplicate_threshold = 5;
-            %spot_data.(dye) = merge_spots(replace_locations(spot_locations.(dye), spot_data.(dye)), duplicate_threshold);
-            
-            % Spot to cell mapping
-            fprintf(['Mapping ' dye ' spots to cells\n']);
+        elseif (strcmpi(ip.Results.algorithm, '2D_local'))
+            % Measure spots using D Larson's 2D Gaussian Mask algorithm
+            fprintf(['Using 2D algorithm with local background to determine spot intensity for ' dye '\n']);
             tic
-            if (~isempty(spot_data.(dye)))
-                spot_data.(dye)(:,5:6) = map_spots_to_cells(cell_map, spot_data.(dye)(:,1:3), []);
-            end
+            spot_data.(dye) = measure_spots(spot_locations.(dye), image.(dye), 'local');
             toc
+        else
+            errormsg = ['Algorithm "' ip.Results.algorithm '" not recognized.  Must be one of: ' sprintf('%s, ',algorithms{:});];
+            error(errormsg)
         end
         
+        % Merge spots
+        % Use original (not modified) spot locations for consistency between
+        % algorithms
+        % TODO Consider reimplementing?
+        %duplicate_threshold = 5;
+        %spot_data.(dye) = merge_spots(replace_locations(spot_locations.(dye), spot_data.(dye)), duplicate_threshold);
         
-        %% Write colorized, transparent spot enhanced images
-        fprintf('Writing colorized images\n');
+        % Spot to cell mapping
+        fprintf(['Mapping ' dye ' spots to cells\n']);
         tic
-        if (~ strcmp(ip.Results.output_dir, ''))
-            % Max project DAPI image
-            layers_around_focus = 3;
-            
-            max_dapi_image_adj = projected_image(dapi_image.max, dapi_image.layers, layers_around_focus);
-            %[PATHSTR,NAME,EXT,VERSN] = fileparts(ip.Results.dapifile);
-            B = cat(3,zeros(size(max_dapi_image_adj)),zeros(size(max_dapi_image_adj)),ones(size(max_dapi_image_adj)));
-            imwrite(B, [ip.Results.output_dir filesep  'dapi_projection.png'], 'png', 'Alpha', max_dapi_image_adj);
-            
-            max_cy3_image_adj = projected_image(image.cy3.max, image.cy3.layers, Inf);
-            %[PATHSTR,NAME,EXT,VERSN] = fileparts(ip.Results.cy3file);
-            G = cat(3,zeros(size(max_cy3_image_adj)),ones(size(max_cy3_image_adj)),zeros(size(max_cy3_image_adj)));
-            imwrite(G, [ip.Results.output_dir filesep 'cy3_projection.png'], 'png', 'Alpha', max_cy3_image_adj);
-            
-            max_cy3_5_image_adj = projected_image(image.cy3_5.max, image.cy3_5.layers, Inf);
-            %[PATHSTR,NAME,EXT,VERSN] = fileparts(ip.Results.cy3_5file);
-            R = cat(3,ones(size(max_cy3_5_image_adj)),zeros(size(max_cy3_5_image_adj)),zeros(size(max_cy3_5_image_adj)));
-            imwrite(R, [ip.Results.output_dir filesep 'cy3_5_projection.png'], 'png', 'Alpha', max_cy3_5_image_adj);
-            
-            max_cy5_image_adj = projected_image(image.cy5.max, image.cy5.layers, Inf);
-            %[PATHSTR,NAME,EXT,VERSN] = fileparts(ip.Results.cy5file);
-            imwrite(ones(size(max_cy5_image_adj)), [ip.Results.output_dir filesep 'cy5_projection.png'], 'png', 'Alpha', max_cy5_image_adj);
+        if (~isempty(spot_data.(dye)))
+            spot_data.(dye)(:,5:6) = map_spots_to_cells(cell_map, spot_data.(dye)(:,1:3), []);
         end
         toc
     end
+    
+    
+    %% Write colorized, transparent spot enhanced images
+    fprintf('Writing colorized images\n');
+    tic
+    if (~ strcmp(ip.Results.output_dir, ''))
+        % Max project DAPI image
+        layers_around_focus = 3;
+        
+        max_dapi_image_adj = projected_image(dapi_image.max, dapi_image.layers, layers_around_focus);
+        %[PATHSTR,NAME,EXT,VERSN] = fileparts(ip.Results.dapifile);
+        B = cat(3,zeros(size(max_dapi_image_adj)),zeros(size(max_dapi_image_adj)),ones(size(max_dapi_image_adj)));
+        imwrite(B, [ip.Results.output_dir filesep  'dapi_projection.png'], 'png', 'Alpha', max_dapi_image_adj);
+        
+        max_cy3_image_adj = projected_image(image.cy3.max, image.cy3.layers, Inf);
+        %[PATHSTR,NAME,EXT,VERSN] = fileparts(ip.Results.cy3file);
+        G = cat(3,zeros(size(max_cy3_image_adj)),ones(size(max_cy3_image_adj)),zeros(size(max_cy3_image_adj)));
+        imwrite(G, [ip.Results.output_dir filesep 'cy3_projection.png'], 'png', 'Alpha', max_cy3_image_adj);
+        
+        max_cy3_5_image_adj = projected_image(image.cy3_5.max, image.cy3_5.layers, Inf);
+        %[PATHSTR,NAME,EXT,VERSN] = fileparts(ip.Results.cy3_5file);
+        R = cat(3,ones(size(max_cy3_5_image_adj)),zeros(size(max_cy3_5_image_adj)),zeros(size(max_cy3_5_image_adj)));
+        imwrite(R, [ip.Results.output_dir filesep 'cy3_5_projection.png'], 'png', 'Alpha', max_cy3_5_image_adj);
+        
+        max_cy5_image_adj = projected_image(image.cy5.max, image.cy5.layers, Inf);
+        %[PATHSTR,NAME,EXT,VERSN] = fileparts(ip.Results.cy5file);
+        imwrite(ones(size(max_cy5_image_adj)), [ip.Results.output_dir filesep 'cy5_projection.png'], 'png', 'Alpha', max_cy5_image_adj);
+    end
+    toc
 end
 
 if ip.Results.debug
