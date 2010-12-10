@@ -1,21 +1,23 @@
 <html>
 <head>
 <style type="text/css">
-div#histograms {
+div#histograms, div#joint_dist_prob, div#joint_dist_thresh {
 	width: 100%;
 }
-ul#histogram_list {
+ul.image_list {
 	padding: 0px;
 }
-ul#histogram_list li {
+ul.image_list li {
 	display: inline;
 	list-style-type: none;
 	padding: 0px;
 }
-ul#histogram_list li img {
+ul.image_list li img {
 	width: 33%;
 	border: none;
-	
+}
+div#dna_content img {
+	border: none;
 }
 </style>
 </head>
@@ -25,12 +27,36 @@ ul#histogram_list li img {
 
 <div id='histograms'>
 	<h3>Spot Intensity Histograms</h3>
-	<ul id='histogram_list'>
+	<ul class="image_list" id='histogram_list'>
 		<li><a href="${experiment.histogram('cy3', 'pdf')}"><img src="${experiment.histogram('cy3', 'png')}" alt="Cy3 Histogram" /></a></li>
 		<li><a href="${experiment.histogram('cy3_5', 'pdf')}"><img src="${experiment.histogram('cy3_5', 'png')}" alt="Cy3.5 Histogram" /></a></li>
 		<li><a href="${experiment.histogram('cy5', 'pdf')}"><img src="${experiment.histogram('cy5', 'png')}" alt="Cy5 Histogram" /></a></li>
 	</ul>
 </div>
+
+<div id='joint_dist_prob'>
+	<h3>Joint Distribution Probabilistic</h3>
+	<ul class="image_list" id='joint_dist_prob_list'>
+		% for jdp in experiment.joint_distributions():
+			<li><a href="${jdp[1]}"><img src="${jdp[0]}" alt="Joint Distribution Histogram" /></a></li>
+		% endfor
+	</ul>
+</div>
+
+<div id='joint_dist_thresh'>
+	<h3>Joint Distribution Thresholding</h3>
+	<ul class="image_list" id='joint_dist_thresh_list'>
+		% for jdp in experiment.joint_distributions(type="thresh"):
+			<li><a href="${jdp[1]}"><img src="${jdp[0]}" alt="Joint Distribution Histogram" /></a></li>
+		% endfor
+	</ul>
+</div>
+
+<div id='dna_content'>
+	<h3>DNA Content</h3>
+	<a href="${experiment.dna_content()[1]}"><img src="${experiment.dna_content()[0]}" alt="DNA Content Graph" /></a>
+</div>
+
 
 <h3>Regions</h3>
 <ul>

@@ -3,6 +3,7 @@ Created on Sep 9, 2010
 
 @author: lparsons
 '''
+import glob
 import os
 
 class Experiment_Set(object):
@@ -70,7 +71,27 @@ class Experiment(object):
                 print cmd
                 os.system(cmd)
         return filename
-                
+    
+    def joint_distributions(self, type='prob'):
+        filenames = []
+        file_paths = glob.glob(os.path.join(self.abs_directory(), 'joint_dist_%s_*.pdf' % type))
+        for f in file_paths:
+            f_png = f.replace('.pdf', '.png')
+            if not os.path.exists(f_png):
+                cmd = "gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=png16m -dGraphicsAlphaBits=4 -dTextAlphaBits=4 -sOutputFile='%s' '%s'" % (f_png, f)
+                print cmd
+                os.system(cmd)
+            filenames.append((os.path.basename(f_png), os.path.basename(f)))
+        return filenames
+            
+    def dna_content(self):
+        f_pdf = 'DNA_content.pdf'
+        f_png = 'DNA_content.png'
+        if not os.path.exists(os.path.join(self.abs_directory(), f_png)):
+            cmd = "gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=png16m -dGraphicsAlphaBits=4 -dTextAlphaBits=4 -sOutputFile='%s' '%s'" % (os.path.join(self.abs_directory(), f_png), os.path.join(self.abs_directory(), f_pdf))
+            print cmd
+            os.system(cmd)
+        return (f_png, f_pdf)
                 
 class Region(object):
     '''
