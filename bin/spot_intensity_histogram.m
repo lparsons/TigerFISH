@@ -21,7 +21,7 @@ f = figure('Visible', 'off');
 plot(bins, i_f, '-or', 'MarkerFaceColor', 'r', 'LineWidth',3, 'MarkerSize',12);
 hold all
 plot(bins, o_f, '--xb', 'MarkerFaceColor', 'b', 'LineWidth',3, 'MarkerSize',12);
-if ip.Results.threshold > 0
+if ~isnan(ip.Results.threshold)
     ylims = get(gca, 'YLim');
     line([ip.Results.threshold, ip.Results.threshold], ylims, 'Color', [.3 .3 .3], 'LineStyle', '--', 'LineWidth', 2);
 end
