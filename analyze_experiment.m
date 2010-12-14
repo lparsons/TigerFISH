@@ -150,9 +150,15 @@ for d=1:size(dyes,1)
         prob_2be_mRNA.all( in_spots_ind ) = prob_2be_mRNA.in;
         prob_2be_mRNA.all( out_spots_ind ) = prob_2be_mRNA.out;
         pvals = 1 - prob_2be_mRNA.in;
-        qvals = mafdr( pvals );
-        [val indT] = min( abs( qvals - FDR_Treshold )  );
-        threshold.(dye) = in_spots( indT );
+        
+        try 
+            [FDR qvals] = mafdr( pvals );
+            [val indT] = min( abs( qvals - FDR_Treshold )  );
+            threshold.(dye) = in_spots( indT );
+        catch
+            error( 'FDR failed' );
+            threshold.(dye)  = NaN;
+        end
         
         %Appending spot probabilities to the spot data matrix
         experiment_spot_data.(dye) = [experiment_spot_data.(dye)  prob_2be_mRNA.all];
