@@ -182,7 +182,7 @@ tic
 % Median = median( Layers, 3 );
 % Max = max(Layers, [], 3);
 cellMap_Layers_Cells = repmat( cellMap.cells, [1 1 size(Layers,3)] ); 
-cellMap_Layers_Nucs = repmat( cellMap.nuc, [1 1 size(Layers,3)] ); 
+%cellMap_Layers_Nucs = repmat( cellMap.nuc, [1 1 size(Layers,3)] ); 
 
 
 %Computes DNA contents based on DAPI intensity
@@ -194,28 +194,28 @@ end
 for Cell_Num=1:cellMap.CellNum
     %fprintf('Cell %d\n', i)
     
-    Cell_Nuc_Pix = cellMap.nuc( cellMap.cells==Cell_Num );
-    Cell_Nuc_Pix = Cell_Nuc_Pix(Cell_Nuc_Pix>0);
-    if numel( Cell_Nuc_Pix ) < 20 
-       %cellMap.cells( cellMap.cells==Cell_Num ) = 0;
-       cellMap.DNA_content(Cell_Num,1) = 0;
-       continue
-    else
-        Nuc_Num = unique( Cell_Nuc_Pix ); 
-    end
+%     Cell_Nuc_Pix = cellMap.nuc( cellMap.cells==Cell_Num );
+%     Cell_Nuc_Pix = Cell_Nuc_Pix(Cell_Nuc_Pix>0);
+%     if numel( Cell_Nuc_Pix ) < 20 
+%        %cellMap.cells( cellMap.cells==Cell_Num ) = 0;
+%        cellMap.DNA_content(Cell_Num,1) = 0;
+%        continue
+%     else
+%         Nuc_Num = unique( Cell_Nuc_Pix ); 
+%     end
     
     % Gets Pixels of the nucleus that will be used for estimating DNA content
-    if numel(Nuc_Num) == 1
-      cellMap.nucPix{Cell_Num} = Layers( cellMap_Layers_Nucs == Nuc_Num );
-    elseif numel(Nuc_Num) >= 2
-        nuc1 = Layers( cellMap_Layers_Nucs == Nuc_Num(1) );
-        nuc2 = Layers( cellMap_Layers_Nucs == Nuc_Num(2) );
-       cellMap.nucPix{Cell_Num} = [nuc1(:); nuc2(:)];
-    elseif numel(Nuc_Num) >= 3
-        fprintf( 'Cell with multiple nuclei !!!\n' );
-    end
+%     if numel(Nuc_Num) == 1
+%       cellMap.nucPix{Cell_Num} = Layers( cellMap_Layers_Nucs == Nuc_Num );
+%     elseif numel(Nuc_Num) >= 2
+%         nuc1 = Layers( cellMap_Layers_Nucs == Nuc_Num(1) );
+%         nuc2 = Layers( cellMap_Layers_Nucs == Nuc_Num(2) );
+%        cellMap.nucPix{Cell_Num} = [nuc1(:); nuc2(:)];
+%     elseif numel(Nuc_Num) >= 3
+%         fprintf( 'Cell with multiple nuclei !!!\n' );
+%     end
     % Gets Pixels of the Cytoplasm (wirthout nucleus) that will be used for estimating DNA content      
-    Cytoplasm = Layers( cellMap_Layers_Cells == Cell_Num & cellMap_Layers_Nucs < 0 );
+    Cytoplasm = Layers( cellMap_Layers_Cells == Cell_Num ); % & cellMap_Layers_Nucs < 0
 	cellMap.CytoMedian(Cell_Num,1) = median(  Cytoplasm(:) );  %cellMap.nucPix
     cellMap.DNA_content(Cell_Num,1) = sum( cellMap.Cytoplasm{Cell_Num}(:) - cellMap.CytoMedian(Cell_Num) );
 end
