@@ -215,7 +215,7 @@ for Cell_Num=1:cellMap.CellNum
 %         fprintf( 'Cell with multiple nuclei !!!\n' );
 %     end
     % Gets Pixels of the Cytoplasm (wirthout nucleus) that will be used for estimating DNA content      
-    Cytoplasm = Layers( cellMap_Layers_Cells == Cell_Num ); % & cellMap_Layers_Nucs < 0
+    Cytoplasm = Layers( cellMap_Layers_Cells == Cell_Num );   % & cellMap_Layers_Nucs < 0
 	cellMap.CytoMedian(Cell_Num,1) = median(  Cytoplasm(:) );  %cellMap.nucPix
     cellMap.DNA_content(Cell_Num,1) = sum( cellMap.Cytoplasm{Cell_Num}(:) - cellMap.CytoMedian(Cell_Num) );
 end
