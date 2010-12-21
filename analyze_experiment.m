@@ -179,6 +179,7 @@ for d=1:size(dyes,1)
         % Spot overlay imagesregion_spot_data
         N = 1;
         regions = unique(experiment_spot_data.(dye)(:,1));
+        total_cells = 0;
         for r=1:size(regions,1)
             reg = regions(r);
             %if (~isempty(experiment_spot_data.(dye)))
@@ -193,6 +194,20 @@ for d=1:size(dyes,1)
             tmp = imread(spot_overlay_filename);
             imwrite(tmp,spot_overlay_filename, 'png','Transparency', [0,0,0]);
             close(spot_overlay);
+            
+            % Write cell map, colored by cell cycle prediction
+            cell_map_struct = experiment_cell_maps{r};
+            phases = cdc.phases(total_cells+1:cell_map_struct.CellNum);
+            total_cells = total_cells + cell_map_struct.CellNum;
+            cell_map_labeled = cell_map_struct.cells;
+            cell_map_image = zeros(size(cell_map_labeled));
+            colors = {[1,1,1], [0,0,1], [0,1,0], [1,0,0]};
+            for p=0:3
+                t = ismember(cell_map_labeled, find(phases==p));
+                cell_map_image = imoverlay(cell_map_image, bwperim(t), colors{p+1});
+            end
+            cell_map_image = imoverlay(cell_map_image, bwperim(cell_map_struct.nuc), [1 1 1]);
+            imwrite(cell_map_image, [reg_output_dir filesep 'cell_map_phases.png'], 'png', 'Transparency', [0, 0, 0]);
         end
     end
 end
