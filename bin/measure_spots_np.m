@@ -10,14 +10,14 @@ end
 
 
 ind = find( spot_locations );
-[x y z] = ind2sub( size(spot_locations), ind );
+[y x z] = ind2sub( size(spot_locations), ind );
 
 
 
 xyz = [x y z]; 
 spot_data = zeros( size(xyz,1), 4 ); 
-spot_data(:,1) = y;
-spot_data(:,2) = x;
+spot_data(:,1) = x;
+spot_data(:,2) = y;
 spot_data(:,3) = z;
 
 
