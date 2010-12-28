@@ -134,13 +134,6 @@ mask_em = bwareaopen(mask_em, 40);
 toc
 
 
-% Gets Coordinates and number of nuclei
-fprintf('Finding nuclear pixels\n')
- nucs = mask_em | cellMap.MaxProj > median( cellMap.MaxProj(cellMap.cells > 0) ) * 1.5;
-[cellMap.nuc cellMap.nucNum]  = bwlabeln( nucs );
-%cellMap.nucMaxproj = cell( cellMap.nucNum, 1 );
-
-
 
 % Create an overlay to view
 %overlay2 = imoverlay(I_eq, bw5_perim | mask_em, [.3 1 .3]);
@@ -174,18 +167,28 @@ toc
 
 
 % Gets cell perimeter
-fprintf('Computing DNA content\n')
-tic
 [cellMap.cellsPerim cellMap.cells cellMap.CellNum] = bwboundaries(cellMap.cellMap);
 
+
+% Gets Coordinates and number of nuclei
+fprintf('Finding nuclear pixels\n')
+tic
+nucs = mask_em | cellMap.MaxProj > median( cellMap.MaxProj(cellMap.cells > 0) ) * 1.5;
+[cellMap.nuc cellMap.nucNum]  = bwlabeln( nucs );
+%cellMap.nucMaxproj = cell( cellMap.nucNum, 1 );
+toc
+
+
+
+%Computes DNA contents based on DAPI intensity
+fprintf('Computing DNA content\n')
+tic
 
 % Median = median( Layers, 3 );
 % Max = max(Layers, [], 3);
 cellMap_Layers_Cells = repmat( cellMap.cells, [1 1 size(Layers,3)] ); 
 cellMap_Layers_Nucs = repmat( cellMap.nuc, [1 1 size(Layers,3)] ); 
 
-
-%Computes DNA contents based on DAPI intensity
 cellMap.DNA_content = []; 
 if cellMap.CellNum == cellMap.nucNum
     cellMap.CytoMedian = zeros( cellMap.CellNum, 1 ); 
