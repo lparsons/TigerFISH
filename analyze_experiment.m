@@ -197,7 +197,7 @@ for d=1:size(dyes,1)
             
             % Write cell map, colored by cell cycle prediction
             cell_map_struct = experiment_cell_maps{r};
-            phases = cdc.phases(total_cells+1:cell_map_struct.CellNum);
+            phases = cdc.phases(total_cells+1:cell_map_struct.CellNum+total_cells);
             total_cells = total_cells + cell_map_struct.CellNum;
             cell_map_labeled = cell_map_struct.cells;
             cell_map_image = zeros(size(cell_map_labeled));

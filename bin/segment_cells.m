@@ -136,8 +136,8 @@ toc
 
 % Gets Coordinates and number of nuclei
 fprintf('Finding nuclear pixels\n')
-
-[cellMap.nuc cellMap.nucNum]  = bwlabeln( mask_em );
+ nucs = mask_em | cellMap.MaxProj > median( cellMap.MaxProj(cellMap.cells > 0) ) * 1.5;
+[cellMap.nuc cellMap.nucNum]  = bwlabeln( nucs );
 %cellMap.nucMaxproj = cell( cellMap.nucNum, 1 );
 
 
@@ -218,6 +218,12 @@ for Cell_Num=1:cellMap.CellNum
     %Cytoplasm = Layers( cellMap_Layers_Cells == Cell_Num );   % & cellMap_Layers_Nucs < 0
     Cytoplasm = cellMap.MaxProj(  cellMap.cells == Cell_Num & cellMap.nuc == 0 );
     Cell = cellMap.MaxProj(  cellMap.cells == Cell_Num  );
+    c1 = cellMap.cells == Cell_Num;
+    c2 = bwmorph(c1, 'thicken', 1);
+    cell_border_pixels = setdiff(find(c2), find(c1));
+    local_background = median(cellMap.MaxProj(cell_border_pixels));
+    
+    
 	cellMap.CytoMedian(Cell_Num,1) = median(  Cytoplasm(:) );  %cellMap.nucPix
     cellMap.DNA_content(Cell_Num,1) = sum( Cell(:) - cellMap.CytoMedian(Cell_Num) );
 end
