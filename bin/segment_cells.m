@@ -181,8 +181,8 @@ tic
 
 % Median = median( Layers, 3 );
 % Max = max(Layers, [], 3);
-%cellMap_Layers_Cells = repmat( cellMap.cells, [1 1 size(Layers,3)] ); 
-%cellMap_Layers_Nucs = repmat( cellMap.nuc, [1 1 size(Layers,3)] ); 
+cellMap_Layers_Cells = repmat( cellMap.cells, [1 1 size(Layers,3)] ); 
+cellMap_Layers_Nucs = repmat( cellMap.nuc, [1 1 size(Layers,3)] ); 
 
 
 %Computes DNA contents based on DAPI intensity
@@ -194,38 +194,39 @@ end
 for Cell_Num=1:cellMap.CellNum
     %fprintf('Cell %d\n', i)
     
-%     Cell_Nuc_Pix = cellMap.nuc( cellMap.cells==Cell_Num );
-%     Cell_Nuc_Pix = Cell_Nuc_Pix(Cell_Nuc_Pix>0);
-%     if numel( Cell_Nuc_Pix ) < 20 
-%        %cellMap.cells( cellMap.cells==Cell_Num ) = 0;
-%        cellMap.DNA_content(Cell_Num,1) = 0;
-%        continue
-%     else
-%         Nuc_Num = unique( Cell_Nuc_Pix ); 
-%     end
+    Cell_Nuc_Pix = cellMap.nuc( cellMap.cells==Cell_Num );
+    Cell_Nuc_Pix = Cell_Nuc_Pix(Cell_Nuc_Pix>0);
+    if numel( Cell_Nuc_Pix ) < 10 
+       %cellMap.cells( cellMap.cells==Cell_Num ) = 0;
+       cellMap.DNA_content(Cell_Num,1) = 0;
+       fprintf('The %d^th Cell does not have a nucleus!!! \n', Cell_Num )
+       continue
+    else
+        Nuc_Num = unique( Cell_Nuc_Pix ); 
+    end
     
-    % Gets Pixels of the nucleus that will be used for estimating DNA content
-%     if numel(Nuc_Num) == 1
-%       cellMap.nucPix{Cell_Num} = Layers( cellMap_Layers_Nucs == Nuc_Num );
-%     elseif numel(Nuc_Num) >= 2
-%         nuc1 = Layers( cellMap_Layers_Nucs == Nuc_Num(1) );
-%         nuc2 = Layers( cellMap_Layers_Nucs == Nuc_Num(2) );
-%        cellMap.nucPix{Cell_Num} = [nuc1(:); nuc2(:)];
-%     elseif numel(Nuc_Num) >= 3
-%         fprintf( 'Cell with multiple nuclei !!!\n' );
-%     end
+   % Gets Pixels of the nucleus that will be used for estimating DNA content
+    if numel(Nuc_Num) == 1
+      cellMap.nucPix{Cell_Num} = Layers( cellMap_Layers_Nucs == Nuc_Num );
+    elseif numel(Nuc_Num) >= 2
+        nuc1 = Layers( cellMap_Layers_Nucs == Nuc_Num(1) );
+        nuc2 = Layers( cellMap_Layers_Nucs == Nuc_Num(2) );
+       cellMap.nucPix{Cell_Num} = [nuc1(:); nuc2(:)];
+    elseif numel(Nuc_Num) >= 3
+        fprintf( 'Cell with multiple nuclei !!!\n' );
+    end
     % Gets Pixels of the Cytoplasm (wirthout nucleus) that will be used for estimating DNA content      
-    %Cytoplasm = Layers( cellMap_Layers_Cells == Cell_Num );   % & cellMap_Layers_Nucs < 0
-    Cytoplasm = cellMap.MaxProj(  cellMap.cells == Cell_Num & cellMap.nuc == 0 );
-    Cell = cellMap.MaxProj(  cellMap.cells == Cell_Num  );
-    c1 = cellMap.cells == Cell_Num;
-    c2 = bwmorph(c1, 'thicken', 1);
-    cell_border_pixels = setdiff(find(c2), find(c1));
-    local_background = median(cellMap.MaxProj(cell_border_pixels));
+    Cytoplasm = Layers( cellMap_Layers_Cells == Cell_Num ); 
+    %Cytoplasm = cellMap.MaxProj(  cellMap.cells == Cell_Num & cellMap.nuc == 0 );
+    %Cell = cellMap.MaxProj(  cellMap.cells == Cell_Num  );
+%     c1 = cellMap.cells == Cell_Num;
+%     c2 = bwmorph(c1, 'thicken', 1);
+%     cell_border_pixels = setdiff(find(c2), find(c1));
+%     local_background = median(cellMap.MaxProj(cell_border_pixels));
     
     
 	cellMap.CytoMedian(Cell_Num,1) = median(  Cytoplasm(:) );  %cellMap.nucPix
-    cellMap.DNA_content(Cell_Num,1) = sum( Cell(:) - cellMap.CytoMedian(Cell_Num) );
+    cellMap.DNA_content(Cell_Num,1) = sum( cellMap.nucPix{Cell_Num}(:) - cellMap.CytoMedian(Cell_Num) );
 end
 toc
 
