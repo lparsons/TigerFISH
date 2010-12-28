@@ -181,7 +181,7 @@ tic
 
 % Median = median( Layers, 3 );
 % Max = max(Layers, [], 3);
-cellMap_Layers_Cells = repmat( cellMap.cells, [1 1 size(Layers,3)] ); 
+%cellMap_Layers_Cells = repmat( cellMap.cells, [1 1 size(Layers,3)] ); 
 %cellMap_Layers_Nucs = repmat( cellMap.nuc, [1 1 size(Layers,3)] ); 
 
 
@@ -216,9 +216,10 @@ for Cell_Num=1:cellMap.CellNum
 %     end
     % Gets Pixels of the Cytoplasm (wirthout nucleus) that will be used for estimating DNA content      
     %Cytoplasm = Layers( cellMap_Layers_Cells == Cell_Num );   % & cellMap_Layers_Nucs < 0
-    Cytoplasm = cellMap.MaxProj(  cellMap.cells == Cell_Num );
+    Cytoplasm = cellMap.MaxProj(  cellMap.cells == Cell_Num & cellMap.nuc == 0 );
+    Cell = cellMap.MaxProj(  cellMap.cells == Cell_Num  );
 	cellMap.CytoMedian(Cell_Num,1) = median(  Cytoplasm(:) );  %cellMap.nucPix
-    cellMap.DNA_content(Cell_Num,1) = sum( Cytoplasm(:) - cellMap.CytoMedian(Cell_Num) );
+    cellMap.DNA_content(Cell_Num,1) = sum( Cell(:) - cellMap.CytoMedian(Cell_Num) );
 end
 toc
 
