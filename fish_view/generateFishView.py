@@ -21,6 +21,7 @@ def main():
     
     parser = OptionParser(usage=usage)
     parser.add_option("-n", "--name", dest="set_name", type="string", help="Name of the Experiment Set")
+    parser.add_option("-f", "--force", dest="force", action="store_true", default=False, help="Force regeneration of png files from pdf files")
     (opts, args) = parser.parse_args()
     
     if len(args) < 1:
@@ -51,7 +52,7 @@ def main():
         experiment_index_file = open(os.path.join(e.root_directory, e.index_file()), 'w')
         try:
             experiment_template = mylookup.get_template('experiment.txt')
-            experiment_index_file.write(experiment_template.render(experiment=e))
+            experiment_index_file.write(experiment_template.render(experiment=e, force=opts.force))
         except:
             print exceptions.text_error_template().render()
         
@@ -60,7 +61,7 @@ def main():
             region_index_file = open(os.path.join(e.abs_directory(), r.directory, 'index.html'), 'w')
             try:
                 region_template = mylookup.get_template('region.txt')
-                region_index_file.write(region_template.render(experiment=e, region=r))
+                region_index_file.write(region_template.render(experiment=e, region=r, force=opts.force))
             except:
                 print exceptions.text_error_template().render()
 

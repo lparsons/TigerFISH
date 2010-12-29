@@ -74,7 +74,7 @@
 	<div id="cy3_5_image" style="position: absolute; z-index: 1200; display: block"><img src="cy3_5_projection.png" /></div>
 	<div id="cy5_image" style="position: absolute; z-index: 1300; display: block"><img src="cy5_projection.png" /></div>
 	
-	<div id="cell_outline" style="position: absolute; z-index: 2000; display: none"><img src="cell_map.png" /></div>
+	<div id="cell_outline" style="position: absolute; z-index: 2000; display: none"><img src="cell_map_phases.png" /></div>
 	<div id="cy3_spots" style="position: absolute; z-index: 2100; display: none"><img src="cy3_spot_image.png" /></div>
 	<div id="cy3_5_spots" style="position: absolute; z-index: 2200; display: none"><img src="cy3_5_spot_image.png" /></div>
 	<div id="cy5_spots" style="position: absolute; z-index: 2300; display: none"><img src="cy5_spot_image.png" /></div>
