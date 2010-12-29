@@ -37,7 +37,7 @@ div#dna_content img {
 <div id='joint_dist_prob'>
 	<h3>Joint Distribution Probabilistic</h3>
 	<ul class="image_list" id='joint_dist_prob_list'>
-		% for jdp in experiment.joint_distributions(force):
+		% for jdp in experiment.joint_distributions(type="prob", force=force):
 			<li><a href="${jdp[1]}"><img src="${jdp[0]}" alt="Joint Distribution Histogram" /></a></li>
 		% endfor
 	</ul>
