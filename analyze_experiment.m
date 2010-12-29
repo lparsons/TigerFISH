@@ -156,7 +156,7 @@ for d=1:size(dyes,1)
             [val indT] = min( abs( qvals - FDR_Treshold )  );
             threshold.(dye) = in_spots( indT );
         catch
-            error( 'FDR failed' );
+            warning( 'FDR failed' );
             threshold.(dye)  = NaN;
         end
         

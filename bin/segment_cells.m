@@ -186,8 +186,9 @@ tic
 
 % Median = median( Layers, 3 );
 % Max = max(Layers, [], 3);
-cellMap_Layers_Cells = repmat( cellMap.cells, [1 1 size(Layers,3)] ); 
-cellMap_Layers_Nucs = repmat( cellMap.nuc, [1 1 size(Layers,3)] ); 
+cellMap_Layers_Cells = cellMap.cells; %repmat( cellMap.cells, [1 1 size(Layers,3)] ); 
+cellMap_Layers_Nucs = cellMap.nuc; %repmat( cellMap.nuc, [1 1 size(Layers,3)] ); 
+Layers = cellMap.MaxProj;
 
 cellMap.DNA_content = []; 
 if cellMap.CellNum == cellMap.nucNum
