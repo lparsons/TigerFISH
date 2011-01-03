@@ -8,7 +8,8 @@ ip.addRequired('threshold',@isnumeric);
 ip.parse(varargin{:});
 
 % Determine max value and split into 30 bins
-mx = max(vertcat(ip.Results.out_spot_intensities, ip.Results.in_spot_intensities), ip.Results.threshold*6);
+%mx = max(vertcat(ip.Results.out_spot_intensities, ip.Results.in_spot_intensities), ip.Results.threshold*6);
+mx = max( 4*median(ip.Results.in_spot_intensities), ip.Results.threshold*6);
 interval = mx/30;
 bins = [0:interval:mx,Inf];
     

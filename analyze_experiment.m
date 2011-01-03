@@ -1,4 +1,4 @@
-function [experiment_spot_data experiment_cell_maps experiment_counts] = analyze_experiment( region_file_list, output_dir, varargin )
+hfunction [experiment_spot_data experiment_cell_maps experiment_counts] = analyze_experiment( region_file_list, output_dir, varargin )
 % analyze_experiment - analyzes each region to determine cell boundaries and spot locations and intensities
 %    - determines experiment wide intensity thresholds
 %    - saves cell map, spot data
@@ -134,11 +134,11 @@ for d=1:size(dyes,1)
         prob_2be_mRNA.all = zeros( size(experiment_spot_data.(dye),1), 1 );
         prob_2be_mRNA.out = zeros( size(out_spots_to_keep,1), 1 );        
         prob_2be_mRNA.out(out_spots_to_keep) =  OUT_CDF.y(  OUT_CDF.ind );
-        prob_2be_mRNA.out(out_spots_to_keep==0) = Inf;
+        prob_2be_mRNA.out(out_spots_to_keep==0) = (1 - 1/sum(out_spots_to_keep) );
         
         prob_2be_mRNA.in = zeros( size(in_spots,1), 1 );
         prob_2be_mRNA.in( in_spots >= OUT_CDF.x(end) ) = (1 - 1/Num);
-        indDimmer = find( in_spots <  OUT_CDF.x(end) );
+        indDimmer = in_spots <  OUT_CDF.x(end);
 %         [yCDF,xCDF] = cdfcalc( out_spots );
 %         OUT_CDF.x = xCDF;
 %         OUT_CDF.y = yCDF(2:end);
