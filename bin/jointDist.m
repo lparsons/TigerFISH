@@ -72,7 +72,7 @@ set(main_fig,'PaperPositionMode','auto', 'PaperSize', [8  8], 'Units', 'inches')
 
 % Plot main image
 h1 = axes( 'Position',    [0.1       0.1      0.65     0.65 ], 'Parent', main_fig, 'Units', 'normalized'  );
-imagesc( [0 MAXx], [MAXy 0], log2(p_1_2(IN.y,IN.x)+1), 'Parent',h1 ); 
+imagesc( [0 MAXx], [MAXy 0], log2(p_1_2(IN.x,IN.y)+1), 'Parent',h1 ); 
 set(h1, 'Ytick', 0:spy:MAXy, 'YtickLabel', MAXy:-spy:0 );
 set(h1, 'Xtick', 0:spx:MAXx, 'XtickLabel', 0:spx:MAXx )
 set(h1, 'FontWeight', 'Bold', 'FontSize', 12 );
