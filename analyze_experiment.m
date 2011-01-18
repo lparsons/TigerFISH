@@ -101,7 +101,7 @@ dye_color.cy3_5 = [1 0 0];
 dye_color.cy5 = [.8 .8 .8];
 
 %Sets a threshold of FDR
-if ~exist( 'FDR_Treshold', 'var' )
+if  ~exist( 'FDR_Treshold', 'var' )
     FDR_Treshold = 0.01;
 end
 
@@ -153,8 +153,9 @@ for d=1:size(dyes,1)
         
         try 
             [FDR qvals pi0] = mafdr( pvals ); fprintf( '%1.2g\n', pi0 );
-            [val indT] = min( abs( qvals - FDR_Treshold )  );
-            threshold.(dye) = in_spots( indT );
+            sign = find(pvals<0.1);
+            [val indT] = min( abs( qvals(sign) - FDR_Treshold )  );
+            threshold.(dye) = in_spots( sign(indT) );
         catch
             warning( 'FDR failed' );
             threshold.(dye)  = NaN;
