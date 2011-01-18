@@ -79,7 +79,7 @@ set(h1, 'FontWeight', 'Bold', 'FontSize', 12 );
 % Set Clim for imagesc plot
 %p_1_2
 p_1_2_sorted = sort( log2(p_1_2(p_1_2>0)) );
-color_lim_max = numel(p_1_2);
+color_lim_max = numel(p_1_2_sorted);
 if color_lim_max > 2
     color_lim_max = color_lim_max - 2; % Saturate the top end of the spectrum
 end
