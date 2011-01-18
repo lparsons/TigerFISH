@@ -1,4 +1,4 @@
-hfunction [experiment_spot_data experiment_cell_maps experiment_counts] = analyze_experiment( region_file_list, output_dir, varargin )
+function [experiment_spot_data experiment_cell_maps experiment_counts] = analyze_experiment( region_file_list, output_dir, varargin )
 % analyze_experiment - analyzes each region to determine cell boundaries and spot locations and intensities
 %    - determines experiment wide intensity thresholds
 %    - saves cell map, spot data
@@ -48,7 +48,10 @@ end
 exp_data_file = [ip.Results.output_dir filesep 'experiment_data.mat'];
 if ip.Results.load_results && exist(exp_data_file, 'file')
     % Load Results
+    tic
+    fprintf('Loading previous data...');
     load(exp_data_file)
+    toc
 else
     % Analyze Regions
     experiment_spot_data.cy3 = [];

@@ -47,7 +47,8 @@ if (~strcmpi(ip.Results.algorithm, algorithms))
 end
 
 %% Loop through experiments
-experiment_set_data = [];
+%experiment_set_data = [];
+experiment_counts = [];
 parfor e=1:size(ip.Results.experiment_list,2)
     experiment = ip.Results.experiment_list(e);
     fprintf('Analyzing Experiment: %s\n', experiment.name);
@@ -58,14 +59,15 @@ parfor e=1:size(ip.Results.experiment_list,2)
         'algorithm', ip.Results.algorithm, ...
         'load_results', ip.Results.load_results, ...
         'dye_labels', experiment.dye_labels);
-    experiment_set_data = [experiment_set_data, experiment];
+    %experiment_set_data = [experiment_set_data, experiment];
+    experiment_counts{e} = experiment.counts;
 end
 
 %% Save results
-save([ip.Results.output_dir filesep 'experiment_set_data.mat'], 'experiment_set_data')
+save([ip.Results.output_dir filesep 'experiment_counts.mat'], 'experiment_counts')
 counts = [];
-for i=1:size(experiment_set_data,2)
-    counts = vertcat(counts, [repmat({experiment_set_data(i).name},size(experiment_set_data(i).counts,1),1), num2cell(experiment_set_data(i).counts)]);
+for i=1:size(experiment_counts,2)
+    counts = vertcat(counts, [repmat({ip.Results.experiment_list(i).name}, size(experiment_counts{i},1),1), num2cell(experiment_counts{i})]);
     %TODO append to file instead of storing in memory
 end
 cellwrite([ip.Results.output_dir filesep 'spot_counts.csv'], counts, '\t', 'wt');
