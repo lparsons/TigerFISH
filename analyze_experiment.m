@@ -102,7 +102,7 @@ dye_color.cy5 = [.8 .8 .8];
 
 %Sets a threshold of FDR
 if ~exist( 'FDR_Treshold', 'var' )
-    FDR_Treshold = 0.05;
+    FDR_Treshold = 0.001;
 end
 
 for d=1:size(dyes,1)
@@ -126,7 +126,7 @@ for d=1:size(dyes,1)
         out_spots = out_spots( out_spots_to_keep );
         %out_spots_ind = out_spots_ind( out_spots_to_keep );
         %Computes the CDF for spots outside of cells
-        Num = numel(out_spots);
+        Num = sum(out_spots_to_keep);
         [OUT_CDF.x   OUT_CDF.ind ] = sort( out_spots );
         OUT_CDF.y = (0:1:(Num-1)) * (1/Num);
 
@@ -134,11 +134,11 @@ for d=1:size(dyes,1)
         prob_2be_mRNA.all = zeros( size(experiment_spot_data.(dye),1), 1 );
         prob_2be_mRNA.out = zeros( size(out_spots_to_keep,1), 1 );        
         prob_2be_mRNA.out(out_spots_to_keep) =  OUT_CDF.y(  OUT_CDF.ind );
-        prob_2be_mRNA.out(out_spots_to_keep==0) = (1 - 1/sum(out_spots_to_keep) );
+        prob_2be_mRNA.out(out_spots_to_keep==0) = (1 - 1/Num );
         
         prob_2be_mRNA.in = zeros( size(in_spots,1), 1 );
         prob_2be_mRNA.in( in_spots >= OUT_CDF.x(end) ) = (1 - 1/Num);
-        indDimmer = in_spots <  OUT_CDF.x(end);
+        indDimmer = (in_spots >  OUT_CDF.x(1)) & (in_spots <  OUT_CDF.x(end));
 %         [yCDF,xCDF] = cdfcalc( out_spots );
 %         OUT_CDF.x = xCDF;
 %         OUT_CDF.y = yCDF(2:end);
@@ -158,8 +158,10 @@ for d=1:size(dyes,1)
         catch
             warning( 'FDR failed' );
             threshold.(dye)  = NaN;
-        end
-        
+        %end
+    %end
+end
+%%        
         %Appending spot probabilities to the spot data matrix
         experiment_spot_data.(dye) = [experiment_spot_data.(dye)  prob_2be_mRNA.all];
         
