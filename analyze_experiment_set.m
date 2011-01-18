@@ -1,4 +1,4 @@
-function experiment_set_data = analyze_experiment_set( varargin )
+function experiment_counts = analyze_experiment_set( varargin )
 % analyze_experiment_set performs FISH image analysis to determine cell boundaries
 %   and determine number of signals in each cell
 %
@@ -48,8 +48,8 @@ end
 
 %% Loop through experiments
 %experiment_set_data = [];
-experiment_counts = [];
-parfor e=1:size(ip.Results.experiment_list,2)
+experiment_counts = {};
+for e=1:size(ip.Results.experiment_list,2)
     experiment = ip.Results.experiment_list(e);
     fprintf('Analyzing Experiment: %s\n', experiment.name);
     exp_output_dir = [ip.Results.output_dir filesep experiment.name];

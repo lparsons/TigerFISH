@@ -77,9 +77,13 @@ set(h1, 'Ytick', 0:spy:MAXy, 'YtickLabel', MAXy:-spy:0 );
 set(h1, 'Xtick', 0:spx:MAXx, 'XtickLabel', 0:spx:MAXx )
 set(h1, 'FontWeight', 'Bold', 'FontSize', 12 );
 % Set Clim for imagesc plot
-p_1_2
-p_1_2_sorted = sort( log2(p_1_2(p_1_2>0)) )
-color_lims = [0 max(1, p_1_2_sorted(end-2))]
+%p_1_2
+p_1_2_sorted = sort( log2(p_1_2(p_1_2>0)) );
+color_lim_max = numel(p_1_2);
+if color_lim_max > 2
+    color_lim_max = color_lim_max - 2; % Saturate the top end of the spectrum
+end
+color_lims = [0 max(1, p_1_2_sorted(color_lim_max))];
 set(h1, 'Clim', color_lims ); 
 % Set axis lables
 h(1) = xlabel( Gene1 );
