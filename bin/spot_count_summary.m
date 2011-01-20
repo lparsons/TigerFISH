@@ -81,6 +81,7 @@ for d1=1:size(dyes,1)
   end
 end
 
+cdc = ip.Results.cdc;
 save( [ip.Results.output_path filesep 'endCountsProbs.mat'], 'counts', 'Y', 'Prob2D', 'cdc' );  
 
 
