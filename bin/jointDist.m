@@ -57,8 +57,8 @@ Y.p_1_2 = p_1_2 * (1/n);
 
 % Plotting
 if nargin < 6
-    MAXy = min( 40, max(x) );  IN.y = 1:MAXy+1;
-    MAXx = min( 40, max(y) );  IN.x = 1:MAXx+1;
+    MAXx = min( 40, max(x) );  IN.x = 1:MAXx+1;    
+    MAXy = min( 40, max(y) );  IN.y = 1:MAXy+1;
 else
     MAXy = Ylim.y;  IN.y = 1:MAXy+1;
     MAXx = Ylim.x;  IN.x = 1:MAXx+1;    
@@ -66,13 +66,13 @@ end
 spx = round( MAXx/10 );
 spy = round( MAXy/10 );
 
-main_fig = figure('Visible', 'off');
-set(main_fig,'PaperPositionMode','auto', 'PaperSize', [8  8], 'Units', 'inches')
+main_fig = figure('Visible', 'on');
+%set(main_fig,'PaperPositionMode','auto', 'PaperSize', [8  8], 'Units', 'inches')
 
 
 % Plot main image
 h1 = axes( 'Position',    [0.1       0.1      0.65     0.65 ], 'Parent', main_fig, 'Units', 'normalized'  );
-imagesc( [0 MAXx], [MAXy 0], log2(p_1_2(IN.x,IN.y)+1), 'Parent',h1 ); 
+imagesc( [0 MAXx], [MAXy 0], log2(p_1_2(IN.x,IN.y)+1)', 'Parent',h1 ); 
 set(h1, 'Ytick', 0:spy:MAXy, 'YtickLabel', MAXy:-spy:0 );
 set(h1, 'Xtick', 0:spx:MAXx, 'XtickLabel', 0:spx:MAXx )
 set(h1, 'FontWeight', 'Bold', 'FontSize', 12 );
@@ -99,18 +99,18 @@ caxis(color_lims)
 
 % Log_2(Cells) Summary calculation
 bins = 0:MAX;
-Errors1 = sqrt(p1);
-Errors2 = sqrt(p2);
-if 1
-    p1 = log2(p1);   Errors1 = 0.3*p1/2;
-    p2 = log2(p2);   Errors2 = 0.3*p2/2;
-end
+% Errors1 = sqrt(p1);
+% Errors2 = sqrt(p2);
+% if 1
+%     p1 = log2(p1);   Errors1 = 0.3*p1/2;
+%     p2 = log2(p2);   Errors2 = 0.3*p2/2;
+% end
 
 % Log_2(Cells) Summary Y-Axis (Gene2)
 h2 = axes( 'Position',    [ 0.1      0.76   0.65     0.2 ] , 'Parent', main_fig, 'Units', 'normalized' );
-bar(0:MAXy, p2(IN.y) ); hold on
-ylim( [0 1.02*max( p2(IN.y) )]);
-xlim( [0-0.5  MAXy+0.5]);
+bar(0:MAXx, p1(IN.x) ); hold on
+ylim( [0 1.02*max( p1(IN.x) )]);
+xlim( [0-0.5  MAXx+0.5]);
 set(h2, 'Xtick', [] );
 set(h2, 'FontWeight', 'Bold' );
 h(3) = ylabel( 'log_2(Cells)' );
@@ -118,9 +118,9 @@ h(3) = ylabel( 'log_2(Cells)' );
 
 % Log_2(Cells) Summary X-Axis (Gene1)
 h3 = axes( 'Position',    [0.76    0.1       0.2     0.65 ] , 'Parent', main_fig, 'Units', 'normalized' );
-barh(0:MAXx, p1(IN.x) ); hold on
-xlim( [0 1.02*max( p1(IN.x) )]);
-ylim( [0-0.5  MAXx+0.5]);
+barh(0:MAXy, p2(IN.y) ); hold on
+xlim( [0 1.02*max( p1(IN.y) )]);
+ylim( [0-0.5  MAXy+0.5]);
 set(h3, 'Ytick', [] );
 set(h3, 'FontWeight', 'Bold' );
 h(4) = xlabel( 'log_2(Cells)' ); 
