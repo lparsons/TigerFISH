@@ -1,10 +1,10 @@
 function generate_experiment_list( path, varargin )
-% wrapper function identifies images in 'path' with specified experiment 
+% wrapper function identifies images in 'path' with specified experiment
 %    numbers and outputs a tab delimited file of experiment names, dye
 %    labels and file paths.
 %
 %    Used when experiments are in separate directories and numbered.
-%    For situations where all experiments are in same directory, use 
+%    For situations where all experiments are in same directory, use
 %       'parse_experiment_dir' function instead.
 %
 %   generate_experiment_list(path, experiment_numbers, output_filename, filemask)
@@ -41,6 +41,8 @@ if isnumeric( path )
     end
 end
 
+exp_expression = ...
+    '(?<experiment_letters>[a-zA-Z]+)(?<experiment_number>\d+)_+(?<cy3>[a-zA-Z0-9]+)_+(?<cy3p5>[a-zA-Z0-9]+)_+(?<cy5>[a-zA-Z0-9]+)_*(?<condition>.*)*';
 
 %% Open output file
 output_filename = [ip.Results.output_filename];
@@ -55,15 +57,18 @@ for I = 1: size(main_dir_list,1)
         continue
     end
     
-    seps = strfind( main_dir_list(I).name, '_' );
-    experiment_number = str2double( main_dir_list(I).name(3:seps-1) );
-    
+    experiment_number = -1;
+    name = main_dir_list(I).name;
+    exp_fields = regexp(name, exp_expression, 'names');
+    if (~isempty(exp_fields))
+        experiment_number = str2double( exp_fields.experiment_number );
+    end
     if ~ismember( experiment_number, ip.Results.experiment_numbers )
         continue
     end
     
     Set = main_dir_list(I).name;
-    subDir_list = dir( [path Set filesep] );
+    subDir_list = dir( [path filesep Set filesep] );
     Segments = regexp(Set, '_', 'split' );
     
     File_Num = zeros(4,1);
@@ -72,7 +77,7 @@ for I = 1: size(main_dir_list,1)
             continue
         end
         subDir=[subDir_list(ii).name filesep];
-        file_list = dir( [path Set filesep subDir] );
+        file_list = dir( [path filesep Set filesep subDir] );
         
         
         for i=1:size(file_list,1)
