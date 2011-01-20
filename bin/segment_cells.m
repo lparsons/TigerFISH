@@ -169,6 +169,10 @@ toc
 % Gets cell perimeter
 [cellMap.cellsPerim cellMap.cells cellMap.CellNum] = bwboundaries(cellMap.cellMap);
 
+% Shrinks the cells to ensure that only cytoplams is used for estimating the median DAPI auofourescence of the cytoplasm 
+cellMap.cellMap_shrink5 = bwmorph( cellMap.cellMap, 'shrink', 5 );
+[cellMap.cellsPerim_5 cellMap.cells_5 cellMap.CellNum_5] = bwboundaries(cellMap.cellMap_shrink5);
+
 
 % Gets Coordinates and number of nuclei
 fprintf('Finding nuclear pixels\n')
