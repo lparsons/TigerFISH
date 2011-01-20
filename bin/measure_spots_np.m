@@ -98,7 +98,7 @@ for i=1:Num
     
     spot_data(i,4) = sp.intensity(i, 1);
 end
-spot_data = spot_data( spot_data(i,4)>0, : ); 
+spot_data = spot_data( spot_data(:,4)>0, : ); 
 
 
 return 
