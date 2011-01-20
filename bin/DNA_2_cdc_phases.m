@@ -65,6 +65,7 @@ if nargout > 1
     cdc_phases_p.G2 = pG2;
     cdc_phases_p.muG1 = muG1;
     cdc_phases_p.sigG1 = sigG1;
+    cdc_phases_p.DNA_Content = DNA_Content;
 end 
 
 
