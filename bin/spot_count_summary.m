@@ -72,10 +72,12 @@ for d1=1:size(dyes,1)
     Y.threshold = jointDist( counts( :, d1+2 ), counts( :, d2+2 ), Gene1, Gene2, Thresh_FileName ); 
     
     %csvwrite([ip.Results.output_path filesep 'joint_dist_prob_' Gene1 '_' Gene2 '.csv'], Prob2D{k}/sum(Prob2D{k}(:)));
-    save([ip.Results.output_path filesep 'joint_dist_prob_' Gene1 '_' Gene2 '.mat'], Prob2D{k});
+    joint_dist_prob = Prob2D{k};
+    save([ip.Results.output_path filesep 'joint_dist_prob_' Gene1 '_' Gene2 '.mat'], 'joint_dist_prob');
     
     %csvwrite([ip.Results.output_path filesep 'joint_dist_thresh_' Gene1 '_' Gene2 '.csv'], Y.threshold);
-    save([ip.Results.output_path filesep 'joint_dist_thresh_' Gene1 '_' Gene2 '.mat'], Y.threshold);
+    
+    save([ip.Results.output_path filesep 'joint_dist_thresh_' Gene1 '_' Gene2 '.mat'], 'Y');
   end
 end
 
