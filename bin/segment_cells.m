@@ -190,7 +190,8 @@ tic
 
 % Median = median( Layers, 3 );
 % Max = max(Layers, [], 3);
-cellMap_Layers_Cells = cellMap.cells; %repmat( cellMap.cells, [1 1 size(Layers,3)] ); 
+cellMap_Layers_Cells = cellMap.cells; %repmat( cellMap.cells, [1 1 size(Layers,3)] );
+cellMap_Layers_Cells_5 = cellMap.cells_5;
 cellMap_Layers_Nucs = cellMap.nuc; %repmat( cellMap.nuc, [1 1 size(Layers,3)] ); 
 Layers = cellMap.MaxProj;
 
@@ -199,10 +200,10 @@ if cellMap.CellNum == cellMap.nucNum
     cellMap.CytoMedian = zeros( cellMap.CellNum, 1 ); 
     cellMap.DNA_content = zeros( cellMap.CellNum, 1 );
 end
-for Cell_Num=1:cellMap.CellNum
+for Cell_Num=1:cellMap.CellNum_5
     %fprintf('Cell %d\n', i)
     
-    Cell_Nuc_Pix = cellMap.nuc( cellMap.cells==Cell_Num );
+    Cell_Nuc_Pix = cellMap.nuc( cellMap.cells_5==Cell_Num );
     Cell_Nuc_Pix = Cell_Nuc_Pix(Cell_Nuc_Pix>0);
     if numel( Cell_Nuc_Pix ) < 10 
        %cellMap.cells( cellMap.cells==Cell_Num ) = 0;
@@ -224,7 +225,13 @@ for Cell_Num=1:cellMap.CellNum
         fprintf( 'Cell with multiple nuclei !!!\n' );
     end
     % Gets Pixels of the Cytoplasm (wirthout nucleus) that will be used for estimating DNA content      
-    Cytoplasm = Layers( cellMap_Layers_Cells == Cell_Num ); 
+    Cytoplasm = Layers( cellMap_Layers_Cells_5 == Cell_Num & cellMap_Layers_Nucs == 0 ); 
+    if numel( Cytoplasm ) < 1e2
+        % Gets the cell number in the map before shrinkage  
+        Cell_Num_All = mode( cellMap.cells( cellMap.cells_5==Cell_Num ) );
+        % Gets the cytoplasmic pixels from the map before shrinkage 
+        Cytoplasm = Layers( cellMap_Layers_Cells == Cell_Num_All & cellMap_Layers_Nucs == 0 );
+    end
     %Cytoplasm = cellMap.MaxProj(  cellMap.cells == Cell_Num & cellMap.nuc == 0 );
     %Cell = cellMap.MaxProj(  cellMap.cells == Cell_Num  );
 %     c1 = cellMap.cells == Cell_Num;
