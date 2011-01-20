@@ -76,6 +76,8 @@ for d1=1:size(dyes,1)
   end
 end
 
+save( [ip.Results.output_path filesep 'endCountsProbs.mat'], 'counts', 'Y', 'Prob2D', 'cdc' );  
+
 
 % thresh_string = '';
 % sep = '';

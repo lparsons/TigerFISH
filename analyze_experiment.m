@@ -155,7 +155,7 @@ for d=1:size(dyes,1)
         pvals = 1 - prob_2be_mRNA.in;
         
         try 
-            [FDR qvals pi0] = mafdr( pvals ); fprintf( '%1.2g\n', pi0 );
+            [FDR qvals pi0] = mafdr( pvals ); %fprintf( '%1.2g\n', pi0 );
             sign = find(pvals<0.1);
             [val indT] = min( abs( qvals(sign) - FDR_Treshold )  );
             threshold.(dye) = in_spots( sign(indT) );
