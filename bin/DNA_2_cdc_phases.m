@@ -10,10 +10,12 @@ var(DNA_Content);
  
 % Generate initial expectations and IC for starting an EM optimization
 Median = median( DNA_Content );
+OK = ( DNA_Content< 3.0*Median); 
 Sorted = sort( DNA_Content );
 num = numel(DNA_Content);
-muG1 = mean( Sorted(1:round(num/3)) );
-sigG1 = std( Sorted(1:round(num/3)) );
+G1_cells = Sorted(1:round(num/3));
+muG1 = mean( G1_cells );
+sigG1 = std( G1_cells );
 
 for i=1:MaxIter
     
@@ -29,8 +31,8 @@ for i=1:MaxIter
     indG1b = find( DNA_Content< muG1 & pcG1 > 0.01 );    
     indG1a = find( DNA_Content> muG1 & pcG1 < 0.8  & pG1> pG2 );
     indG1 = [indG1a; indG1b];
-    indG2b = find( DNA_Content> 2*muG1 & pcG2 < 0.99 );    
-    indG2a = find( DNA_Content< 2*muG1 & pcG2 > 0.2  & pG1< pG2 );
+    indG2b = find( DNA_Content> 2*muG1 & pcG2 < 0.99 & OK);    
+    indG2a = find( DNA_Content< 2*muG1 & pcG2 > 0.2  & pG1< pG2 & OK );
     indG2 = [indG2a; indG2b];
     
     % Updates the expectations muG1 and sigG1 based on 
@@ -76,7 +78,7 @@ end
 
 if nargin >= 3 && ~isempty(PathFileName)
 
-    figure('Visible', 'off')
+    figure('Visible', 'on')
     
     l = linspace( min(0,min(DNA_Content)),...
                  min(3*Median, max(DNA_Content)), 30 ); clear fr  
