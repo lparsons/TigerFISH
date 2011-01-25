@@ -196,7 +196,7 @@ cellMap_Layers_Nucs = cellMap.nuc; %repmat( cellMap.nuc, [1 1 size(Layers,3)] );
 Layers = cellMap.MaxProj;
 
 cellMap.DNA_content = []; 
-if cellMap.CellNum_5 == cellMap.nucNum_5
+if cellMap.CellNum_5 == cellMap.nucNum
     cellMap.CytoMedian = zeros( cellMap.CellNum_5, 1 ); 
     cellMap.DNA_content = zeros( cellMap.CellNum_5, 1 );
 end

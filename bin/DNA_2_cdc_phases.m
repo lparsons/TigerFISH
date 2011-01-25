@@ -10,8 +10,10 @@ var(DNA_Content);
  
 % Generate initial expectations and IC for starting an EM optimization
 Median = median( DNA_Content );
-muG1 = 0.6*Median;
-sigG1 = std( DNA_Content( DNA_Content< 1.4*muG1 ) );
+Sorted = sort( DNA_Content );
+num = numel(DNA_Content);
+muG1 = mean( Sorted(1:round(num/3)) );
+sigG1 = std( Sorted(1:round(num/3)) );
 
 for i=1:MaxIter
     
