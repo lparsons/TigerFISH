@@ -105,7 +105,7 @@ dye_color.cy5 = [.8 .8 .8];
 
 %Sets a threshold of FDR
 if  ~exist( 'FDR_Treshold', 'var' )
-    FDR_Treshold = 0.001;
+    FDR_Treshold = 0.01;
 end
 
 for d=1:size(dyes,1)
