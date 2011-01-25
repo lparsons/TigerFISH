@@ -6,17 +6,17 @@ function Y = jointDist_probs( p_1_2,  Gene1, Gene2, Folder_File_Name)  %, Iter
 % Plotting  
 MAXy = min( 40, size(p_1_2,2) );  IN.y = 1:MAXy; Y.y = MAXy;
 MAXx = min( 40, size(p_1_2,1) );  IN.x = 1:MAXx; Y.x = MAXx;
-spx = round( MAXx/10 );
+spx = round( MAXy/10 );
 spy = round( MAXy/10 );
 
-main_fig = figure('Visible', 'off');
+main_fig = figure('Visible', 'on');
 set(main_fig,'PaperPositionMode','auto', 'PaperSize', [8  8], 'Units', 'inches')
 
 % Plot main image
 h1 = axes( 'Position',    [0.1        0.1       0.65         0.65]  );
-imagesc( [0 MAXx], [MAXy 0], log2(p_1_2(IN.x,IN.y)+1) ); 
-set(h1, 'Ytick', 0:spy:MAXy, 'YtickLabel', MAXy:-spy:0 );
-set(h1, 'Xtick', 0:spx:MAXx, 'XtickLabel', 0:spx:MAXx )
+imagesc( [0 MAXy], [MAXx 0], log2(p_1_2(IN.x,IN.y)+1) ); 
+set(h1, 'Ytick', 0:spx:MAXx, 'YtickLabel', MAXx:-spx:0 );
+set(h1, 'Xtick', 0:spy:MAXy, 'XtickLabel', 0:spy:MAXy )
 set(h1, 'FontWeight', 'Bold', 'FontSize', 12 );
 % Set Clim for imagesc plot
 p_1_2_sorted = sort( log2(p_1_2(p_1_2>0)) );
@@ -40,18 +40,18 @@ p2 = sum( p_1_2, 2 );
 
 % Density Summary Y-Axis (Gene2)
 h2 = axes( 'Position',    [ 0.1       0.76   0.65     0.2 ]  );
-bar(1:MAXx, p2(IN.x) ); hold on
-ylim( [0 1.02*max( p2(IN.x) )]);
-xlim( [1-0.5  MAXx+0.5]);
+bar(1:MAXy, p1(IN.y) ); hold on
+ylim( [0 1.02*max( p1(IN.y) )]);
+xlim( [1-0.5  MAXy+0.5]);
 set(h2, 'Xtick', [] );
 set(h2, 'FontWeight', 'Bold' );
 h(3) = ylabel( 'Density' );
 
 % Density Summary X-Axis (Gene1)
 h3 = axes( 'Position',    [0.76    0.1       0.2     0.65 ]  );
-barh(1:MAXy, p1(IN.y) ); hold on
-xlim( [0 1.02*max( p1(IN.y) )]);
-ylim( [1-0.5  MAXy+0.5]);
+barh(1:MAXx, p2(IN.x) ); hold on
+xlim( [0 1.02*max( p2(IN.x) )]);
+ylim( [1-0.5  MAXx+0.5]);
 set(h3, 'Ytick', [] );
 set(h3, 'FontWeight', 'Bold' );
 h(4) = xlabel( 'Density' ); 

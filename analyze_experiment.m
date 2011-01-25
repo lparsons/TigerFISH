@@ -105,7 +105,7 @@ dye_color.cy5 = [.8 .8 .8];
 
 %Sets a threshold of FDR
 if  ~exist( 'FDR_Treshold', 'var' )
-    FDR_Treshold = 0.01;
+    FDR_Treshold = 0.001;
 end
 
 for d=1:size(dyes,1)
@@ -125,7 +125,7 @@ for d=1:size(dyes,1)
         %Removes very bright spots outside of the cells that are likley to be artifacts and mRNAs
         out_spots =  experiment_spot_data.(dye)(out_spots_ind,5);
         in_spots =  experiment_spot_data.(dye)(in_spots_ind,5);
-        out_spots_to_keep = out_spots < 3* median(out_spots);
+        out_spots_to_keep = out_spots < 5* median(out_spots);
         out_spots = out_spots( out_spots_to_keep );
         %out_spots_ind = out_spots_ind( out_spots_to_keep );
         %Computes the CDF for spots outside of cells
@@ -156,7 +156,7 @@ for d=1:size(dyes,1)
         
         try
             [FDR qvals pi0] = mafdr( pvals ); %fprintf( '%1.2g\n', pi0 );
-            sign = find(pvals<0.1);
+            sign = find(pvals<0.05);
             [val indT] = min( abs( qvals(sign) - FDR_Treshold )  );
             threshold.(dye) = in_spots( sign(indT) );
         catch

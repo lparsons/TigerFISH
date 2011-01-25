@@ -96,7 +96,7 @@ for i=1:Num
     %sp.hat_xyz(i,:) = hat_xyz;
     %sp.contrast(i) = Contrast;
     
-    spot_data(i,4) = sp.intensity(i, 1);
+    spot_data(i,4) = sp.intensity(i, 1)/Background;
 end
 spot_data = spot_data( spot_data(:,4)>0, : ); 
 
