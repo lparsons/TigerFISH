@@ -28,7 +28,7 @@ function experiment_counts = analyze_experiment_set( varargin )
 %           counts - matrix with 5 colums, row for each cell
 %               columns: region, cell, cy3 count, cy3.5 count, cy5 count
 %
-addpath bin/
+addpath bin
 
 %% Parse Arguments
 

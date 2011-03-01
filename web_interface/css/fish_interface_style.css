@@ -1,0 +1,35 @@
+div#header {
+	border: 1px solid #999;
+	margin-bottom: .5em;
+	padding: .5em;
+	background: #CCC;
+}
+
+div#title {
+	font-size: 4em;
+}
+
+
+div#sub-title {
+}
+
+div.mycolumn {
+	padding: .5em;
+}
+
+div.mycolumn h4 {
+	text-align: center;
+	margin-bottom: 0em;
+}
+
+div.mysection {
+	margin-bottom: 1em;
+}
+
+div#analysis_options, #analyze_submit_div {
+	text-align: center;
+}
+
+#analysis_name {
+	width: 100%;
+}

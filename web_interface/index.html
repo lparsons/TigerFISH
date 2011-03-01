@@ -1,0 +1,215 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+	<head>
+		<title>An XHTML 1.0 Strict standard template</title>
+
+		<meta http-equiv="content-type" 
+		content="text/html;charset=utf-8" />
+
+		<link rel="stylesheet" type="text/css" href="class.css" />
+
+		<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/themes/ui-lightness/jquery-ui.css" />
+
+		<script src="javascript.js"></script>
+
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.js"></script>
+
+		<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.js"></script>
+
+
+		<link rel="stylesheet" href="css/blueprint/screen.css" type="text/css" media="screen, projection">
+		<link rel="stylesheet" href="css/blueprint/print.css" type="text/css" media="print">	
+		<!--[if lt IE 8]><link rel="stylesheet" href="css/blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
+
+		<link rel="stylesheet" href="css/fish_interface_style.css" type="text/css" media="all">
+		<script>
+			$(function() {
+				$( "#accordion" ).accordion({
+					fillSpace: true,
+					collapsible: true
+				});
+			});
+			$(function() {
+				$( "#accordionResizer" ).resizable({
+					minHeight: 140,
+					resize: function() {
+						$( "#accordion" ).accordion( "resize" );
+					}
+				});
+			});
+			$(function() {
+				$( "#analyze_submit" ).button();
+			});
+			$(function() {
+				$( "#algorithm_select2" ).buttonset();
+			});
+
+		</script>
+
+	</script>
+
+
+</script>
+</head>
+
+<body>
+	<div class="container">
+
+		<div class="span-24 last">
+			<div id="header">
+				<div id="title">
+					FISH Image Analysis
+				</div>
+				<div id="sub-title">
+					Image analysis for fluorescence in situ hybridization experiments
+				</div>
+			</div>
+		</div>
+		<div class="span-12">
+			<div id="select_analysis" class="ui-widget-content mycolumn">
+				<h4 class="ui-widget-header">Select Experiments to Analyze</h4>
+				<div id="experiment_div" class="mysection">
+					<form id="select_experiment">
+						<div id="accordion">
+							<h3><a href="#">Initial Experiment Set</a></h3>
+							<div>
+								<select multiple="multiple">
+									<option value="1">E168_aro9_rki1_yef3</option>
+									<option value="1">E169_gar1_aro9_yef3</option>
+									<option value="1">E170_yor285w_aro9_yef3</option>
+									<option value="1">E171_sur4_aro9_yef3</option>
+									<option value="1">E168_aro9_rki1_yef3</option>
+									<option value="1">E169_gar1_aro9_yef3</option>
+									<option value="1">E170_yor285w_aro9_yef3</option>
+									<option value="1">E171_sur4_aro9_yef3</option>
+									<option value="1">E168_aro9_rki1_yef3</option>
+									<option value="1">E169_gar1_aro9_yef3</option>
+									<option value="1">E170_yor285w_aro9_yef3</option>
+									<option value="1">E171_sur4_aro9_yef3</option>
+									<option value="1">E168_aro9_rki1_yef3</option>
+									<option value="1">E169_gar1_aro9_yef3</option>
+									<option value="1">E170_yor285w_aro9_yef3</option>
+									<option value="1">E171_sur4_aro9_yef3</option>
+									<option value="1">E168_aro9_rki1_yef3</option>
+									<option value="1">E169_gar1_aro9_yef3</option>
+									<option value="1">E170_yor285w_aro9_yef3</option>
+									<option value="1">E171_sur4_aro9_yef3</option>
+									<option value="1">E168_aro9_rki1_yef3</option>
+									<option value="1">E169_gar1_aro9_yef3</option>
+									<option value="1">E170_yor285w_aro9_yef3</option>
+									<option value="1">E171_sur4_aro9_yef3</option>
+									<option value="1">E168_aro9_rki1_yef3</option>
+									<option value="1">E169_gar1_aro9_yef3</option>
+									<option value="1">E170_yor285w_aro9_yef3</option>
+									<option value="1">E171_sur4_aro9_yef3</option>
+									<option value="1">E168_aro9_rki1_yef3</option>
+									<option value="1">E169_gar1_aro9_yef3</option>
+									<option value="1">E170_yor285w_aro9_yef3</option>
+									<option value="1">E171_sur4_aro9_yef3</option>
+									<option value="1">E168_aro9_rki1_yef3</option>
+									<option value="1">E169_gar1_aro9_yef3</option>
+									<option value="1">E170_yor285w_aro9_yef3</option>
+									<option value="1">E171_sur4_aro9_yef3</option>
+									<option value="1">E168_aro9_rki1_yef3</option>
+									<option value="1">E169_gar1_aro9_yef3</option>
+									<option value="1">E170_yor285w_aro9_yef3</option>
+									<option value="1">E171_sur4_aro9_yef3</option>
+									<option value="1">E168_aro9_rki1_yef3</option>
+									<option value="1">E169_gar1_aro9_yef3</option>
+									<option value="1">E170_yor285w_aro9_yef3</option>
+									<option value="1">E171_sur4_aro9_yef3</option>
+								</select>
+							</div>
+							<h3><a href="#">New Scope Images</a></h3>
+							<div>
+								<select multiple="multiple">
+									<option value="1">E304_CTP1_NO_NOP1</option>
+									<option value="1">E305_NOP1_NO_CTP1</option>
+									<option value="1">E306_CTP1_NO_HSP30</option>
+									<option value="1">E307_HSP30_NO_CTP1</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+									<option value="1">E308_NOP1_NO_HSP30</option>
+								</select>
+							</div>
+							<h3><a href="#">Nikolai' Experiment Set</a></h3>
+							<div>Third content</div>
+
+						</div>
+					</div>
+					<h4 class="ui-widget-header">Select Intensity Measurement Algorithm</h4>
+					<div id="analysis_options" class="mysection">
+						<div id="algorithm_select">
+							<input type="radio" id="3D" name="radio" /><label for="3D">3D</label>
+							<input type="radio" id="2D_local" name="radio" /><label for="2D_local">2D (local background)</label>
+							<input type="radio" id="2D_global" name="radio" /><label for="2D_global">2D (global background)</label>
+						</div>
+
+					</div>
+					<h4 class="ui-widget-header">Enter Descriptive Name for Analysis</h4>
+					<div id="analysis_name_section" class="mysection">
+						<input id="analysis_name" type="text" value="" />
+					</div>
+					<div id="analyze_submit_div" class="mysection">
+						<input id="analyze_submit" type="submit" value="Analyze Experiments" />
+					</div>
+
+				</form>
+
+			</div>
+		</div>
+
+		<div class="span-12 last">
+			<div id="results" class="ui-widget-content mycolumn">
+				<h4 class="ui-widget-header">View Analysis Results</h4>
+				<ol>
+					<li><a href="">Cell Cycle Experiments (12/16/2010, nslavov)</a></li>
+					<li><a href="">Control Experiments (1/15/2011, lparsons)</a></li>
+				</ol>
+			</div>
+		</div>
+
+	</div>
+
+</body>
+</html>
+
