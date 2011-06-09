@@ -24,28 +24,28 @@ function [experiment_spot_data experiment_cell_maps experiment_counts] = analyze
 %
 %   load_results is optional parameter, if true load previous cell map and
 %       spot intensity data (if it exists).  Off be default
+p = mfilename('fullpath');
+[pathstr] = fileparts(p);
+addpath([pathstr filesep 'bin'])
 
-addpath bin/
 
 %% Parse Arguments
+algorithms = {'3D', '2D', '2D_local'};
 
 ip = inputParser;
 ip.FunctionName = 'analyze_experiment';
 ip.addRequired('region_file_list',@iscell);
 ip.addRequired('output_dir',@isdir);
 ip.addOptional('dye_labels',{'gene1', 'gene2', 'gene3', 'DNA'},@iscell);
-ip.addParamValue('algorithm','3D',@ischar);
+ip.addParamValue('algorithm','3D',@(x)any(strcmpi(x,algorithms)));
+ip.addParamValue('thresholds',{},@iscell);
+ip.addParamValue('histogram_max',{NaN, NaN, NaN},@iscell);
 ip.addParamValue('load_results',false,@islogical);
 ip.parse(region_file_list, output_dir, varargin{:});
 
-algorithms = {'3D', '2D', '2D_local'};
-if (~strcmpi(ip.Results.algorithm, algorithms))
-    errormsg = ['Algorithm "' ip.Results.algorithm '" not recognized.  Must be one of: ' sprintf('%s, ',algorithms{:});];
-    error(errormsg)
-end
+exp_data_file = [ip.Results.output_dir filesep 'experiment_data.mat'];
 
 %% Calculate or load results
-exp_data_file = [ip.Results.output_dir filesep 'experiment_data.mat'];
 if ip.Results.load_results && exist(exp_data_file, 'file')
     % Load Results
     tic
@@ -67,7 +67,7 @@ else
         [cell_map spot_data] = analyze_region(ip.Results.region_file_list{p,1}, ...
             ip.Results.region_file_list{p,2}, ip.Results.region_file_list{p,3}, ...
             ip.Results.region_file_list{p,4}, reg_output_dir, ...
-	    'algorithm', ip.Results.algorithm, 'debug', ip.Results.load_results);
+            'algorithm', ip.Results.algorithm, 'debug', ip.Results.load_results);
         
         experiment_spot_data.cy3 = vertcat(experiment_spot_data.cy3, horzcat(repmat(p, size(spot_data.cy3, 1),1),spot_data.cy3));
         experiment_spot_data.cy3_5 = vertcat(experiment_spot_data.cy3_5, horzcat(repmat(p, size(spot_data.cy3_5, 1),1),spot_data.cy3_5));
@@ -78,9 +78,8 @@ else
         experiment_cell_maps{p} = cell_map;
     end
     % Estimates a CDC phase for each cell based on the DNA content inferred from DAPI staining
-    %Directory and name for the plot of DNA content
-    PathFileName  = [ip.Results.output_dir filesep 'DNA_content.pdf'];
-    [cdc.phases cdc.probs] = DNA_2_cdc_phases( DNA_content, [], PathFileName );
+    % Save pdf of the plot of DNA content
+    [cdc.phases cdc.probs] = DNA_2_cdc_phases( DNA_content, [], [ip.Results.output_dir filesep 'DNA_content.pdf'] );
     
     %Lance,
     %   1) give the proper value to PathFileName
@@ -97,7 +96,7 @@ end
 
 
 
-%% Determine Thresholds
+%% Determine Thresholds, Spot Probabilities, Plot Histograms
 
 dyes = fields(experiment_spot_data);
 dye_color.cy3 = [0 1 0];
@@ -106,85 +105,40 @@ dye_color.cy5 = [.8 .8 .8];
 
 %Sets a threshold of FDR
 if  ~exist( 'FDR_Treshold', 'var' )
-    FDR_Treshold = 0.01;
+    FDR_Threshold = 0.01;
 end
 
 for d=1:size(dyes,1)
-    % Determine Thresholds - 90% outside spots threshold
+    
     dye = dyes{d};
     if (~isempty(experiment_spot_data.(dye)))
+        % Index for spots inside vs outside of cells
         out_spots_ind = experiment_spot_data.(dye)(:,7)==2;
         in_spots_ind = experiment_spot_data.(dye)(:,7)==0;
-        % TODO Implement FDR calc here (need p-vals, q-vals)
-        % Estimate p-values based on spots outside cells
-        % - Get median, toss outliers beyond 3 sd
-        %- [ycdf, xcdf] = cdfstats(int_out)
-        %- p_val = interp1(x, y, intensities_in) % default is cubic
-        %- [fdr q] = mafdr(p_val)
-        %- threshold q values
+        spot_intensities = experiment_spot_data.(dye)(:,5);
         
-        %Removes very bright spots outside of the cells that are likley to be artifacts and mRNAs
-        out_spots =  experiment_spot_data.(dye)(out_spots_ind,5);
-        in_spots =  experiment_spot_data.(dye)(in_spots_ind,5);
-        out_spots_to_keep = out_spots < 5* median(out_spots);
-        out_spots = out_spots( out_spots_to_keep );
-        %out_spots_ind = out_spots_ind( out_spots_to_keep );
-        %Computes the CDF for spots outside of cells
-        Num = sum(out_spots_to_keep);
-        [OUT_CDF.x   OUT_CDF.ind ] = sort( out_spots );
-        OUT_CDF.y = (0:1:(Num-1)) * (1/Num);
+        % Probabilities are always calculated using inside vs outside spots
+        mrna_probabilies = determine_mrna_probabilities(spot_intensities, out_spots_ind, in_spots_ind);
+        % Append spot probabilities to the spot data matrix
+        experiment_spot_data.(dye) = [experiment_spot_data.(dye) mrna_probabilies];
         
-        %Computes p values for spots inside of cells
-        prob_2be_mRNA.all = zeros( size(experiment_spot_data.(dye),1), 1 );
-        prob_2be_mRNA.out = zeros( size(out_spots_to_keep,1), 1 );
-        prob_2be_mRNA.out(out_spots_to_keep) =  OUT_CDF.y(  OUT_CDF.ind );
-        prob_2be_mRNA.out(out_spots_to_keep==0) = (1 - 1/Num );
-        
-        prob_2be_mRNA.in = zeros( size(in_spots,1), 1 );
-        prob_2be_mRNA.in( in_spots >= OUT_CDF.x(end) ) = (1 - 1/Num);
-        indDimmer = (in_spots >  OUT_CDF.x(1)) & (in_spots <  OUT_CDF.x(end));
-        %         [yCDF,xCDF] = cdfcalc( out_spots );
-        %         OUT_CDF.x = xCDF;
-        %         OUT_CDF.y = yCDF(2:end);
-        nondup = [diff(OUT_CDF.x); 1] > 0;
-        
-        prob_2be_mRNA.in(indDimmer) = interp1( OUT_CDF.x(nondup),...
-            OUT_CDF.y(nondup),...
-            in_spots(indDimmer) );
-        prob_2be_mRNA.all( in_spots_ind ) = prob_2be_mRNA.in;
-        prob_2be_mRNA.all( out_spots_ind ) = prob_2be_mRNA.out;
-        pvals = 1 - prob_2be_mRNA.in;
-        
-        try
-            [FDR qvals pi0] = mafdr( pvals ); %fprintf( '%1.2g\n', pi0 );
-            sign = find(pvals<0.05);
-            [val indT] = min( abs( qvals(sign) - FDR_Treshold )  );
-            threshold.(dye) = in_spots( sign(indT) );
-        catch
-            warning( 'FDR failed' );
-            [val indT] = min( abs( pvals - 0.2 )  );
-            threshold.(dye)  = in_spots( indT );
-            %end
-            %end
+        % Determine Thresholds 
+        if (isempty(ip.Results.thresholds)) % Using FDR and inside vs. outside spots
+            threshold.(dye) = determine_threshold(spot_intensities(in_spots_ind), mrna_probabilies(in_spots_ind), FDR_Threshold);
+        else % Thresholds specified in arguments
+            threshold.(dye) = ip.Results.thresholds{d};
         end
-        %%
-        %Appending spot probabilities to the spot data matrix
-        experiment_spot_data.(dye) = [experiment_spot_data.(dye)  prob_2be_mRNA.all];
-        
-        
-        %The old method
-        %threshold.(dye) = determine_threshold(experiment_spot_data.(dye)(out_spots,5), experiment_spot_data.(dye)(in_spots,5));
         
         % Histogram
-        histogram.(dye) = spot_intensity_histogram(experiment_spot_data.(dye)(out_spots_ind,5), experiment_spot_data.(dye)(in_spots_ind,5), threshold.(dye));
+        histogram.(dye) = spot_intensity_histogram(spot_intensities(out_spots_ind), spot_intensities(in_spots_ind), threshold.(dye), ...
+            'max', ip.Results.histogram_max{d});
         title([strrep(dye, '_', '.') ' Spot Intensity Histogram'], 'FontSize', 22);
         set(histogram.(dye),'PaperPositionMode','auto', 'PaperSize', [10 5], 'Units', 'inches')
         set(histogram.(dye), 'Position',  [.25 .25 9.5 4.5] );
-        set(histogram.(dye),'InvertHardCopy','on');
         print(histogram.(dye), '-dpdf', [ip.Results.output_dir filesep dye '_spot_intensity_histogram.pdf'], '-r0');
         close(histogram.(dye))
         
-        % Spot overlay imagesregion_spot_data
+        % Spot overlay images
         N = 1;
         regions = unique(experiment_spot_data.(dye)(:,1));
         total_cells = 0;
@@ -231,3 +185,68 @@ experiment_counts = spot_count_summary(experiment_spot_data, ...
 %% Save Results
 %csvwrite([ip.Results.output_dir filesep 'spot_counts.csv'], experiment_counts)
 %save([exp_output_dir filesep 'experiment.mat'], 'experiment')
+
+end
+
+%% Determine Threshold
+% Estimate p-values based on spots outside cells
+% - Get median, toss outliers beyond 3 sd
+%- [ycdf, xcdf] = cdfstats(int_out)
+%- p_val = interp1(x, y, intensities_in) % default is cubic
+%- [fdr q] = mafdr(p_val)
+%- threshold q values
+function threshold = determine_threshold(in_spots_intensities, in_spots_probabilites, fdr)
+pvals = 1 - in_spots_probabilites;
+try
+    [FDR qvals pi0] = mafdr( pvals ); %fprintf( '%1.2g\n', pi0 );
+    sign = find(pvals<0.05);
+    [val indT] = min( abs( qvals(sign) - fdr )  );
+    threshold = in_spots_intensities( sign(indT) );
+catch
+    warning( ['FDR failed'] );
+    [val indT] = min( abs( pvals - 0.2 )  );
+    threshold = in_spots_intensities( indT );
+end
+end
+
+%% Determine mrna probabilities based on intensity values for spots inside
+% vs. outside cells
+function mrna_probabilities = determine_mrna_probabilities(spot_intensities, out_spots_ind, in_spots_ind)
+%Removes very bright spots outside of the cells that are likley to
+%be artifacts and mRNAs
+out_spots =  spot_intensities(out_spots_ind);
+in_spots =  spot_intensities(in_spots_ind);
+out_spots_to_keep_ind = out_spots_ind & spot_intensities <5 * median(out_spots);
+out_spots_to_keep = spot_intensities(out_spots_to_keep_ind);
+%out_spots = out_spots( out_spots_to_keep );
+%out_spots_ind(~out_spots_to_keep) = 0;
+%out_spots_ind = out_spots_ind( out_spots_to_keep );
+
+%Computes the CDF for spots outside of cells
+Num = sum(out_spots_to_keep_ind);
+[OUT_CDF.x   OUT_CDF.ind ] = sort( out_spots_to_keep );
+OUT_CDF.y = (0:1:(Num-1)) * (1/Num);
+
+%Computes p values for spots inside of cells
+mrna_probabilities = zeros( size(spot_intensities, 1), 1 );
+
+prob_2be_mRNA.out = zeros( size(out_spots_to_keep,1), 1 );
+prob_2be_mRNA.out =  OUT_CDF.y(  OUT_CDF.ind );
+%prob_2be_mRNA.out(out_spots_to_keep==0) = (1 - 1/Num );
+
+prob_2be_mRNA.in = zeros( size(in_spots,1), 1 );
+prob_2be_mRNA.in( in_spots >= OUT_CDF.x(end) ) = (1 - 1/Num);
+indDimmer = (in_spots >  OUT_CDF.x(1)) & (in_spots <  OUT_CDF.x(end));
+%         [yCDF,xCDF] = cdfcalc( out_spots );
+%         OUT_CDF.x = xCDF;
+%         OUT_CDF.y = yCDF(2:end);
+nondup = [diff(OUT_CDF.x); 1] > 0;
+
+prob_2be_mRNA.in(indDimmer) = interp1( OUT_CDF.x(nondup),...
+    OUT_CDF.y(nondup),...
+    in_spots(indDimmer) );
+
+mrna_probabilities( in_spots_ind ) = prob_2be_mRNA.in;
+mrna_probabilities( out_spots_ind ) = (1 - 1/Num );
+mrna_probabilities( out_spots_to_keep_ind ) = prob_2be_mRNA.out;
+end

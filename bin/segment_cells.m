@@ -34,7 +34,10 @@ end
 fprintf('DAPI Searching Best focus\n');
 tic
 num_stacks = length(image.info);
+
 in_focus_layer = best_focus_layer_var(image.layers);
+%in_focus_layer = round(num_stacks/2);
+
 cellMap.Best_Focus_Ind = in_focus_layer;
 bottom_layer = max(1,in_focus_layer-layers_around_focus);
 top_layer = min(num_stacks,in_focus_layer+layers_around_focus);

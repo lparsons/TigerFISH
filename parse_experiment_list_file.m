@@ -15,8 +15,9 @@ function experiment_set = parse_experiment_list_file(filename)
 %           experiment.dye_labels - cell array of dye labels for
 %               each experiment
 %               {Cy3_label, Cy3.5_label, Cy5_label, DAPI_label}
-
-addpath bin/
+p = mfilename('fullpath');
+[pathstr] = fileparts(p);
+addpath([pathstr filesep 'bin'])
 
 experiment_set = [];
 fid = fopen(filename);

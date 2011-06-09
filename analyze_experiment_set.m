@@ -1,4 +1,4 @@
-function experiment_counts = analyze_experiment_set( varargin )
+function experiment_counts = analyze_experiment_set( experiment_list, output_dir, varargin )
 % analyze_experiment_set performs FISH image analysis to determine cell boundaries
 %   and determine number of signals in each cell
 %
@@ -28,23 +28,20 @@ function experiment_counts = analyze_experiment_set( varargin )
 %           counts - matrix with 5 colums, row for each cell
 %               columns: region, cell, cy3 count, cy3.5 count, cy5 count
 %
-addpath bin
+p = mfilename('fullpath');
+[pathstr] = fileparts(p);
+addpath([pathstr filesep 'bin'])
 
 %% Parse Arguments
+algorithms = {'3D', '2D', '2D_local'};
 
 ip = inputParser;
 ip.FunctionName = 'analyze_experiment_set';
 ip.addRequired('experiment_list',@isstruct);
 ip.addRequired('output_dir',@isdir);
-ip.addOptional('algorithm','3D',@ischar);
-ip.addOptional('load_results',false,@islogical);
-ip.parse(varargin{:});
-
-algorithms = {'3D', '2D', '2D_local'};
-if (~strcmpi(ip.Results.algorithm, algorithms))
-    errormsg = ['Algorithm "' ip.Results.algorithm '" not recognized.  Must be one of: ' sprintf('%s, ',algorithms{:});];
-    error(errormsg)
-end
+ip.addParamValue('algorithm','3D',@(x)any(strcmpi(x,algorithms)));
+ip.addParamValue('load_results',false,@islogical);
+ip.parse(experiment_list, output_dir, varargin{:});
 
 %% Loop through experiments
 %experiment_set_data = [];

@@ -11,6 +11,8 @@ function generate_experiment_list( path, varargin )
 %       Examines 'path' for experiments listed in 'experiment_numbers' and
 %       categorizes them into CY3, CY3.5, CY5, and DAPI images
 %
+%   writes tab delimited file with the following columns:
+%      Experiment, Region, Cy3_label, Cy3_file, Cy3.5_label, Cy3.5_file, Cy5_label, Cy5_file, DAPI_label, DAPI_file
 
 addpath bin/
 

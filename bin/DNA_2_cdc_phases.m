@@ -78,7 +78,7 @@ end
 
 if nargin >= 3 && ~isempty(PathFileName)
 
-    figure('Visible', 'on')
+    figure('Visible', 'off')
     
     l = linspace( min(0,min(DNA_Content)),...
                  min(3*Median, max(DNA_Content)), 30 ); clear fr  

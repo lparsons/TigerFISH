@@ -144,7 +144,7 @@ for i=1:num_spots
     
     valid_spot = true;
     contrast = rm(1)/rm(spot_radius);
-    if (contrast > 1.2)
+    if (contrast > 1.1)
         for r=1:(spot_radius-1)
             if rm(r) < rm(r+1)
                 valid_spot = false;
