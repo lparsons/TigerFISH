@@ -53,6 +53,7 @@ class Experiment(object):
             if os.path.isdir(os.path.join(self.abs_directory(), f)):
                 r = Region(f, f)
                 region_list.append(r)
+            region_list.sort(key=lambda x: x.number)
         return region_list
     
     def index_file(self):
@@ -96,7 +97,8 @@ class Experiment(object):
                 
 class Region(object):
     '''
-    classdocs
+    Create with name and directory
+    Number is set to name.split('_')[1] if that is a float, else it is name 
     '''
     
     def __init__(self, name, directory):
@@ -105,7 +107,13 @@ class Region(object):
         '''
         self.name = name
         self.directory = directory
-    
+        self.number = name
+        try:
+            number = name.split('_')[1]
+            self.number = float(number)
+        except:
+            pass
+
     def index_file(self):
         return os.path.join(self.directory, 'index.html')
         
