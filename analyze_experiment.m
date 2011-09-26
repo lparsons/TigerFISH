@@ -14,13 +14,18 @@ function [experiment_spot_data experiment_cell_maps experiment_counts] = analyze
 %           defaults to {'gene1', 'gene2', 'gene3', 'DNA'}
 %
 %
-%   Properties
+%   Parameters
 %
-%   algorithm is an optional parameter that determines method of intensity measurement
+%   algorithm - optional parameter that determines method of intensity measurement
 %       Must be one of '3D', '2D', or '2D_local'
 %       3D - Non-parametric 3D spot intensity measurement
 %       2D - Uses 2D Gaussian mask with global background per image
 %       2D_local - 2D Gaussian mask with local background around spot
+%
+%   thresholds - optional parameter that defines thresholds for spot intensity
+%       Cell array with three values, for cy3, cy3.5, and cy5
+%       Default is to determine these using spots inside vs. outside of
+%           cells and an FDR of 0.05
 %
 %   load_results is optional parameter, if true load previous cell map and
 %       spot intensity data (if it exists).  Off be default
@@ -109,8 +114,8 @@ if  ~exist( 'FDR_Treshold', 'var' )
 end
 
 for d=1:size(dyes,1)
-    
     dye = dyes{d};
+    threshold.(dye) = ip.Results.thresholds{d};
     if (~isempty(experiment_spot_data.(dye)))
         % Index for spots inside vs outside of cells
         out_spots_ind = experiment_spot_data.(dye)(:,7)==2;
