@@ -37,7 +37,7 @@ class Experiment_Set(object):
 class Experiment(object):
     '''
     Create with name and directory
-    Number is set to name.split('_')[1] if that is a float, else it is name 
+    Attempt to parse experiment number, otherwise number is set to name
     '''
 
     def __init__(self, name, directory, root_directory):
@@ -98,6 +98,7 @@ class Experiment(object):
                 print cmd
                 os.system(cmd)
             filenames.append((os.path.basename(f_png), os.path.basename(f)))
+        filenames.sort(key=lambda x: x[0])
         return filenames
             
     def dna_content(self, force=False):
