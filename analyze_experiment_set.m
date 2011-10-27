@@ -1,8 +1,9 @@
 function experiment_counts = analyze_experiment_set( experiment_list, output_dir, varargin )
+global params 
 % analyze_experiment_set performs FISH image analysis to determine cell boundaries
 %   and determine number of signals in each cell
 %
-%   experiment_set_data = analyze_experiment_set( input_dir, output_dir [algorithm], [load_results]) 
+%   experiment_set_data = analyze_experiment_set( input_dir, output_dir, [algorithm], [load_results]) 
 %       finds experiments in input_dir
 %
 %   algorithm is an optional parameter that determines method of intensity measurement
@@ -39,7 +40,7 @@ ip = inputParser;
 ip.FunctionName = 'analyze_experiment_set';
 ip.addRequired('experiment_list',@isstruct);
 ip.addRequired('output_dir',@isdir);
-ip.addParamValue('algorithm','3D',@(x)any(strcmpi(x,algorithms)));
+ip.addParamValue('algorithm', '2D_local', @(x)any(strcmpi(x,algorithms)) );
 ip.addParamValue('load_results',false,@islogical);
 ip.parse(experiment_list, output_dir, varargin{:});
 
@@ -57,14 +58,15 @@ for e=1:size(ip.Results.experiment_list,2)
         'load_results', ip.Results.load_results, ...
         'dye_labels', experiment.dye_labels);
     %experiment_set_data = [experiment_set_data, experiment];
-    experiment_counts{e} = experiment.counts;
+	experiment_counts{e,1} =  experiment.name;
+    experiment_counts{e,2} = experiment.counts;
 end
 
 %% Save results
 save([ip.Results.output_dir filesep 'experiment_counts.mat'], 'experiment_counts')
 counts = [];
-for i=1:size(experiment_counts,2)
-    counts = vertcat(counts, [repmat({ip.Results.experiment_list(i).name}, size(experiment_counts{i},1),1), num2cell(experiment_counts{i})]);
+for i=1:size(experiment_counts,1)
+    counts = vertcat(counts, [repmat({ip.Results.experiment_list(i).name}, size(experiment_counts{i,2},1),1),  num2cell(experiment_counts{i,2})]);
     %TODO append to file instead of storing in memory
 end
 cellwrite([ip.Results.output_dir filesep 'spot_counts.csv'], counts, '\t', 'wt');

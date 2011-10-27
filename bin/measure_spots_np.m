@@ -40,10 +40,11 @@ rg4 = -4:4;   r4 = 2*4+1;
 rg5 = -5:5;   r5 = 2*5+1;
 rg6 = -6:6;   r6 = 2*6+1;
 
-i_num3 = 1/( r2*r3^2 ); % volume in pixels 
-i_num4 = 1/( r2*r4^2 ); % volume in pixels 
-i_num5 = 1/( r3*r5^2 - r2*r4^2 );
-i_num6 = 1/( r3*r6^2 - r2*r5^2 );
+i_num3  = 1/( r2*r3^2 ); % volume in pixels 
+i_num4  = 1/( r2*r4^2 ); % volume in pixels 
+i_num5  = 1/( r2*r5^2 - r2*r4^2 );
+i_num53 = 1/( r3*r5^2 - r2*r4^2 );
+i_num6  = 1/( r3*r6^2 - r2*r5^2 );
 %Background_median = median( img.layers(:) );
 for i=1:Num
     
@@ -79,6 +80,7 @@ for i=1:Num
 
     %Mean = sum( pix_3(:) ) * i_num3;
     Background = (sum(pix_6(:)) - sum(pix_5(:)) ) * i_num6;
+	%Background = (sum(pix_53(:)) - sum(pix_4(:)) ) * i_num53;
         
     %Contrast = Mean/Background;
     %potSpot.contrast(i) = Contrast;
@@ -88,7 +90,7 @@ for i=1:Num
  
     %sp.mean(i) =  Mean;
     sp.background(i) = Background;
-    pix = pix_5(:) - Background; %Background_median;
+    pix = pix_3(:) - Background; %Background_median;
     sp.intensity(i, 1) = ( pix' * pix ) / sum( pix );
     %sp.xyz(i,:) = xyz(i,:);
     %sp.pixs{j} = pix_b;

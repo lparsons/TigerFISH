@@ -8,11 +8,8 @@ function Y = jointDist( x, y,  Gene1, Gene2, Folder_File_Name, Ylim)  %, Iter
 % 3) Computes the Mutual Information (MI) between x and y
 
 
-% If a single argument is passed it has to be nx2 matrix
+% If a single argument is passed it has to be a matrix n x 2 
 if   min(size(x)) == 2, y=x(:,2); x=x(:,1);  end 
-%If no iteration is passed the function will compute the
-% marginal distr. 
-%if nargin < 3, Iter = 1; end 
 
 %Makes sure the input vectors have the same size
 l1 = length(x);
@@ -20,14 +17,10 @@ l2 = length(y);
 if l1 ~= l2, error( 'Different Sizes !' ); else n = l1; end 
 %% 
 
-% Computes the marginal dostributions.
-% We should avoid recomputing the marginal dostributions thousands of times when bootstrapping
-%if Iter == 1     
-    %bins = unique([x y]);
+% Computes the marginal distributions.
     MAX = max( max(x), max(y) );
     MAX = min( 40, MAX );
     bins = 0:MAX;
-    %bins(end) = inf;
     bin_num = numel(bins);
 
     p1 = histc(x, bins); 
@@ -38,7 +31,7 @@ if l1 ~= l2, error( 'Different Sizes !' ); else n = l1; end
      
     H_1 = nansum(p_1.*log2(p_1));
     H_2 = nansum(p_2.*log2(p_2));
-%end
+    
 Y.p_1 = p_1; % marginal dostribution for x
 Y.p_2 = p_2; % marginal dostribution for y
 
@@ -50,8 +43,8 @@ for i=1:bin_num
     p_1_2(:,i) = histc( x( y==bins(i) ),  bins);
 end
     %p_1_2(:,i+1) = histc( x( y>bins(i) ),  bins);
-    p1 = sum(p_1_2,2);
-    p2 = sum(p_1_2,1);
+p1 = sum(p_1_2,2);
+p2 = sum(p_1_2,1);
 Y.p_1_2 = p_1_2 * (1/n);
 
 
@@ -67,7 +60,7 @@ spx = round( MAXx/10 );
 spy = round( MAXy/10 );
 
 main_fig = figure('Visible', 'on');
-%set(main_fig,'PaperPositionMode','auto', 'PaperSize', [8  8], 'Units', 'inches')
+set(main_fig,'PaperPositionMode','auto', 'PaperSize', [8  8], 'Units', 'inches')
 
 
 % Plot main image
@@ -113,17 +106,17 @@ ylim( [0 1.02*max( p1(IN.x) )]);
 xlim( [0-0.5  MAXx+0.5]);
 set(h2, 'Xtick', [] );
 set(h2, 'FontWeight', 'Bold' );
-h(3) = ylabel( 'log_2(Cells)' );
+h(3) = ylabel( 'Cells' ); %'log_2(Cells)'
 
 
 % Log_2(Cells) Summary X-Axis (Gene1)
 h3 = axes( 'Position',    [0.76    0.1       0.2     0.65 ] , 'Parent', main_fig, 'Units', 'normalized' );
 barh(0:MAXy, p2(IN.y) ); hold on
-xlim( [0 1.02*max( p1(IN.y) )]);
+xlim( [0 1.02*max( p2(IN.y) )]);
 ylim( [0-0.5  MAXy+0.5]);
 set(h3, 'Ytick', [] );
 set(h3, 'FontWeight', 'Bold' );
-h(4) = xlabel( 'log_2(Cells)' ); 
+h(4) = xlabel( 'Cells' ); %'log_2(Cells)'
 
 
 % Set fontsize of axis labels

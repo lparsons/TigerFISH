@@ -5,6 +5,7 @@
 % Cohen et al. http://www.sciencemag.org/cgi/content/abstract/322/5907/1511
 
 function cellMap = segment_cells(image_input, second_image)
+global params 
 %% Configuration
 % Number of layers above a below the best infocus layer to use
 layers_around_focus = 3;
@@ -52,8 +53,9 @@ toc
 %% Scale image values
 fprintf ('Searching for nuclei\n');
 tic
+max_image  = max_image *( 1/median(max_image(:)) );
 I_sc = mat2gray(max_image);
-
+%I_sc = I_sc *( 1/median(I_sc(:)) );
 
 %% Adaptive contrast enhancement 
 % adapthisteq implements a technique called contrast-limited adaptive
@@ -121,8 +123,12 @@ bw6 = bwmorph(bw5, 'thicken', cellBorderThicken);
 %% Segment cells using Marker-based watershed segmentation
 %
 % Find nuclei - extended maxima operator can be used to identify groups of
-% pixels that are significantly higher than their immediate surrounding. 
-mask_em = imextendedmax(I_sc, .137);
+% pixels that are significantly higher than their immediate surrounding.
+
+if ~isfield(  params, 'DAPI_Contrast' ) || isempty(params.DAPI_Contrast)
+	params.DAPI_Contrast = 0.137; % Sets a default for DAPI Contrast
+end
+mask_em = imextendedmax(I_sc, params.DAPI_Contrast );
 
 % Cleanup nuclei using morphological close, fill,  remove small objects
 % The morphological close operation is a dilation followed by an erosion,
@@ -181,7 +187,9 @@ cellMap.cellMap_shrink5 = bwmorph( cellMap.cellMap, 'shrink', 5 );
 fprintf('Finding nuclear pixels\n')
 tic
 nucs = mask_em | cellMap.MaxProj > median( cellMap.MaxProj(cellMap.cells > 0) ) * 1.5;
-[cellMap.nuc cellMap.nucNum]  = bwlabeln( nucs );
+[cellMap.nuc cellMap.nucNum]  = bwlabeln( nucs ); 
+%cellMap.nuc = bwmorph( cellMap.nuc, 'thicken', 1 );
+
 %cellMap.nucMaxproj = cell( cellMap.nucNum, 1 );
 toc
 
@@ -193,24 +201,42 @@ tic
 
 % Median = median( Layers, 3 );
 % Max = max(Layers, [], 3);
-cellMap_Layers_Cells = cellMap.cells; %repmat( cellMap.cells, [1 1 size(Layers,3)] );
-cellMap_Layers_Cells_5 = cellMap.cells_5;
-cellMap_Layers_Nucs = cellMap.nuc; %repmat( cellMap.nuc, [1 1 size(Layers,3)] ); 
-Layers = cellMap.MaxProj;
-
-cellMap.DNA_content = []; 
-if cellMap.CellNum_5 == cellMap.nucNum
-    cellMap.CytoMedian = zeros( cellMap.CellNum_5, 1 ); 
-    cellMap.DNA_content = zeros( cellMap.CellNum_5, 1 );
+switch params.DAPI_Dimensions	
+	case{ 2, '2D' } 
+		cellMap_Layers_Cells = cellMap.cells; 
+		cellMap_Layers_Cells_5 = cellMap.cells_5;
+		cellMap_Layers_Nucs =  cellMap.nuc; %
+		Layers = cellMap.MaxProj;	
+	case{ 3, '3D' } 
+		cellMap_Layers_Cells = 	  repmat( cellMap.cells,   [1 1 size(Layers,3)] ); 
+		cellMap_Layers_Cells_5 =  repmat( cellMap.cells_5, [1 1 size(Layers,3)] );
+		cellMap_Layers_Nucs = 	  repmat( cellMap.nuc,     [1 1 size(Layers,3)] );
 end
-for Cell_Num=1:cellMap.CellNum_5
+
+%cellMap.DNA_content = []; 
+%if cellMap.CellNum_5 == cellMap.nucNum
+    cellMap.CytoMedian = zeros( cellMap.CellNum, 1 ); 
+    cellMap.DNA_content = zeros( cellMap.CellNum, 1 );
+	cellMap.Cell_Size = zeros( cellMap.CellNum, 1 );
+	cellMap.Cell_2_Exclude = zeros( cellMap.CellNum, 1 );
+%end
+for Cell_Num=1:cellMap.CellNum
     %fprintf('Cell %d\n', i)
+	
+	% Estimates the size of the cell using the 2D projection 
+	cellMap.Cell_Size(Cell_Num,1) = sum( cellMap.cells(:) == Cell_Num );
+	
+	% Gets the coressponding cell number in the shranken map 
+	Cell_Num_5 = cellMap.cells_5( cellMap.cells==Cell_Num );
+	Cell_Num_5  = Cell_Num_5( Cell_Num_5 ~= 0 ); 
+	Cell_Num_5 = mode( Cell_Num_5(:) );
     
-    Cell_Nuc_Pix = cellMap.nuc( cellMap.cells_5==Cell_Num );
+    Cell_Nuc_Pix = cellMap.nuc( cellMap.cells_5==Cell_Num_5 );
     Cell_Nuc_Pix = Cell_Nuc_Pix(Cell_Nuc_Pix>0);
     if numel( Cell_Nuc_Pix ) < 10 
        %cellMap.cells( cellMap.cells==Cell_Num ) = 0;
        cellMap.DNA_content(Cell_Num,1) = 0;
+	   cellMap.Cell_2_Exclude(Cell_Num,1) = 1;
        fprintf('The %d^th Cell does not have a nucleus!!! \n', Cell_Num )
        continue
     else
@@ -228,13 +254,19 @@ for Cell_Num=1:cellMap.CellNum_5
         fprintf( 'Cell with multiple nuclei !!!\n' );
     end
     % Gets Pixels of the Cytoplasm (wirthout nucleus) that will be used for estimating DNA content      
-    Cytoplasm = Layers( cellMap_Layers_Cells_5 == Cell_Num & cellMap_Layers_Nucs == 0 ); 
+    %Cytoplasm = Layers( cellMap_Layers_Cells_5 == Cell_Num_5 & cellMap_Layers_Nucs == 0 ); 
+	Cytoplasm = Layers( cellMap_Layers_Cells == Cell_Num & cellMap_Layers_Nucs == 0 );
+	
     if numel( Cytoplasm ) < 1e2
-        % Gets the cell number in the map before shrinkage  
-        Cell_Num_All = mode( cellMap.cells( cellMap.cells_5==Cell_Num ) );
-        % Gets the cytoplasmic pixels from the map before shrinkage 
-        Cytoplasm = Layers( cellMap_Layers_Cells == Cell_Num_All & cellMap_Layers_Nucs == 0 );
+        %Gets the cell number in the map before shrinkage  
+        %Cell_Num_All = mode( cellMap.cells( cellMap.cells_5==Cell_Num ) );
+        %Gets the cytoplasmic pixels from the map before shrinkage 
+        Cytoplasm = Layers( cellMap_Layers_Cells == Cell_Num & cellMap_Layers_Nucs == 0 );
     end
+	
+	if numel( Cytoplasm ) < 50 ||  numel(Cytoplasm)/numel(cellMap.nucPix{Cell_Num}) < 1.3
+		cellMap.Cell_2_Exclude(Cell_Num,1) = 2; % Very large ratio of nuclear to cytoplasmic volume
+	end
     %Cytoplasm = cellMap.MaxProj(  cellMap.cells == Cell_Num & cellMap.nuc == 0 );
     %Cell = cellMap.MaxProj(  cellMap.cells == Cell_Num  );
 %     c1 = cellMap.cells == Cell_Num;

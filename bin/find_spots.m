@@ -1,4 +1,4 @@
-function spots = find_spots(image_input)
+function spots = find_spots(image_input, Contrast_Treshold, Rsq_Treshold)
 
 %[pathstr, name, ext, versn] = fileparts(image_file);
 
@@ -12,6 +12,9 @@ if (ischar(image_input))
 else
     image = image_input;
 end
+
+if nargin <2, Contrast_Treshold = 1.05; end 
+if nargin <3, Rsq_Treshold = 0.4; end 
 
 
 %% Identify potential spots
@@ -118,7 +121,8 @@ for i=1:num_spots
     % Skip if too close to edge of image
     x_edge = min(x, image.info(1).Width-x);
     y_edge = min(y, image.info(1).Height-y);
-    if (x_edge <= spot_radius || y_edge <= spot_radius)
+	z_edge = min(z, size(image.layers,3)-z);
+    if (x_edge <= spot_radius || y_edge <= spot_radius || z_edge <= spot_radius)
         continue
     end
     
@@ -141,10 +145,12 @@ for i=1:num_spots
     %     rm(2) = (sum( pix_2(:) ) - sum(pix_1(:)) ) * i_num2;
     %     rm(3) = (sum( pix_3(:) ) - sum(pix_2(:)) ) * i_num3;
     %     rm(4) = (sum( pix_4(:) ) - sum(pix_3(:)) ) * i_num4;
+	
+	
     
     valid_spot = true;
     contrast = rm(1)/rm(spot_radius);
-    if (contrast > 1.1)
+    if (contrast > Contrast_Treshold)
         for r=1:(spot_radius-1)
             if rm(r) < rm(r+1)
                 valid_spot = false;
@@ -155,8 +161,15 @@ for i=1:num_spots
     end
     
     if valid_spot
-        spots(y,x,z) = true;
+        %spots(y,x,z) = true;
+		
+		[sl Mean Rsq] = spot_regress_fun(  image.layers(y+rg{3}, x+rg{3}, z+rg{3}), 7 ); %Rsq, pause (0.5)
+		if Rsq > Rsq_Treshold
+		  spots(y,x,z) = true;
+		end
     end
+	
+	
     
     %     if (rm(1) > rm(2) && rm(2) > rm(3) && contrast > 1.1)
     %         spots(y,x,z) = true;

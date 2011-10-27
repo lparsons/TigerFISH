@@ -2,12 +2,12 @@ function Y = jointDist_probs( p_1_2,  Gene1, Gene2, Folder_File_Name)  %, Iter
 %
 % Plots a 2D matrix plot of the PMF and prints it as pdf file
 %
-
+p_1_2 = p_1_2';
 % Plotting  
 MAXy = min( 40, size(p_1_2,2) );  IN.y = 1:MAXy; Y.y = MAXy;
 MAXx = min( 40, size(p_1_2,1) );  IN.x = 1:MAXx; Y.x = MAXx;
-spx = round( MAXy/10 );
-spy = round( MAXy/10 );
+spx = round( MAXy/6 );
+spy = round( MAXy/6 );
 
 main_fig = figure('Visible', 'on');
 set(main_fig,'PaperPositionMode','auto', 'PaperSize', [8  8], 'Units', 'inches')
@@ -20,7 +20,12 @@ set(h1, 'Xtick', 0:spy:MAXy, 'XtickLabel', 0:spy:MAXy )
 set(h1, 'FontWeight', 'Bold', 'FontSize', 12 );
 % Set Clim for imagesc plot
 p_1_2_sorted = sort( log2(p_1_2(p_1_2>0)) );
-set(h1, 'Clim', [0 1]);
+color_lim_max = numel(p_1_2_sorted);
+if color_lim_max > 2
+    color_lim_max = color_lim_max - 2; % Saturate the top end of the spectrum
+end
+color_lims = [0 max(1, p_1_2_sorted(color_lim_max))];
+set(h1, 'Clim', color_lims ); 
 % Set axis lables
 h(1) = xlabel( Gene1 );    
 h(2) = ylabel( Gene2 );   

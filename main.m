@@ -1,4 +1,5 @@
 function experiment_set_data = main( experiment_list_file, output_dir, varargin )
+global params 
 % main function runs fish analysis on experiments listed in file_list_csv
 %
 %
@@ -41,16 +42,32 @@ function experiment_set_data = main( experiment_list_file, output_dir, varargin 
 %               (,1) = Cy3_file
 %               (,2) = Cy3.5_file
 %               (,3) = Cy5_file
-%               (,4) = DAPI_file
+%               (,4) = DAPI_file	
 %
 
 
 i_p = inputParser;
 i_p.FunctionName = 'main';
-i_p.addParamValue('algorithm','3D',@ischar);
+i_p.addParamValue('algorithm', '3D' ,@ischar); %'3D'
 i_p.addParamValue('load_results',false,@islogical);
 i_p.parse(varargin{:});
 
 
+
+fid = fopen( [ output_dir filesep 'parameters.txt'], 'w' );
+fprintf( fid, 'Contrast Thresholds: %1.2f %1.2f  %1.2f \n',  params.Threshold_Contrast  );
+fprintf( fid, 'Intensity Thresholds: %1.2f %1.2f  %1.2f \n',  params.Threshold_Intensity{:}  );
+fprintf( fid, 'Algorithm for quantifying spot intensity: %s\n',  params.algorithm  );
+fprintf( fid, 'DAPI was quantified in %d Dimensions\n',  params.DAPI_Dimensions  );
+fclose(fid); 
+
 experiment_set = parse_experiment_list_file(experiment_list_file);
-experiment_set_data = analyze_experiment_set(experiment_set, output_dir, i_p.Results.algorithm, i_p.Results.load_results);
+experiment_set_data = analyze_experiment_set(experiment_set, output_dir, 'load_results', i_p.Results.load_results ); %, i_p.Results.algorithm, i_p.Results.load_results
+
+
+
+
+
+
+
+
