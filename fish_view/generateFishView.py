@@ -23,7 +23,7 @@ def main():
     
     parser = OptionParser(usage=usage)
     parser.add_option("-n", "--name", dest="set_name", type="string", help="Name of the Experiment Set")
-    parser.add_option("-f", "--force", dest="force", action="store_true", default=False, help="Force regeneration of png files from pdf files")
+    parser.add_option("-f", "--force", dest="force", action="store_true", default=True, help="Force regeneration of png files from pdf files")
     (opts, args) = parser.parse_args()
     
     if len(args) < 1:

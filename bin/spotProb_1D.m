@@ -13,7 +13,7 @@ prob = zeros( 1, length(rna)+1 );
 % If the number of spots is large, computing the full Multinomial becomes rather expensive. 
 % To avoid combinatoril increase in complexity, only the dimmest N spots
 % are considered to be noise (the probabilities for that are computted)
-N = 12;
+N = 8;
 if numel( rna ) > N
 	%rna1 = rna;
 	% One approach is to use k-mean clusters which is very natural but since the size of each cluster 

@@ -1,4 +1,5 @@
 function [cell_map_struct spot_data] = analyze_region(cy3file, cy3_5file, cy5file, dapifile, varargin )
+global params 
 % analyze_region determines cell boundaries and outputs spot locations and
 %   intensities
 %
@@ -83,7 +84,7 @@ else
             toc
             fprintf(['Locating ' dye ' Spots\n']);
             tic
-            spot_locations.(dye) = find_spots(image.(dye));
+            spot_locations.(dye) = find_spots(image.(dye),  params.Threshold_Contrast( d ) );
             toc
             
             
@@ -91,26 +92,28 @@ else
             % spot_locations.(dye) = filter_border_spots( spot_locations.(dye) );
             
             % Measure spot intensities
-            if (strcmpi(ip.Results.algorithm, '3D'))
+			%Algorithm = ip.Results.algorithm;  
+			Algorithm = params.algorithm; %'2D_local';
+            if (strcmpi(Algorithm, '3D'))
                 % Measure spots using Nikolai's 3D Non-Parametric method
                 fprintf(['Using 3D algorithm to determine spot intensity for ' dye '\n']);
                 tic
                 [spot_data.(dye) sb.(dye)] = measure_spots_np(spot_locations.(dye), image.(dye));
                 toc
-            elseif (strcmpi(ip.Results.algorithm, '2D'))
+            elseif (strcmpi(Algorithm, '2D'))
                 % Measure spots using D Larson's 2D Gaussian Mask algorithm
                 fprintf(['Using 2D algorithm with global image background to determine spot intensity for ' dye '\n']);
                 tic
                 spot_data.(dye) = measure_spots(spot_locations.(dye), image.(dye), 'global');
                 toc
-            elseif (strcmpi(ip.Results.algorithm, '2D_local'))
+            elseif (strcmpi(Algorithm, '2D_local'))
                 % Measure spots using D Larson's 2D Gaussian Mask algorithm
                 fprintf(['Using 2D algorithm with local background to determine spot intensity for ' dye '\n']);
                 tic
                 spot_data.(dye) = measure_spots(spot_locations.(dye), image.(dye), 'local');
                 toc
             else
-                errormsg = ['Algorithm "' ip.Results.algorithm '" not recognized.  Must be one of: ' sprintf('%s, ',algorithms{:});];
+                errormsg = ['Algorithm "' Algorithm '" not recognized.  Must be one of: ' sprintf('%s, ',algorithms{:});];
                 error(errormsg)
             end
             

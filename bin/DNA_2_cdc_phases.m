@@ -55,6 +55,10 @@ end
 cdc_phases = zeros( size(DNA_Content) );  
 cdc_phases( indG1 ) = 1;
 cdc_phases( indG2 ) = 3;
+indG = ones( size(DNA_Content) );
+indG( indG1 ) = 0;
+indG( indG2 ) = 0;
+cdc_phases( indG & DNA_Content>2*muG1 ) = 4;
 
 indS = find( cdc_phases == 0       &...
              DNA_Content >    muG1 &...
@@ -79,7 +83,7 @@ end
 if nargin >= 3 && ~isempty(PathFileName)
 
     figure('Visible', 'off')
-    
+    DNA_Content( isnan(DNA_Content) ) = 0; 
     l = linspace( min(0,min(DNA_Content)),...
                  min(3*Median, max(DNA_Content)), 30 ); clear fr  
 

@@ -10,11 +10,18 @@ ip.parse(varargin{:});
 
 % Determine max value and split into 30 bins
 %mx = max(vertcat(ip.Results.out_spot_intensities, ip.Results.in_spot_intensities), ip.Results.threshold*6);
-if isnan(ip.Results.max)
-    mx = max( 4*median(ip.Results.in_spot_intensities), ip.Results.threshold*3);
-else
-    mx = ip.Results.max;
-end
+% if isnan(ip.Results.max)
+    % mx = max( 4*median(ip.Results.in_spot_intensities), ip.Results.threshold*3);
+% else
+    % mx = ip.Results.max;
+% end
+
+mx = max( 3*median(ip.Results.in_spot_intensities(~isnan(ip.Results.in_spot_intensities))),...
+	      2*ip.Results.threshold 	);
+% if numel(mx) ~= 1 || mx(1) < 0.1
+ % mx = 0.1;
+% end 
+
 interval = mx/30;
 bins = [0:interval:mx,Inf];
     
@@ -33,11 +40,12 @@ if ~isnan(ip.Results.threshold)
 end
 
 hold off
+xlim( [0 mx*1.05] ); 
 xlabel('Spot Intensity','FontSize', 20,'FontWeight', 'Bold')
 ylabel('Fraction','FontSize', 20,'FontWeight', 'Bold')
 title('Spot Intensity Histogram','FontSize', 22);
 set( gca, 'FontSize', 14, 'FontWeight', 'Bold' ); 
-lh = legend('Inside Cells', 'Outside Cells');
+lh = legend( ['Inside Cells: ' num2str(sum(i_n))], ['Outside Cells: '  num2str(sum(o_n))] );
 set (lh, 'FontSize', 20,'FontWeight', 'Bold');
     
 end

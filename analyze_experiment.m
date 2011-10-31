@@ -1,4 +1,5 @@
 function [experiment_spot_data experiment_cell_maps experiment_counts] = analyze_experiment( region_file_list, output_dir, varargin )
+global params 
 % analyze_experiment - analyzes each region to determine cell boundaries and spot locations and intensities
 %    - determines experiment wide intensity thresholds
 %    - saves cell map, spot data
@@ -62,7 +63,10 @@ else
     experiment_spot_data.cy3 = [];
     experiment_spot_data.cy3_5 = [];
     experiment_spot_data.cy5 = [];
+	DNA_content1 = [];
     DNA_content = [];
+	Cell_Sizes = [];
+	Cell_2_Exclude = [];
     % Loop through regions
     for p=1:size(ip.Results.region_file_list,1)
         fprintf('Position number %s\n', num2str(p))
@@ -78,19 +82,27 @@ else
         experiment_spot_data.cy3_5 = vertcat(experiment_spot_data.cy3_5, horzcat(repmat(p, size(spot_data.cy3_5, 1),1),spot_data.cy3_5));
         experiment_spot_data.cy5 = vertcat(experiment_spot_data.cy5, horzcat(repmat(p, size(spot_data.cy5, 1),1),spot_data.cy5));
         
-        fprintf(  '%1.2f\t', cell_map.DNA_content);
-        DNA_content = [DNA_content; cell_map.DNA_content]; %MatLab is going to call vertcat anyway so I prefrer the simpler syntax
+        %fprintf(  '%1.2f\t', cell_map.DNA_content);
+        DNA_content1 = [DNA_content1; cell_map.DNA_content]; %MatLab is going to call vertcat anyway so I prefrer the simpler syntax
+		DNA_content = [DNA_content;   cell_map.DNA_content*(1/median(cell_map.DNA_content(:) )) ];
+		Cell_Sizes =  [Cell_Sizes; 	  cell_map.Cell_Size];
+		Cell_2_Exclude = [Cell_2_Exclude; 	  cell_map.Cell_2_Exclude];
         experiment_cell_maps{p} = cell_map;
     end
     % Estimates a CDC phase for each cell based on the DNA content inferred from DAPI staining
     % Save pdf of the plot of DNA content
     [cdc.phases cdc.probs] = DNA_2_cdc_phases( DNA_content, [], [ip.Results.output_dir filesep 'DNA_content.pdf'] );
-    
+    cdc.DNA_content_nor = DNA_content;
+	cdc.DNA_content = DNA_content1;
+	cdc.Cell_Sizes = Cell_Sizes;
+	cdc.Cell_2_Exclude = Cell_2_Exclude;
     %Lance,
     %   1) give the proper value to PathFileName
     %   2) if necessary, correct my saving of cdc
+    if params.Save_Detailed_Results 
+		save(exp_data_file, 'experiment_spot_data', 'experiment_cell_maps', 'cdc' );
+	end	
     
-    save(exp_data_file, 'experiment_spot_data', 'experiment_cell_maps', 'cdc' );
     % Experiment_spot_data.(dye) is matrix with 7 columns:
     %   Region, X, Y, Z, Intensity, Cell, Cell_Type
     %
@@ -109,8 +121,13 @@ dye_color.cy3_5 = [1 0 0];
 dye_color.cy5 = [.8 .8 .8];
 
 %Sets a threshold of FDR
-if  ~exist( 'FDR_Treshold', 'var' )
+if  isfield(params, 'FDR_Treshold')
+	FDR_Threshold = params.FDR_Threshold;
+else
     FDR_Threshold = 0.01;
+end
+if ~isfield( params, 'NULL' )
+	params.NULL = [1 1 1];
 end
 
 for d=1:size(dyes,1)
@@ -123,16 +140,20 @@ for d=1:size(dyes,1)
         spot_intensities = experiment_spot_data.(dye)(:,5);
         
         % Probabilities are always calculated using inside vs outside spots
-        mrna_probabilies = determine_mrna_probabilities(spot_intensities, out_spots_ind, in_spots_ind);
+        mrna_probabilies = determine_mrna_probabilities(spot_intensities, out_spots_ind, in_spots_ind, params.NULL(d) );
         % Append spot probabilities to the spot data matrix
         experiment_spot_data.(dye) = [experiment_spot_data.(dye) mrna_probabilies];
         
         % Determine Thresholds 
+		if ~isempty(params.Threshold_Intensity{ d } ) 
+			threshold.(dye) = params.Threshold_Intensity{ d };
+		else
         if (isempty(ip.Results.thresholds)) % Using FDR and inside vs. outside spots
             threshold.(dye) = determine_threshold(spot_intensities(in_spots_ind), mrna_probabilies(in_spots_ind), FDR_Threshold);
         else % Thresholds specified in arguments
             threshold.(dye) = ip.Results.thresholds{d};
         end
+		end
         
         % Histogram
         histogram.(dye) = spot_intensity_histogram(spot_intensities(out_spots_ind), spot_intensities(in_spots_ind), threshold.(dye), ...
@@ -164,12 +185,16 @@ for d=1:size(dyes,1)
             
             % Write cell map, colored by cell cycle prediction
             cell_map_struct = experiment_cell_maps{r};
-            phases = cdc.phases(total_cells+1:cell_map_struct.CellNum+total_cells);
+			Region_Cells = (1:cell_map_struct.CellNum)+total_cells;
             total_cells = total_cells + cell_map_struct.CellNum;
+			
+            phases = cdc.phases(Region_Cells);
+			phases(  cdc.Cell_2_Exclude( Region_Cells )>0 )= 5;
+            
             cell_map_labeled = cell_map_struct.cells;
             cell_map_image = zeros(size(cell_map_labeled));
-            colors = {[1,1,1], [0,0,1], [0,1,0], [1,0,0]};
-            for p=0:3
+            colors = {[1,1,1], [0,0,1], [0,1,0], [1,0,0], [1 0.1 0.7],  [1 0.7 0.1]};
+            for p=0:5
                 t = ismember(cell_map_labeled, find(phases==p));
                 cell_map_image = imoverlay(cell_map_image, bwperim(t), colors{p+1});
             end
@@ -199,7 +224,7 @@ end
 %- [ycdf, xcdf] = cdfstats(int_out)
 %- p_val = interp1(x, y, intensities_in) % default is cubic
 %- [fdr q] = mafdr(p_val)
-%- threshold q values
+%- threshold q values params.Threshold_Intensity
 function threshold = determine_threshold(in_spots_intensities, in_spots_probabilites, fdr)
 pvals = 1 - in_spots_probabilites;
 try
@@ -212,32 +237,60 @@ catch
     [val indT] = min( abs( pvals - 0.2 )  );
     threshold = in_spots_intensities( indT );
 end
+
+if  threshold< median(in_spots_intensities)
+	vals = sort( in_spots_intensities );
+	threshold = vals( floor(0.08*numel(vals)) );
+end
 end
 
 %% Determine mrna probabilities based on intensity values for spots inside
 % vs. outside cells
-function mrna_probabilities = determine_mrna_probabilities(spot_intensities, out_spots_ind, in_spots_ind)
+function mrna_probabilities = determine_mrna_probabilities(spot_intensities, out_spots_ind, in_spots_ind, NULL_Distribution)
+
 %Removes very bright spots outside of the cells that are likley to
 %be artifacts and mRNAs
 out_spots =  spot_intensities(out_spots_ind);
 in_spots =  spot_intensities(in_spots_ind);
 out_spots_to_keep_ind = out_spots_ind & spot_intensities <5 * median(out_spots);
 out_spots_to_keep = spot_intensities(out_spots_to_keep_ind);
+
+mrna_probabilities = zeros( size(spot_intensities, 1), 1 );
 %out_spots = out_spots( out_spots_to_keep );
 %out_spots_ind(~out_spots_to_keep) = 0;
 %out_spots_ind = out_spots_ind( out_spots_to_keep );
 
+
+switch NULL_Distribution
+	case{ 1, 'IN Spots' }
+	% Deterimne a threshold based on: (1) the mode and(2) assuming the distribution of single probe intensities is symmetric
+	  if 0
+		mx = max( 3*median(in_spots) );
+		interval = mx/30;
+		bins = [0:interval:mx, Inf];  
+		[i_n i_xout] = histc(in_spots, bins);
+		[val ind] = max( i_n ); 
+		Mode = bins( ind+1 ); 
+	   else 
+		Mode  = median(in_spots); 
+	   end 	
+		NULL = [ in_spots(in_spots<Mode); 2*Mode-in_spots(in_spots<Mode)];
+		Num = numel(NULL);
+		[OUT_CDF.x   OUT_CDF.ind ] = sort( NULL );
+		OUT_CDF.y = (0:1:(Num-1)) * (1/Num);
+
+	case{ 2, 'OUT Spots' }
 %Computes the CDF for spots outside of cells
 Num = sum(out_spots_to_keep_ind);
 [OUT_CDF.x   OUT_CDF.ind ] = sort( out_spots_to_keep );
 OUT_CDF.y = (0:1:(Num-1)) * (1/Num);
 
-%Computes p values for spots inside of cells
-mrna_probabilities = zeros( size(spot_intensities, 1), 1 );
-
 prob_2be_mRNA.out = zeros( size(out_spots_to_keep,1), 1 );
 prob_2be_mRNA.out =  OUT_CDF.y(  OUT_CDF.ind );
-%prob_2be_mRNA.out(out_spots_to_keep==0) = (1 - 1/Num );
+		mrna_probabilities( out_spots_to_keep_ind ) = prob_2be_mRNA.out;
+end		
+
+%Computes p values for spots inside cells
 
 prob_2be_mRNA.in = zeros( size(in_spots,1), 1 );
 prob_2be_mRNA.in( in_spots >= OUT_CDF.x(end) ) = (1 - 1/Num);
@@ -253,5 +306,4 @@ prob_2be_mRNA.in(indDimmer) = interp1( OUT_CDF.x(nondup),...
 
 mrna_probabilities( in_spots_ind ) = prob_2be_mRNA.in;
 mrna_probabilities( out_spots_ind ) = (1 - 1/Num );
-mrna_probabilities( out_spots_to_keep_ind ) = prob_2be_mRNA.out;
 end

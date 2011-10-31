@@ -1,4 +1,5 @@
 function generate_experiment_list( path, varargin )
+global params 
 % wrapper function identifies images in 'path' with specified experiment
 %    numbers and outputs a tab delimited file of experiment names, dye
 %    labels and file paths.
@@ -28,26 +29,37 @@ ip.addOptional('load_results',false,@islogical);
 ip.parse(varargin{:});
 filemask = ip.Results.filemask;
 
+if isfield( params, 'nmiss' )
+	nmiss  = params.nmiss;
+else
+	nmiss = 0;
+end
+
 % Convience cases for use during testing
-if isempty( path ), path = 1; end
-if isnumeric( path )
+if isfield( params, 'images' ) 
+    path = params.images.path;
+	filemask = params.images.mask;
+	else
+	if isempty( path ), path = 1; end
+	if isnumeric( path )
     switch path
         case{ 1, 'nslavov' }
-            path = '/Genomics/grid/users/nslavov/locSpot/fish_img/';
-            path = [path 'new/nslavov/' ];
+            path = '/home/nslavov/data-fish/';
             filemask = 'N*';
         case{ 2, 'sandy' }
-            path = '/Genomics/grid/users/nslavov/locSpot/fish_img/';
-            path = [path 'new/' ];
+            %path = '/Genomics/grid/users/nslavov/locSpot/fish_img/';
+            path = '/home/nslavov/data-fish/';
             filemask = 'E*';
     end
 end
+end
+
 
 exp_expression = ...
     '(?<experiment_letters>[a-zA-Z]+)(?<experiment_number>\d+)_+(?<cy3>[a-zA-Z0-9]+)_+(?<cy3p5>[a-zA-Z0-9]+)_+(?<cy5>[a-zA-Z0-9]+)_*(?<condition>.*)*';
 
 %% Open output file
-output_filename = [ip.Results.output_filename];
+output_filename = ip.Results.output_filename;
 output_file = fopen(output_filename, 'w');
 
 
@@ -113,15 +125,20 @@ for I = 1: size(main_dir_list,1)
     if sum( File_Num ) == 0, continue, end
     
     fprintf('\n\n' );
-    fprintf('%s\n', Set );
+    fprintf('%s\n', Set ); File_Num
     %fprintf( 'Number of Files: %d\n', File_Num );
     
-    if sum(File_Num==0)>=1,
+    if sum(File_Num==0) > nmiss,
         warning( 'Missing file! I will skip the field !!!' );
         continue
     end
-    
-    for reg=1:min(File_Num)
+	
+    if isfield( params, 'Region_num' ) 
+	    Region_num = params.Region_num;
+	else 
+		Region_num = mode(File_Num);
+	end
+    for reg=1: Region_num
         
         %fprintf( '\nWorking on field: %d\n', reg );
         
@@ -131,12 +148,14 @@ for I = 1: size(main_dir_list,1)
         
         rNum(1) = str2double( cy3_file{reg}(rPos_1:rPos_2) );
         rNum(2) = str2double( cy4_file{reg}(rPos_1:rPos_2) );
-        rNum(3) = str2double( cy5_file{reg}(rPos_1:rPos_2) );
+		rNum(3) = str2double( cy5_file{reg}(rPos_1:rPos_2) );
         rNum(4) = str2double( dapi_file{reg}(rPos_1:rPos_2) );
-        if sum(  rNum==rNum(1)  ) ~= 4
+        if sum(  rNum==rNum(1)  ) < (4-nmiss)
             warning( 'Skipping files from non corresponding regions !!!' );
             continue
         end
+		
+		
         
         fprintf( output_file, '%s\t', Set);
         fprintf( output_file, '%s\t', num2str(reg) );
@@ -144,8 +163,10 @@ for I = 1: size(main_dir_list,1)
         fprintf( output_file, '%s\t', [path filesep Set filesep cy3_file{reg}]  );
         fprintf( output_file, '%s\t', Segments{3}  );
         fprintf( output_file, '%s\t', [path filesep Set filesep cy4_file{reg}]  );
-        fprintf( output_file, '%s\t', Segments{4}  );
-        fprintf( output_file, '%s\t', [path filesep Set filesep cy5_file{reg}]  );
+		if  sum(  rNum==rNum(1)  ) >= (4-nmiss)
+			fprintf( output_file, '%s\t', Segments{4}  );
+			fprintf( output_file, '%s\t', [path filesep Set filesep cy5_file{reg}]  );
+		end	
         fprintf( output_file, '%s\t', 'DAPI'  );
         fprintf( output_file, '%s\n', [path filesep Set filesep dapi_file{reg}]  );
         
