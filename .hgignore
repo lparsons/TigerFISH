@@ -1,4 +1,5 @@
 syntax: glob
 
+run.m
 *.pyc
 fish_view/tmp/*
