@@ -132,7 +132,7 @@ end
 
 for d=1:size(dyes,1)
     dye = dyes{d};
-    threshold.(dye) = ip.Results.thresholds{d};
+    %threshold.(dye) = ip.Results.thresholds{d};
     if (~isempty(experiment_spot_data.(dye)))
         % Index for spots inside vs outside of cells
         out_spots_ind = experiment_spot_data.(dye)(:,7)==2;
