@@ -34,9 +34,14 @@ end
 %% Find best focus layer and use a few layers around that
 fprintf('DAPI Searching Best focus\n');
 tic
-num_stacks = length(image.info);
 
-in_focus_layer = best_focus_layer_var(image.layers);
+if (isfield(params, 'DAPI_focus_layer_method'))
+    DAPI_focus_layer_method = params.DAPI_focus_layer_method;
+else
+    DAPI_focus_layer_method = 'variance';
+end
+num_stacks = length(image.info);
+in_focus_layer = best_focus_layer(image.layers, DAPI_focus_layer_method);
 %in_focus_layer = round(num_stacks/2);
 
 cellMap.Best_Focus_Ind = in_focus_layer;
@@ -211,6 +216,8 @@ switch params.DAPI_Dimensions
 		cellMap_Layers_Cells = 	  repmat( cellMap.cells,   [1 1 size(Layers,3)] ); 
 		cellMap_Layers_Cells_5 =  repmat( cellMap.cells_5, [1 1 size(Layers,3)] );
 		cellMap_Layers_Nucs = 	  repmat( cellMap.nuc,     [1 1 size(Layers,3)] );
+    otherwise
+        error('params.DAPI_Dimensions must be either 2 or 3')
 end
 
 %cellMap.DNA_content = []; 

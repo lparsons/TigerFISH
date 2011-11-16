@@ -24,7 +24,6 @@ ip.FunctionName = 'generate_experiment_list';
 ip.addOptional('experiment_numbers',1:1000,@isnumeric);
 ip.addOptional('output_filename','experiment_list.txt',@ischar);
 ip.addOptional('filemask','*',@ischar);
-ip.addOptional('algorithm','3D',@ischar);
 ip.addOptional('load_results',false,@islogical);
 ip.parse(varargin{:});
 filemask = ip.Results.filemask;
@@ -66,7 +65,7 @@ output_file = fopen(output_filename, 'w');
 %% Loop through files in directory
 main_dir_list = dir( [path filesep filemask] );
 for I = 1: size(main_dir_list,1)
-    
+    disp (main_dir_list(I).name)
     if   strcmp( main_dir_list(I).name(1),  '.' )
         continue
     end
