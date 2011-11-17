@@ -4,20 +4,21 @@ function [ f ] = plot_cdc_phases( dna_content, cdc_phases, filename )
 %   Returns figure handle
 
 % Normalize variance to avoid problems from treating pdf as pmf
-dna_content_std = std(  dna_content( ~isnan(dna_content) )  );
-dna_content = dna_content * (1/dna_content_std );
-dna_content_median = median( dna_content );
+dna_content_std = std(  dna_content( ~isnan(dna_content) & ~isinf(dna_content) ) );
+dna_content_norm = dna_content * (1/dna_content_std );
+dna_content_median = median( dna_content( ~isnan(dna_content) & ~isinf(dna_content) ) );
 
 f = figure('Visible', 'off');
 
-dna_content( isnan(dna_content) ) = 0;
+dna_content_nonan = dna_content_norm;
+dna_content_nonan( isnan(dna_content_nonan) ) = 0;
 
-l = linspace( min(0,min(dna_content)),...
-    min(3*dna_content_median, max(dna_content)), 30 ); clear fr
+l = linspace( min(0,min(dna_content_nonan)),...
+    min(3*dna_content_median, max(dna_content_nonan)), 30 ); clear fr
 
 l = unique(l); % Prevent bar plot function from crashing
 
-frBar = histc( dna_content, l );
+frBar = histc( dna_content_nonan, l );
 
 % TODO - This often fails and crashed
 % Error: XData cannot contain duplicate values)
@@ -28,7 +29,7 @@ set(hbar,...
     'EdgeColor', 'k',...
     'BarWidth', 0.8  );
 for i=1:3
-    fr(:,i) = histc( dna_content(cdc_phases==i), l );
+    fr(:,i) = histc( dna_content_nonan(cdc_phases==i), l );
 end
 
 plot( l, fr, 'LineWidth', 3 )
