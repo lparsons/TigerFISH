@@ -38,7 +38,14 @@ hold all
 plot(bins, o_f, '--xb', 'MarkerFaceColor', 'b', 'LineWidth',3, 'MarkerSize',12);
 if ~isnan(ip.Results.threshold)
     ylims = get(gca, 'YLim');
-    line([ip.Results.threshold, ip.Results.threshold], ylims, 'Color', [.3 .3 .3], 'LineStyle', '--', 'LineWidth', 2);
+    threshold_label = text(ip.Results.threshold, ylims(1), ...
+        num2str(ip.Results.threshold), ...
+        'HorizontalAlignment', 'center', ...
+        'VerticalAlignment', 'bottom');
+    threshold_label_extent = get(threshold_label,'Extent');
+    threshold_start = threshold_label_extent(2)  + threshold_label_extent(4);
+    line([ip.Results.threshold, ip.Results.threshold], [threshold_start, ylims(2)], ...
+        'Color', [.3 .3 .3], 'LineStyle', '--', 'LineWidth', 2);
 end
 
 hold off
