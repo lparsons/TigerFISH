@@ -59,7 +59,7 @@ end
 spx = round( MAXx/10 );
 spy = round( MAXy/10 );
 
-main_fig = figure('Visible', 'on');
+main_fig = figure('Visible', 'off');
 set(main_fig,'PaperPositionMode','auto', 'PaperSize', [8  8], 'Units', 'inches')
 
 

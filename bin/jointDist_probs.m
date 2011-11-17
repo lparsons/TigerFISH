@@ -9,7 +9,7 @@ MAXx = min( 40, size(p_1_2,1) );  IN.x = 1:MAXx; Y.x = MAXx;
 spx = round( MAXy/6 );
 spy = round( MAXy/6 );
 
-main_fig = figure('Visible', 'on');
+main_fig = figure('Visible', 'off');
 set(main_fig,'PaperPositionMode','auto', 'PaperSize', [8  8], 'Units', 'inches')
 
 % Plot main image
