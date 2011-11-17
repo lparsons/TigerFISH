@@ -72,10 +72,9 @@ end
 
 %% Save results
 save([ip.Results.output_dir filesep 'experiment_counts.mat'], 'experiment_counts')
-counts = [];
+headers = {'Experiment','Region','Cell','Cy3','Cy3.5','Cy5'};
+cellwrite([ip.Results.output_dir filesep 'spot_counts.csv'], headers, '\t', 'wt');
 for i=1:size(experiment_counts,1)
-    counts = vertcat(counts, [repmat({ip.Results.experiment_list(i).name}, size(experiment_counts{i,2},1),1),  num2cell(experiment_counts{i,2})]);
-    %TODO append to file instead of storing in memory
+    counts = [repmat({ip.Results.experiment_list(i).name}, size(experiment_counts{i,2},1),1),  num2cell(experiment_counts{i,2})];
+    cellwrite([ip.Results.output_dir filesep 'spot_counts.csv'], counts, '\t', 'at');
 end
-cellwrite([ip.Results.output_dir filesep 'spot_counts.csv'], counts, '\t', 'wt');
-%csvwrite([ip.Results.output_dir filesep 'spot_counts.csv'], counts);
