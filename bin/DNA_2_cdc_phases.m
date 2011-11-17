@@ -1,4 +1,4 @@
-function [cdc_phases cdc_phases_p] = DNA_2_cdc_phases( DNA_Content, MaxIter, PathFileName )
+function [cdc_phases cdc_phases_p] = DNA_2_cdc_phases( DNA_Content, MaxIter )
 
 % Set MaxIter default
 if nargin ==1 || isempty(MaxIter), MaxIter = 1e2; end 
@@ -74,47 +74,51 @@ if nargout > 1
     cdc_phases_p.muG1 = muG1;
     cdc_phases_p.sigG1 = sigG1;
     cdc_phases_p.DNA_Content = DNA_Content;
-end 
+end
 
+
+%% This crashes often, moving to separate function (plot_cdc_phases)
 
 %Prints distribution of DNA content and separation by phases if filename
 %(and path a provided as a third argument)
 
-if nargin >= 3 && ~isempty(PathFileName)
-
-    figure('Visible', 'off')
-    DNA_Content( isnan(DNA_Content) ) = 0; 
-    l = linspace( min(0,min(DNA_Content)),...
-                 min(3*Median, max(DNA_Content)), 30 ); clear fr  
-
-    frBar = histc( DNA_Content, l );
-    hbar = bar( l, frBar ); hold on
-    set(hbar,...
-        'FaceColor', 'w',...
-        'EdgeColor', 'k',...
-        'BarWidth', 0.8  );
-    for i=1:3
-      fr(:,i) = histc( DNA_Content(cdc_phases==i), l );
-    end
-
-    plot( l, fr, 'LineWidth', 3 )
-    fprintf('CDC Phases xlim %f : %f', l(1), l(end));
-    fprintf(  '%1.2f\t', DNA_Content);
-    xlim( [l(1) l(end)] );
-    h(1) = xlabel( 'DNA Content' );
-    h(2) = ylabel( 'Number of Cells' );
-    h(3) = legend( 'All', 'G1', 'S', 'G2'  );
-    set(h, 'fontsize',       24,...
-           'interpreter',   'tex'       );  
-    
-    %set( gcf, 'Position', [440  159  692   419] )
-    %set( gca, 'Position',  [0.14 0.14 0.80  0.78] );
-    set( gca, 'FontSize', 14, 'FontWeight', 'Bold' );
-    set( gcf, 'PaperSize', [8 5],...
-              'PaperPositionMode', 'manual',...
-	      'PaperPosition', [.1 .1 7.8 4.8] );
-
-    print( '-dpdf', PathFileName );
-      
-end
+% if nargin >= 3 && ~isempty(PathFileName)
+% 
+%     figure('Visible', 'off')
+%     DNA_Content( isnan(DNA_Content) ) = 0; 
+%     l = linspace( min(0,min(DNA_Content)),...
+%                  min(3*Median, max(DNA_Content)), 30 ); clear fr  
+%     l = unique(l); % Prevent bar plot function from crashing
+%     frBar = histc( DNA_Content, l );
+%     % TODO - This often fails and crashed 
+%     % Error: XData cannot contain duplicate values)
+%     hbar = bar( l, frBar ); hold on
+%     set(hbar,...
+%         'FaceColor', 'w',...
+%         'EdgeColor', 'k',...
+%         'BarWidth', 0.8  );
+%     for i=1:3
+%       fr(:,i) = histc( DNA_Content(cdc_phases==i), l );
+%     end
+% 
+%     plot( l, fr, 'LineWidth', 3 )
+%     fprintf('CDC Phases xlim %f : %f', l(1), l(end));
+%     fprintf(  '%1.2f\t', DNA_Content);
+%     xlim( [l(1) l(end)] );
+%     h(1) = xlabel( 'DNA Content' );
+%     h(2) = ylabel( 'Number of Cells' );
+%     h(3) = legend( 'All', 'G1', 'S', 'G2'  );
+%     set(h, 'fontsize',       24,...
+%            'interpreter',   'tex'       );  
+%     
+%     %set( gcf, 'Position', [440  159  692   419] )
+%     %set( gca, 'Position',  [0.14 0.14 0.80  0.78] );
+%     set( gca, 'FontSize', 14, 'FontWeight', 'Bold' );
+%     set( gcf, 'PaperSize', [8 5],...
+%               'PaperPositionMode', 'manual',...
+% 	      'PaperPosition', [.1 .1 7.8 4.8] );
+% 
+%     print( '-dpdf', PathFileName );
+%       
+% end
 
