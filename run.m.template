@@ -14,6 +14,7 @@ params.Threshold_Contrast = [1.06  1.1  1.1];
 
 % Manual intensity threshold for Cy3, Cy3.5, Cy5 
 params.Threshold_Intensity = { 0.195, [], []};
+% Automatic Thresholding based on NULL distribution (See below): { [], [], [] };
 % 3D algorithm sample: { 0.22, 0.32, 0.3 };
 % 2D algorithm sample: { 750, 750, 750 }
 

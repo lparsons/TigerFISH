@@ -26,9 +26,11 @@ interval = mx/30;
 bins = [0:interval:mx,Inf];
     
 [i_n i_xout] = histc(ip.Results.in_spot_intensities, bins);
-i_f = i_n/sum(i_n);
 [o_n o_xout] = histc(ip.Results.out_spot_intensities, bins);
-o_f = o_n/sum(o_n);
+
+% Plot as fraction of all spots
+i_f = i_n/(sum(i_n)+sum(o_n));
+o_f = o_n/(sum(i_n)+sum(o_n));
 
 f = figure('Visible', 'off');
 plot(bins, i_f, '-or', 'MarkerFaceColor', 'r', 'LineWidth',3, 'MarkerSize',12);
