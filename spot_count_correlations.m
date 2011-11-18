@@ -55,3 +55,45 @@ for e = 1:length(experiments)
             experiments{e}, num2str(pairs(p,1)), num2str(pairs(p,2)), c, twosidedp, hsc, hs_twosidedp);
     end
 end
+
+%% Correlations with Cell Cycle
+% Setup output file
+cell_cycle_output_filename = [data_dir filesep 'gene_correlations_with_cell_cycle.tsv'];
+cell_cycle_output_file = fopen(cell_cycle_output_filename, 'wt');
+fprintf(cell_cycle_output_file, 'Experiment\tGene\tMean Count G1\tSD G1\tMean Count S\tSD S\tMean Count G2\tSD G2\tMean Count Other\tSD Other\n');
+fclose(cell_cycle_output_file);
+
+% Generate Cell Cycle Correlations
+cell_cycle_output_file = fopen(cell_cycle_output_filename, 'at');
+format_string = '%s\t%s\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\n';
+for e = 1:length(experiments)
+    experiment_data_file = [data_dir filesep experiments{e} filesep 'experiment_data.mat'];
+    full_experiment_data = load(experiment_data_file);
+    
+    experiment_index = strcmp(spot_count_import.textdata(2:end,1), experiments(e));
+    experiment_data = spot_count_import.data(experiment_index,:);
+    cell_index = experiment_data(:,2)>0;
+    
+    % phases
+    % 0-> other?
+    % 1-> G1
+    % 2-> S
+    % 3-> G2
+    % 4-> other?
+    % 5-> other?
+    for g = 1:3
+        gene_data = experiment_data(cell_index,g+2);
+        fprintf(cell_cycle_output_file, format_string, ...
+            experiments{e},...
+            ['gene ' num2str(g)], ...
+            mean(gene_data(full_experiment_data.cdc.phases==1)),...
+            std(gene_data(full_experiment_data.cdc.phases==1)),...
+            mean(gene_data(full_experiment_data.cdc.phases==2)),...
+            std(gene_data(full_experiment_data.cdc.phases==2)),...
+            mean(gene_data(full_experiment_data.cdc.phases==3)),...
+            std(gene_data(full_experiment_data.cdc.phases==3)),...
+            mean(gene_data(full_experiment_data.cdc.phases==0 | full_experiment_data.cdc.phases>=4)),...
+            std(gene_data(full_experiment_data.cdc.phases==0 | full_experiment_data.cdc.phases>=4))...
+        );
+    end    
+end
