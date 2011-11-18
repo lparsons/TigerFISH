@@ -58,7 +58,7 @@ end
 
 %% Correlations with Cell Cycle
 % Setup output file
-cell_cycle_output_filename = [data_dir filesep 'gene_correlations_with_cell_cycle.tsv'];
+cell_cycle_output_filename = [data_dir filesep 'gene_counts_per_cell_phase.tsv'];
 cell_cycle_output_file = fopen(cell_cycle_output_filename, 'wt');
 fprintf(cell_cycle_output_file, 'Experiment\tGene\tMean Count G1\tSD G1\tMean Count S\tSD S\tMean Count G2\tSD G2\tMean Count Other\tSD Other\n');
 fclose(cell_cycle_output_file);
