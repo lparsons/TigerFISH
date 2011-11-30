@@ -40,7 +40,7 @@ for i=1:MaxIter
     muG2 = mean( DNA_Content(indG2) ); 
     muG1 = mean( muG1 + 0.5*muG2 );        % fprintf( '%1.2f\n', muG1 );
     if muG1>Median, muG1=muG1/2; end
-    if muG1<0.1*Median, muG1=2*muG12; end
+    if muG1<0.1*Median, muG1=2*muG1; end
     
     sigG1 = std( DNA_Content(indG1) ); 
     sigG2 = std( DNA_Content(indG2) ); 
