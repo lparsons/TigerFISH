@@ -19,7 +19,11 @@ input_dir = ip.Results.input_dir;
 filemask = ip.Results.filemask;
 region_marker = ip.Results.region_marker;
 output_filename = [ip.Results.output_filename];
-output_file = fopen(output_filename, 'w');
+[output_file fopen_message] = fopen(output_filename, 'w');
+if output_file < 0
+    fprintf('Unable to open file "%s"\n', output_filename)
+    error(fopen_message)
+end
 
 % Get unique experiment list
 exp_re = ip.Results.regex ; %['^(?<experiment>.+?)[\s-_]+' region_marker '[\s]+(?<region>[\d]+).+DAPI\.tiff$'];
@@ -63,7 +67,7 @@ for i=1:size(exp_name_list,2)
         region_files = {'','','',''};
         for f=1:size(exp_reg_file_list,1)
             renames = regexp(exp_reg_file_list(f).name, exp_re, 'names');
-            if strcmp(renames.experiment, exp_name_list{i})
+            if ~isempty(renames) && isfield(renames, 'experiment') && strcmp(renames.experiment, exp_name_list{i})
                 if  ~isempty(findstr(exp_reg_file_list(f).name, ['_C' ip.Results.dyes{1} '.tiff']))
                     region_files{4} = [input_dir filesep exp_reg_file_list(f).name];
                 elseif ~isempty(findstr(exp_reg_file_list(f).name, ['_C' ip.Results.dyes{2} '.tiff']))

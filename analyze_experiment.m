@@ -115,7 +115,11 @@ end
 % CDC Phases code crashes often (when DAPI images are less than perfect)
 % Save first, then run this
 if isfield(cdc, 'DNA_content_nor') && isfield(cdc, 'phases')
-    plot_cdc_phases(cdc.DNA_content_nor, cdc.phases, [ip.Results.output_dir filesep 'DNA_content.pdf']);
+    try
+        plot_cdc_phases(cdc.DNA_content_nor, cdc.phases, [ip.Results.output_dir filesep 'DNA_content.pdf']);
+    catch plotError
+        warning('FISHIA:DNA_Content:plottingError', 'Error plotting CDC phases: %s\n', plotError.message)
+    end
 end
 
 %% Determine Thresholds, Spot Probabilities, Plot Histograms
@@ -249,7 +253,7 @@ try
     [val indT] = min( abs( qvals(sign) - fdr )  );
     threshold = in_spots_intensities( sign(indT) );
 catch
-    warning( ['FDR failed'] );
+    warning('FISHIA:Threshold:FDRFailed', 'Unable to compute FDR using pvalues');
     [val indT] = min( abs( pvals - 0.2 )  );
     threshold = in_spots_intensities( indT );
 end
@@ -324,7 +328,7 @@ if (~isempty(OUT_CDF.x))
         OUT_CDF.y(nondup),...
         in_spots(indDimmer) );
 else
-    warning('No spots outside cells found, p values set to 0!')
+    warning('FISHIA:MRNA_probabilities:noOutsideSpots', 'No spots outside cells found, p values set to 0!')
 end
 
 mrna_probabilities( in_spots_ind ) = prob_2be_mRNA.in;
