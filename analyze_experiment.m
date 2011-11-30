@@ -60,9 +60,9 @@ if ip.Results.load_results && exist(exp_data_file, 'file')
     toc
 else
     % Analyze Regions
-    experiment_spot_data.cy3 = [];
-    experiment_spot_data.cy3_5 = [];
-    experiment_spot_data.cy5 = [];
+    experiment_spot_data = struct('cy3', [], 'cy3_5', [], 'cy5', []);
+    experiment_cell_maps = cell(size(ip.Results.region_file_list,1));
+    cdc = struct();
     DNA_content1 = [];
     DNA_content = [];
     Cell_Sizes = [];
@@ -71,31 +71,33 @@ else
     for p=1:size(ip.Results.region_file_list,1)
         fprintf('Position number %s\n', num2str(p))
         reg_output_dir = [ip.Results.output_dir filesep 'region_' num2str(p)];
-        [s,mess,messid] = mkdir(reg_output_dir);
+        [s,mess,messid] = mkdir(reg_output_dir); %#ok<ASGLU,NASGU>
         
-        [cell_map spot_data] = analyze_region(ip.Results.region_file_list{p,1}, ...
-            ip.Results.region_file_list{p,2}, ip.Results.region_file_list{p,3}, ...
-            ip.Results.region_file_list{p,4}, reg_output_dir, ...
-            'algorithm', ip.Results.algorithm, 'debug', ip.Results.load_results);
-        
-        experiment_spot_data.cy3 = vertcat(experiment_spot_data.cy3, horzcat(repmat(p, size(spot_data.cy3, 1),1),spot_data.cy3));
-        experiment_spot_data.cy3_5 = vertcat(experiment_spot_data.cy3_5, horzcat(repmat(p, size(spot_data.cy3_5, 1),1),spot_data.cy3_5));
-        experiment_spot_data.cy5 = vertcat(experiment_spot_data.cy5, horzcat(repmat(p, size(spot_data.cy5, 1),1),spot_data.cy5));
-        
-        %fprintf(  '%1.2f\t', cell_map.DNA_content);
-        DNA_content1 = [DNA_content1; cell_map.DNA_content]; %MatLab is going to call vertcat anyway so I prefrer the simpler syntax
-        DNA_content = [DNA_content;   cell_map.DNA_content*(1/median(cell_map.DNA_content(:) )) ];
-        Cell_Sizes =  [Cell_Sizes; 	  cell_map.Cell_Size];
-        Cell_2_Exclude = [Cell_2_Exclude; 	  cell_map.Cell_2_Exclude];
-        experiment_cell_maps{p} = cell_map;
-
-        % Estimates a CDC phase for each cell based on the DNA content inferred from DAPI staining
-        % Save pdf of the plot of DNA content
-        [cdc.phases cdc.probs] = DNA_2_cdc_phases( DNA_content, [] );
-        cdc.DNA_content_nor = DNA_content;
-        cdc.DNA_content = DNA_content1;
-        cdc.Cell_Sizes = Cell_Sizes;
-        cdc.Cell_2_Exclude = Cell_2_Exclude;
+        if exist(ip.Results.region_file_list{p,4}, 'file')
+            [cell_map spot_data] = analyze_region(ip.Results.region_file_list{p,1}, ...
+                ip.Results.region_file_list{p,2}, ip.Results.region_file_list{p,3}, ...
+                ip.Results.region_file_list{p,4}, reg_output_dir, ...
+                'algorithm', ip.Results.algorithm, 'debug', ip.Results.load_results);
+            experiment_cell_maps{p} = cell_map;
+            experiment_spot_data.cy3 = vertcat(experiment_spot_data.cy3, horzcat(repmat(p, size(spot_data.cy3, 1),1),spot_data.cy3));
+            experiment_spot_data.cy3_5 = vertcat(experiment_spot_data.cy3_5, horzcat(repmat(p, size(spot_data.cy3_5, 1),1),spot_data.cy3_5));
+            experiment_spot_data.cy5 = vertcat(experiment_spot_data.cy5, horzcat(repmat(p, size(spot_data.cy5, 1),1),spot_data.cy5));
+            
+            DNA_content1 = [DNA_content1; cell_map.DNA_content]; %MatLab is going to call vertcat anyway so I prefrer the simpler syntax
+            DNA_content = [DNA_content;   cell_map.DNA_content*(1/median(cell_map.DNA_content(:) )) ];
+            Cell_Sizes =  [Cell_Sizes; 	  cell_map.Cell_Size];
+            Cell_2_Exclude = [Cell_2_Exclude; 	  cell_map.Cell_2_Exclude];
+            
+            % Estimates a CDC phase for each cell based on the DNA content inferred from DAPI staining
+            % Save pdf of the plot of DNA content
+            [cdc.phases cdc.probs] = DNA_2_cdc_phases( DNA_content, [] );
+            cdc.DNA_content_nor = DNA_content;
+            cdc.DNA_content = DNA_content1;
+            cdc.Cell_Sizes = Cell_Sizes;
+            cdc.Cell_2_Exclude = Cell_2_Exclude;
+        else
+            fprintf('\tSkipping, DAPI file not found\n')
+        end
     end
     
     if params.Save_Detailed_Results
@@ -112,8 +114,9 @@ end
 
 % CDC Phases code crashes often (when DAPI images are less than perfect)
 % Save first, then run this
-plot_cdc_phases(cdc.DNA_content_nor, cdc.phases, [ip.Results.output_dir filesep 'DNA_content.pdf']);
-
+if isfield(cdc, 'DNA_content_nor') && isfield(cdc, 'phases')
+    plot_cdc_phases(cdc.DNA_content_nor, cdc.phases, [ip.Results.output_dir filesep 'DNA_content.pdf']);
+end
 
 %% Determine Thresholds, Spot Probabilities, Plot Histograms
 
@@ -135,7 +138,18 @@ end
 for d=1:size(dyes,1)
     dye = dyes{d};
     dyelabel = ip.Results.dye_labels{d};
-    %threshold.(dye) = ip.Results.thresholds{d};
+    
+    % Set Thresholds
+    if ~isempty(params.Threshold_Intensity{ d } )
+        threshold.(dye) = params.Threshold_Intensity{ d };
+    else
+        if (isempty(ip.Results.thresholds))
+            threshold.dye = 0; % Default if there are no spots
+        else
+            threshold.(dye) = ip.Results.thresholds{d};
+        end
+    end
+    
     if (~isempty(experiment_spot_data.(dye)))
         % Index for spots inside vs outside of cells
         out_spots_ind = experiment_spot_data.(dye)(:,7)==2;
@@ -147,15 +161,10 @@ for d=1:size(dyes,1)
         % Append spot probabilities to the spot data matrix
         experiment_spot_data.(dye) = [experiment_spot_data.(dye) mrna_probabilies];
         
-        % Determine Thresholds
-        if ~isempty(params.Threshold_Intensity{ d } )
-            threshold.(dye) = params.Threshold_Intensity{ d };
-        else
-            if (isempty(ip.Results.thresholds)) % Using FDR and inside vs. outside spots
-                threshold.(dye) = determine_threshold(spot_intensities(in_spots_ind), mrna_probabilies(in_spots_ind), FDR_Threshold);
-            else % Thresholds specified in arguments
-                threshold.(dye) = ip.Results.thresholds{d};
-            end
+        % Determine Thresholds if not set
+        if isempty(params.Threshold_Intensity{ d } ) && isempty(ip.Results.thresholds)
+            % Using FDR and inside vs. outside spots
+            threshold.(dye) = determine_threshold(spot_intensities(in_spots_ind), mrna_probabilies(in_spots_ind), FDR_Threshold);
         end
         
         % Histogram
@@ -170,7 +179,6 @@ for d=1:size(dyes,1)
         % Spot overlay images
         N = 1;
         regions = unique(experiment_spot_data.(dye)(:,1));
-        total_cells = 0;
         for r=1:size(regions,1)
             reg = regions(r);
             %if (~isempty(experiment_spot_data.(dye)))
@@ -185,26 +193,31 @@ for d=1:size(dyes,1)
             tmp = imread(spot_overlay_filename);
             imwrite(tmp,spot_overlay_filename, 'png','Transparency', [0,0,0]);
             close(spot_overlay);
-            
-            % Write cell map, colored by cell cycle prediction
-            cell_map_struct = experiment_cell_maps{r};
-            Region_Cells = (1:cell_map_struct.CellNum)+total_cells;
-            total_cells = total_cells + cell_map_struct.CellNum;
-            
-            phases = cdc.phases(Region_Cells);
-            phases(  cdc.Cell_2_Exclude( Region_Cells )>0 )= 5;
-            
-            cell_map_labeled = cell_map_struct.cells;
-            cell_map_image = zeros(size(cell_map_labeled));
-            colors = {[1,1,1], [0,0,1], [0,1,0], [1,0,0], [1 0.1 0.7],  [1 0.7 0.1]};
-            for p=0:5
-                t = ismember(cell_map_labeled, find(phases==p));
-                cell_map_image = imoverlay(cell_map_image, bwperim(t), colors{p+1});
-            end
-            cell_map_image = imoverlay(cell_map_image, bwperim(cell_map_struct.nuc), [1 1 1]);
-            imwrite(cell_map_image, [reg_output_dir filesep 'cell_map_phases.png'], 'png', 'Transparency', [0, 0, 0]);
         end
     end
+end
+
+%% Write cell map, colored by cell cycle prediction
+total_cells = 0;
+for r=1:size(experiment_cell_maps,2)
+    reg_output_dir = [ip.Results.output_dir filesep 'region_' num2str(r)];
+    
+    cell_map_struct = experiment_cell_maps{r};
+    Region_Cells = (1:cell_map_struct.CellNum)+total_cells;
+    total_cells = total_cells + cell_map_struct.CellNum;
+
+    phases = cdc.phases(Region_Cells);
+    phases(  cdc.Cell_2_Exclude( Region_Cells )>0 )= 5;
+
+    cell_map_labeled = cell_map_struct.cells;
+    cell_map_image = zeros(size(cell_map_labeled));
+    colors = {[1,1,1], [0,0,1], [0,1,0], [1,0,0], [1 0.1 0.7],  [1 0.7 0.1]};
+    for p=0:5
+        t = ismember(cell_map_labeled, find(phases==p));
+        cell_map_image = imoverlay(cell_map_image, bwperim(t), colors{p+1});
+    end
+    cell_map_image = imoverlay(cell_map_image, bwperim(cell_map_struct.nuc), [1 1 1]);
+    imwrite(cell_map_image, [reg_output_dir filesep 'cell_map_phases.png'], 'png', 'Transparency', [0, 0, 0]);
 end
 
 %% Spot Count Summary
@@ -308,8 +321,8 @@ if (~isempty(OUT_CDF.x))
     %         OUT_CDF.y = yCDF(2:end);
     nondup = [diff(OUT_CDF.x); 1] > 0;
     prob_2be_mRNA.in(indDimmer) = interp1( OUT_CDF.x(nondup),...
-    OUT_CDF.y(nondup),...
-    in_spots(indDimmer) );
+        OUT_CDF.y(nondup),...
+        in_spots(indDimmer) );
 else
     warning('No spots outside cells found, p values set to 0!')
 end

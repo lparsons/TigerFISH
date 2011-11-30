@@ -29,13 +29,22 @@ bins = [0:interval:mx,Inf];
 [o_n o_xout] = histc(ip.Results.out_spot_intensities, bins);
 
 % Plot as fraction of all spots
-i_f = i_n/(sum(i_n)+sum(o_n));
-o_f = o_n/(sum(i_n)+sum(o_n));
-
+num_spots = (sum(i_n)+sum(o_n));
+if ~isempty(num_spots)
+    i_f = i_n/(sum(i_n)+sum(o_n));
+    o_f = o_n/(sum(i_n)+sum(o_n));
+else
+    i_f = zeros(size(i_n));
+    o_f = zeros(size(o_n));
+end
 f = figure('Visible', 'off');
-plot(bins, i_f, '-or', 'MarkerFaceColor', 'r', 'LineWidth',3, 'MarkerSize',12);
-hold all
-plot(bins, o_f, '--xb', 'MarkerFaceColor', 'b', 'LineWidth',3, 'MarkerSize',12);
+if ~isempty(i_f)
+    plot(bins, i_f, '-or', 'MarkerFaceColor', 'r', 'LineWidth',3, 'MarkerSize',12);
+    hold all
+end
+if ~isempty(o_f)
+    plot(bins, o_f, '--xb', 'MarkerFaceColor', 'b', 'LineWidth',3, 'MarkerSize',12);
+end
 if ~isnan(ip.Results.threshold)
     ylims = get(gca, 'YLim');
     threshold_label = text(ip.Results.threshold, ylims(1), ...

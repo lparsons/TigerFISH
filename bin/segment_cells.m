@@ -28,7 +28,7 @@ else
 end
     
 % Parse filename
-[pathstr, name, ext, versn] = fileparts(image.filename);
+%[pathstr, name, ext] = fileparts(image.filename);
 
 
 %% Find best focus layer and use a few layers around that

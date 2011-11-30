@@ -35,11 +35,11 @@ addpath([pathstr filesep 'bin'])
 algorithms = {'3D', '2D', '2D_local'};
 
 ip = inputParser;
-ip.FunctionName = 'analyze_region';
+ip.FunctionName = mfilename;
 ip.addRequired('cy3file',@(x)ischar(x) || isempty(x));
 ip.addRequired('cy3_5file',@(x)ischar(x) || isempty(x));
 ip.addRequired('cy5file',@(x)ischar(x) || isempty(x));
-ip.addRequired('dapifile',@ischar);
+ip.addRequired('dapifile',@(x)ischar(x) && exist(x, 'file'));
 ip.addOptional('output_dir','',@isdir);
 ip.addParamValue('algorithm','3D',@(x)any(strcmpi(x,algorithms)));
 ip.addParamValue('debug',false,@islogical);
