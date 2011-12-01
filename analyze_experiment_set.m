@@ -53,7 +53,7 @@ ip.parse(experiment_list, output_dir, varargin{:});
 
 %% Loop through experiments
 %experiment_set_data = [];
-experiment_counts = {};
+experiment_counts = cell(size(ip.Results.experiment_list,2),2);
 for e=1:size(ip.Results.experiment_list,2)
     experiment = ip.Results.experiment_list(e);
     fprintf('Analyzing Experiment: %s\n', experiment.name);
@@ -70,11 +70,12 @@ for e=1:size(ip.Results.experiment_list,2)
     experiment_counts{e,2} = experiment.counts;
 end
 
-%% Save results
+%% Save spot count results
 save([ip.Results.output_dir filesep 'experiment_counts.mat'], 'experiment_counts')
-headers = {'Experiment','Region','Cell','Cy3','Cy3.5','Cy5'};
-cellwrite([ip.Results.output_dir filesep 'spot_counts.csv'], headers, '\t', 'wt');
+spotCountsFile = [ip.Results.output_dir filesep 'spot_counts.tsv'];
+headers = {'Experiment','Region','Cell','Cy3','Cy3.5','Cy5','Cell Phase'};
+cellwrite(spotCountsFile, headers, '\t', 'wt');
 for i=1:size(experiment_counts,1)
     counts = [repmat({ip.Results.experiment_list(i).name}, size(experiment_counts{i,2},1),1),  num2cell(experiment_counts{i,2})];
-    cellwrite([ip.Results.output_dir filesep 'spot_counts.csv'], counts, '\t', 'at');
+    cellwrite(spotCountsFile, counts, '\t', 'at');
 end

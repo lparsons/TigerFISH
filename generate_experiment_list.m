@@ -1,5 +1,5 @@
 function generate_experiment_list( path, varargin )
-global params 
+global params
 % wrapper function identifies images in 'path' with specified experiment
 %    numbers and outputs a tab delimited file of experiment names, dye
 %    labels and file paths.
@@ -29,28 +29,28 @@ ip.parse(varargin{:});
 filemask = ip.Results.filemask;
 
 if isfield( params, 'nmiss' )
-	nmiss  = params.nmiss;
+    nmiss  = params.nmiss;
 else
-	nmiss = 0;
+    nmiss = 0;
 end
 
 % Convience cases for use during testing
-if isfield( params, 'images' ) 
+if isfield( params, 'images' )
     path = params.images.path;
-	filemask = params.images.mask;
-	else
-	if isempty( path ), path = 1; end
-	if isnumeric( path )
-    switch path
-        case{ 1, 'nslavov' }
-            path = '/home/nslavov/data-fish/';
-            filemask = 'N*';
-        case{ 2, 'sandy' }
-            %path = '/Genomics/grid/users/nslavov/locSpot/fish_img/';
-            path = '/home/nslavov/data-fish/';
-            filemask = 'E*';
+    filemask = params.images.mask;
+else
+    if isempty( path ), path = 1; end
+    if isnumeric( path )
+        switch path
+            case{ 1, 'nslavov' }
+                path = '/home/nslavov/data-fish/';
+                filemask = 'N*';
+            case{ 2, 'sandy' }
+                %path = '/Genomics/grid/users/nslavov/locSpot/fish_img/';
+                path = '/home/nslavov/data-fish/';
+                filemask = 'E*';
+        end
     end
-end
 end
 
 
@@ -65,7 +65,6 @@ output_file = fopen(output_filename, 'w');
 %% Loop through files in directory
 main_dir_list = dir( [path filesep filemask] );
 for I = 1: size(main_dir_list,1)
-    disp (main_dir_list(I).name)
     if   strcmp( main_dir_list(I).name(1),  '.' )
         continue
     end
@@ -101,20 +100,20 @@ for I = 1: size(main_dir_list,1)
             
             if file_list(i).bytes < 50e6, continue; end
             
-            if   ~isempty(findstr(file_list(i).name, '_CCY3.tiff'))
+            if   ~isempty(strfind(file_list(i).name, '_CCY3.tiff'))
                 File_Num(1) = File_Num(1) + 1;
                 cy3_file{File_Num(1)} = [subDir file_list(i).name];
                 
             end
-            if  ~isempty(findstr(file_list(i).name, '_CCY3.5'))
+            if  ~isempty(strfind(file_list(i).name, '_CCY3.5'))
                 File_Num(2) = File_Num(2) + 1;
                 cy4_file{File_Num(2)} = [subDir file_list(i).name];
             end
-            if  ~isempty(findstr(file_list(i).name, '_CCY5.tiff'))
+            if  ~isempty(strfind(file_list(i).name, '_CCY5.tiff'))
                 File_Num(3) = File_Num(3) + 1;
                 cy5_file{File_Num(3)} = [subDir file_list(i).name];
             end
-            if  ~isempty(findstr(file_list(i).name, '_CDAPI.tiff'))
+            if  ~isempty(strfind(file_list(i).name, '_CDAPI.tiff'))
                 File_Num(4) = File_Num(4) + 1;
                 dapi_file{File_Num(4)} = [subDir file_list(i).name];
             end
@@ -123,20 +122,19 @@ for I = 1: size(main_dir_list,1)
     
     if sum( File_Num ) == 0, continue, end
     
-    fprintf('\n\n' );
-    fprintf('%s\n', Set ); File_Num
+    fprintf('\n%s\n', Set );
     %fprintf( 'Number of Files: %d\n', File_Num );
     
     if sum(File_Num==0) > nmiss,
-        warning( 'Missing file! I will skip the field !!!' );
+        warning( 'FISHIA:experiment_list:missingFile', 'Missing file! I will skip the field !!!' );
         continue
     end
-	
-    if isfield( params, 'Region_num' ) 
-	    Region_num = params.Region_num;
-	else 
-		Region_num = mode(File_Num);
-	end
+    
+    if isfield( params, 'Region_num' )
+        Region_num = params.Region_num;
+    else
+        Region_num = mode(File_Num);
+    end
     for reg=1: Region_num
         
         %fprintf( '\nWorking on field: %d\n', reg );
@@ -147,14 +145,14 @@ for I = 1: size(main_dir_list,1)
         
         rNum(1) = str2double( cy3_file{reg}(rPos_1:rPos_2) );
         rNum(2) = str2double( cy4_file{reg}(rPos_1:rPos_2) );
-		rNum(3) = str2double( cy5_file{reg}(rPos_1:rPos_2) );
+        rNum(3) = str2double( cy5_file{reg}(rPos_1:rPos_2) );
         rNum(4) = str2double( dapi_file{reg}(rPos_1:rPos_2) );
         if sum(  rNum==rNum(1)  ) < (4-nmiss)
-            warning( 'Skipping files from non corresponding regions !!!' );
+            warning( 'FISHIA:experiment_list:nonMatchingRegions', 'Skipping files from non corresponding regions !!!' );
             continue
         end
-		
-		
+        
+        
         
         fprintf( output_file, '%s\t', Set);
         fprintf( output_file, '%s\t', num2str(reg) );
@@ -162,10 +160,10 @@ for I = 1: size(main_dir_list,1)
         fprintf( output_file, '%s\t', [path filesep Set filesep cy3_file{reg}]  );
         fprintf( output_file, '%s\t', Segments{3}  );
         fprintf( output_file, '%s\t', [path filesep Set filesep cy4_file{reg}]  );
-		if  sum(  rNum==rNum(1)  ) >= (4-nmiss)
-			fprintf( output_file, '%s\t', Segments{4}  );
-			fprintf( output_file, '%s\t', [path filesep Set filesep cy5_file{reg}]  );
-		end	
+        if  sum(  rNum==rNum(1)  ) >= (4-nmiss)
+            fprintf( output_file, '%s\t', Segments{4}  );
+            fprintf( output_file, '%s\t', [path filesep Set filesep cy5_file{reg}]  );
+        end
         fprintf( output_file, '%s\t', 'DAPI'  );
         fprintf( output_file, '%s\n', [path filesep Set filesep dapi_file{reg}]  );
         

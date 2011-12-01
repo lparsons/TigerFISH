@@ -45,10 +45,14 @@ if ~ isempty(regions)
                 r_counts = horzcat(r_counts, zeros(size(r_counts,1),1));
             end
         end
+        
         sz = size(Dye_probs,1);
         Dye_probs((sz+1):(sz+c),:) = dye_probs(2:end,:);
         counts = vertcat(counts, r_counts);
     end
+    % Append cell phases to spot count summary
+    counts = horzcat(counts,repmat(-1, size(counts,1),1));
+    counts(counts(:,2)>0,6)=ip.Results.cdc.phases;
     
     %% Computes 2D Distributions
     N = 50;
