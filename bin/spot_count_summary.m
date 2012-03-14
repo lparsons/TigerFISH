@@ -52,7 +52,17 @@ if ~ isempty(regions)
     end
     % Append cell phases to spot count summary
     counts = horzcat(counts,repmat(-1, size(counts,1),1));
-    counts(counts(:,2)>0,6)=ip.Results.cdc.phases;
+    try
+        counts(counts(:,2)>0,6)=ip.Results.cdc.phases;
+    catch err
+        if (strcmp(err.identifier,'MATLAB:subsassigndimmismatch'))
+            warning('MATLAB:FISHIA:cdcphases:cellnummismatch', ...
+                'cdc.phases calculated for %i cells, but %i cells were found!', ...
+                size(ip.Results.cdc.phases,1),size(counts(counts(:,2)>0,6),1));
+        else
+            rethrow(err)
+        end
+    end
     
     %% Computes 2D Distributions
     N = 50;
