@@ -48,12 +48,15 @@ global params
 
 i_p = inputParser;
 i_p.FunctionName = 'main';
-i_p.addParamValue('algorithm', '3D' ,@ischar); %'3D'
+i_p.addParamValue('algorithm', '3D' ,@ischar);
 i_p.addParamValue('load_results',false,@islogical);
 i_p.parse(varargin{:});
 
 
-
+if ~exist(output_dir, 'dir')
+    mkdir(output_dir);
+end
+save( [ output_dir filesep 'parameters.mat'], 'params');
 fid = fopen( [ output_dir filesep 'parameters.txt'], 'w' );
 fprintf( fid, 'Contrast Thresholds: %1.2f %1.2f  %1.2f \n',  params.Threshold_Contrast  );
 fprintf( fid, 'Intensity Thresholds: %1.2f %1.2f  %1.2f \n',  params.Threshold_Intensity{:}  );

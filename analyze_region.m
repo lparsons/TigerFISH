@@ -1,5 +1,4 @@
 function [cell_map_struct spot_data] = analyze_region(cy3file, cy3_5file, cy5file, dapifile, varargin )
-global params 
 % analyze_region determines cell boundaries and outputs spot locations and
 %   intensities
 %
@@ -27,6 +26,8 @@ global params
 %           3D - Non-parametric 3D spot intensity measurement
 %           2D - Uses 2D Gaussian mask with global background per image
 %           2D_local - 2D Gaussian mask with local background around spot
+global params 
+
 p = mfilename('fullpath');
 [pathstr] = fileparts(p);
 addpath([pathstr filesep 'bin'])
@@ -60,7 +61,7 @@ else
     toc
     
     fprintf('Segmenting Cells\n');
-    cell_map_struct = segment_cells(dapi_image);
+    cell_map_struct = segment_cells(dapi_image, [], params);
     cell_map = cell_map_struct.cellMap;
     imwrite(bwperim(cell_map), [ip.Results.output_dir filesep 'cell_map.png'], 'png', 'Transparency', 0);
     

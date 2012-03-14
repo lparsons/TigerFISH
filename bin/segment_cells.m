@@ -1,14 +1,55 @@
-% Script to read DAPI image and segment into cells using seeded watershed
+function cellMap = segment_cells(image_input, second_image, params)
+% Read DAPI images and segment into cells using seeded watershed
 % segmentation
-% Based off method described on
-% http://blogs.mathworks.com/steve/2006/06/02/cell-segmentation/ and in
+%
+%   CELL_MAP = segment_cells( IMAGE, SECOND_IMAGE, PARAMS )
+%
+%       CELL_MAP = Structure with following fields:
+%
+%          Best_Focus_Ind: Best focus layer (int)
+%                 MaxProj: Max Projection (double)
+%                 cellMap: 2D Map of cells (logical)
+%              cellsPerim: Cell array with boundary pixels for each cell
+%                   cells: 2D Map of cells, labeled (double)
+%                 CellNum: Number of cells
+%         cellMap_shrink5: Cell map after shrink 5 (for DNA content est.)
+%            cellsPerim_5: Cell perimeters after shrink 5
+%                 cells_5: Labeled cells after shrink 5
+%               CellNum_5: Number of cells after shrink 5
+%                     nuc: Map of nuclei (including simply bright pixels)
+%                  nucNum: Number of nuclei
+%              CytoMedian: [114x1 double]
+%             DNA_content: [114x1 double]
+%               Cell_Size: [114x1 double]
+%          Cell_2_Exclude: [114x1 double]
+%                  nucPix: {1x113 cell}
+%
+%
+%       IMAGE = Filename or image data for DAPI image
+%
+%       SECOND_IMAGE = Optional second image, combined with first to
+%       enhance cell boundary detection (e.g. image with high
+%       autoflourescence)
+%
+%       PARAMS = Optional struct specifying parameters to use
+%           See default_paramaters.m for parameter list and default values
+%
+%
+% Based on method described in
+% http://blogs.mathworks.com/steve/2006/06/02/cell-segmentation/
+% and in
 % Cohen et al. http://www.sciencemag.org/cgi/content/abstract/322/5907/1511
 
-function cellMap = segment_cells(image_input, second_image)
-global params 
 %% Configuration
+% Get default parmaters
+if nargin >= 3
+    parsed_params = default_parameters(params);
+else
+    parsed_params = default_parameters();
+end
+
 % Number of layers above a below the best infocus layer to use
-layers_around_focus = 3;
+layers_around_focus = parsed_params.DAPI_layers_around_focus;
 
 % Morphological open structure
 morphOpenStruct = ones(5,5);
@@ -26,23 +67,14 @@ if (ischar(image_input))
 else
     image = image_input;
 end
-    
-% Parse filename
-%[pathstr, name, ext] = fileparts(image.filename);
 
 
 %% Find best focus layer and use a few layers around that
 fprintf('DAPI Searching Best focus\n');
 tic
-
-if (isfield(params, 'DAPI_focus_layer_method'))
-    DAPI_focus_layer_method = params.DAPI_focus_layer_method;
-else
-    DAPI_focus_layer_method = 'variance';
-end
+DAPI_focus_layer_method = parsed_params.DAPI_focus_layer_method;
 num_stacks = length(image.info);
 in_focus_layer = best_focus_layer(image.layers, DAPI_focus_layer_method);
-%in_focus_layer = round(num_stacks/2);
 
 cellMap.Best_Focus_Ind = in_focus_layer;
 bottom_layer = max(1,in_focus_layer-layers_around_focus);
@@ -62,10 +94,8 @@ max_image  = max_image *( 1/median(max_image(:)) );
 I_sc = mat2gray(max_image);
 %I_sc = I_sc *( 1/median(I_sc(:)) );
 
-%% Adaptive contrast enhancement 
-% adapthisteq implements a technique called contrast-limited adaptive
-% histogram equalization, or CLAHE.
-if nargin >1
+%% Incorporate second image to better find cell boundaries
+if nargin >= 2 && ~isempty(second_image)
     if (ischar(second_image)) 
         image_2 = load_image(second_image);
     else
@@ -73,11 +103,15 @@ if nargin >1
     end
     max_image_2 = max(image_2.layers(:,:,bottom_layer:top_layer),[],3);
     I_sc_2 = mat2gray(max_image_2);
-    I_sc_both = mat2gray( I_sc + 0.2*I_sc_2 ); %*(1/median(I_sc_2(:))) );
-    I_eq = adapthisteq(I_sc_both); %*(1/median(I_sc(:)))
-else 
-    I_eq = adapthisteq(I_sc);
+    I_sc = mat2gray( I_sc + 0.2*I_sc_2 ); %*(1/median(I_sc_2(:))) );
 end
+
+%% Adaptive contrast enhancement 
+% adapthisteq implements a technique called contrast-limited adaptive
+% histogram equalization, or CLAHE.
+I_eq = adapthisteq(I_sc);
+
+
 %% Separate cells from background
 %
 % Global image threshold using Otsu's method 
@@ -129,11 +163,7 @@ bw6 = bwmorph(bw5, 'thicken', cellBorderThicken);
 %
 % Find nuclei - extended maxima operator can be used to identify groups of
 % pixels that are significantly higher than their immediate surrounding.
-
-if ~isfield(  params, 'DAPI_Contrast' ) || isempty(params.DAPI_Contrast)
-	params.DAPI_Contrast = 0.137; % Sets a default for DAPI Contrast
-end
-mask_em = imextendedmax(I_sc, params.DAPI_Contrast );
+mask_em = imextendedmax(I_sc, parsed_params.DAPI_Contrast );
 
 % Cleanup nuclei using morphological close, fill,  remove small objects
 % The morphological close operation is a dilation followed by an erosion,
@@ -193,9 +223,6 @@ fprintf('Finding nuclear pixels\n')
 tic
 nucs = mask_em | cellMap.MaxProj > median( cellMap.MaxProj(cellMap.cells > 0) ) * 1.5;
 [cellMap.nuc cellMap.nucNum]  = bwlabeln( nucs ); 
-%cellMap.nuc = bwmorph( cellMap.nuc, 'thicken', 1 );
-
-%cellMap.nucMaxproj = cell( cellMap.nucNum, 1 );
 toc
 
 
@@ -204,9 +231,7 @@ toc
 fprintf('Computing DNA content\n')
 tic
 
-% Median = median( Layers, 3 );
-% Max = max(Layers, [], 3);
-switch params.DAPI_Dimensions	
+switch parsed_params.DAPI_Dimensions	
 	case{ 2, '2D' } 
 		cellMap_Layers_Cells = cellMap.cells; 
 		cellMap_Layers_Cells_5 = cellMap.cells_5;
@@ -220,15 +245,12 @@ switch params.DAPI_Dimensions
         error('params.DAPI_Dimensions must be either 2 or 3')
 end
 
-%cellMap.DNA_content = []; 
-%if cellMap.CellNum_5 == cellMap.nucNum
-    cellMap.CytoMedian = zeros( cellMap.CellNum, 1 ); 
-    cellMap.DNA_content = zeros( cellMap.CellNum, 1 );
-	cellMap.Cell_Size = zeros( cellMap.CellNum, 1 );
-	cellMap.Cell_2_Exclude = zeros( cellMap.CellNum, 1 );
-%end
+cellMap.CytoMedian = zeros( cellMap.CellNum, 1 );
+cellMap.DNA_content = zeros( cellMap.CellNum, 1 );
+cellMap.Cell_Size = zeros( cellMap.CellNum, 1 );
+cellMap.Cell_2_Exclude = zeros( cellMap.CellNum, 1 );
+
 for Cell_Num=1:cellMap.CellNum
-    %fprintf('Cell %d\n', i)
 	
 	% Estimates the size of the cell using the 2D projection 
 	cellMap.Cell_Size(Cell_Num,1) = sum( cellMap.cells(:) == Cell_Num );
