@@ -1,5 +1,4 @@
 function [experiment_spot_data experiment_cell_maps experiment_counts] = analyze_experiment( region_file_list, output_dir, varargin )
-global params
 % analyze_experiment - analyzes each region to determine cell boundaries and spot locations and intensities
 %    - determines experiment wide intensity thresholds
 %    - saves cell map, spot data
@@ -7,47 +6,49 @@ global params
 %
 %
 %   [experiment_spot_data experiment_cell_maps experiment_counts] =
-%       analyze_experiment( region_file_list, output_dir, [dye_labels], 'ParameterName', ParameterValue )
+%       analyze_experiment( region_file_list, output_dir, [dye_labels], 'ParamName', ParamValue, ... )
 %
+%   INPUT
 %       region_file_list - list of files cy3file, cy3_5file, cy5file, dapifile
 %       output_dir - directory to output experiment data, histograms, etc.'
 %       dye_labels - optional cell array of labels for each dye
 %           defaults to {'gene1', 'gene2', 'gene3', 'DNA'}
 %
+%   OPTIONAL PARAMETERS
+%       params - optional struct containing parameter values for analysis
+%           See default_parameters.m for list of parameters and
+%           documentation
 %
-%   Parameters
+%       load_results - optional parameter, if true load previous cell map and
+%           spot intensity data (if it exists).  Off by default.
 %
-%   algorithm - optional parameter that determines method of intensity measurement
-%       Must be one of '3D', '2D', or '2D_local'
-%       3D - Non-parametric 3D spot intensity measurement
-%       2D - Uses 2D Gaussian mask with global background per image
-%       2D_local - 2D Gaussian mask with local background around spot
+%   OUTPUT
+%       experiment_spot_data
 %
-%   thresholds - optional parameter that defines thresholds for spot intensity
-%       Cell array with three values, for cy3, cy3.5, and cy5
-%       Default is to determine these using spots inside vs. outside of
-%           cells and an FDR of 0.05
+%       experiment_cell_maps
 %
-%   load_results is optional parameter, if true load previous cell map and
-%       spot intensity data (if it exists).  Off be default
+%       experiment_counts
+%
+
 p = mfilename('fullpath');
 [pathstr] = fileparts(p);
 addpath([pathstr filesep 'bin'])
 
 
 %% Parse Arguments
-algorithms = {'3D', '2D', '2D_local'};
 
 ip = inputParser;
 ip.FunctionName = 'analyze_experiment';
 ip.addRequired('region_file_list',@iscell);
 ip.addRequired('output_dir',@isdir);
 ip.addOptional('dye_labels',{'gene1', 'gene2', 'gene3', 'DNA'},@iscell);
-ip.addParamValue('algorithm','3D',@(x)any(strcmpi(x,algorithms)));
-ip.addParamValue('thresholds',{},@iscell);
+ip.addParamValue('params',struct(),@isstruct);
 ip.addParamValue('histogram_max',{NaN, NaN, NaN},@iscell);
 ip.addParamValue('load_results',false,@islogical);
 ip.parse(region_file_list, output_dir, varargin{:});
+
+% Get default parmaters
+parsed_params = default_parameters(ip.Results.params);
 
 exp_data_file = [ip.Results.output_dir filesep 'experiment_data.mat'];
 
@@ -77,7 +78,7 @@ else
             [cell_map spot_data] = analyze_region(ip.Results.region_file_list{p,1}, ...
                 ip.Results.region_file_list{p,2}, ip.Results.region_file_list{p,3}, ...
                 ip.Results.region_file_list{p,4}, reg_output_dir, ...
-                'algorithm', ip.Results.algorithm, 'debug', ip.Results.load_results);
+                'params', parsed_params, 'debug', ip.Results.load_results);
             experiment_cell_maps{p} = cell_map;
             experiment_spot_data.cy3 = vertcat(experiment_spot_data.cy3, horzcat(repmat(p, size(spot_data.cy3, 1),1),spot_data.cy3));
             experiment_spot_data.cy3_5 = vertcat(experiment_spot_data.cy3_5, horzcat(repmat(p, size(spot_data.cy3_5, 1),1),spot_data.cy3_5));
@@ -100,7 +101,7 @@ else
         end
     end
     
-    if params.Save_Detailed_Results
+    if parsed_params.Save_Detailed_Results
         save(exp_data_file, 'experiment_spot_data', 'experiment_cell_maps', 'cdc' );
     end
     
@@ -123,36 +124,17 @@ if isfield(cdc, 'DNA_content_nor') && isfield(cdc, 'phases')
 end
 
 %% Determine Thresholds, Spot Probabilities, Plot Histograms
-
 dyes = fields(experiment_spot_data);
 dye_color.cy3 = [0 1 0];
 dye_color.cy3_5 = [1 0 0];
 dye_color.cy5 = [.8 .8 .8];
-
-%Sets a threshold of FDR
-if  isfield(params, 'FDR_Threshold')
-    FDR_Threshold = params.FDR_Threshold;
-else
-    FDR_Threshold = 0.01;
-end
-if ~isfield( params, 'NULL' )
-    params.NULL = [1 1 1];
-end
 
 for d=1:size(dyes,1)
     dye = dyes{d};
     dyelabel = ip.Results.dye_labels{d};
     
     % Set Thresholds
-    if ~isempty(params.Threshold_Intensity{ d } )
-        threshold.(dye) = params.Threshold_Intensity{ d };
-    else
-        if (isempty(ip.Results.thresholds))
-            threshold.dye = 0; % Default if there are no spots
-        else
-            threshold.(dye) = ip.Results.thresholds{d};
-        end
-    end
+    threshold.(dye) = parsed_params.Threshold_Intensity{ d };
     
     if (~isempty(experiment_spot_data.(dye)))
         % Index for spots inside vs outside of cells
@@ -161,14 +143,14 @@ for d=1:size(dyes,1)
         spot_intensities = experiment_spot_data.(dye)(:,5);
         
         % Probabilities are always calculated using inside vs outside spots
-        mrna_probabilies = determine_mrna_probabilities(spot_intensities, out_spots_ind, in_spots_ind, params.NULL(d) );
+        mrna_probabilies = determine_mrna_probabilities(spot_intensities, out_spots_ind, in_spots_ind, parsed_params.NULL(d) );
         % Append spot probabilities to the spot data matrix
         experiment_spot_data.(dye) = [experiment_spot_data.(dye) mrna_probabilies];
         
         % Determine Thresholds if not set
-        if isempty(params.Threshold_Intensity{ d } ) && isempty(ip.Results.thresholds)
+        if isnan(threshold.(dye))
             % Using FDR and inside vs. outside spots
-            threshold.(dye) = determine_threshold(spot_intensities(in_spots_ind), mrna_probabilies(in_spots_ind), FDR_Threshold);
+            threshold.(dye) = determine_threshold(spot_intensities(in_spots_ind), mrna_probabilies(in_spots_ind), parsed_params.FDR_Threshold);
         end
         
         % Histogram

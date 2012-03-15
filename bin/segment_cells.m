@@ -54,9 +54,6 @@ layers_around_focus = parsed_params.DAPI_layers_around_focus;
 % Morphological open structure
 morphOpenStruct = ones(5,5);
 
-% Minimum cell area (pixels)
-minCellSize = 40;
-
 % Cell border thickening (pixels)
 cellBorderThicken = 5;
 
@@ -134,7 +131,7 @@ bw3 = imopen(bw2, morphOpenStruct);
 %   Determine connected components (8 pixel neighborhood)
 %   Compute area of each component
 %   Remove those below specified value
-bw4 = bwareaopen(bw3, minCellSize);
+bw4 = bwareaopen(bw3, parsed_params.minCellSize);
 
 % Morphological closing (dilation followed by erosion).
 bw5 = bwmorph(bw4, 'close');

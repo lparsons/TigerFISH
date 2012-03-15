@@ -1,4 +1,4 @@
-function spots = find_spots(image_input, Contrast_Treshold, Rsq_Treshold)
+function spots = find_spots(image_input, contrast_threshold)
 
 
 %% Read Image File
@@ -9,8 +9,8 @@ else
     image = image_input;
 end
 
-if nargin <2, Contrast_Treshold = 1.05; end 
-if nargin <3, Rsq_Treshold = 0.4; end 
+%if nargin <2, contrast_threshold = 1.05; end 
+%if nargin <3, Rsq_Treshold = 0.4; end 
 
 
 %% Identify potential spots
@@ -146,7 +146,7 @@ for i=1:num_spots
     
     valid_spot = true;
     contrast = rm(1)/rm(spot_radius);
-    if (contrast > Contrast_Treshold)
+    if (contrast > contrast_threshold)
         for r=1:(spot_radius-1)
             if rm(r) < rm(r+1)
                 valid_spot = false;

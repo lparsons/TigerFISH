@@ -2,31 +2,27 @@ function [cell_map_struct spot_data] = analyze_region(cy3file, cy3_5file, cy5fil
 % analyze_region determines cell boundaries and outputs spot locations and
 %   intensities
 %
-%   [CELL_MAP, SPOT_DATA] = analyze_region( cy3file, cy3_5file, cy5file,
-%       dapifile )
+%   [CELL_MAP, SPOT_DATA] = analyze_region( cy3file, cy3_5file, cy5file, dapifile, [output_dir], 'ParamName', ParamValue, ... )
 %
+%   INPUT
+%       output_dir - if specified, transparent, enchanced projections are
+%           written to the directory for each dye.
+%
+%   OPTIONAL PARAMETERS
+%       params - optional struct containing parameter values for analysis
+%           See default_parameters.m for list of parameters and
+%           documentation
+%
+%       load_results - optional parameter, if true load previous cell map and
+%           spot intensity data (if it exists).  Off by default.
+%
+%   OUTPUT
 %       CELL_MAP = logical matrix that identifies cells
 %       SPOT_DATA = data structure with fields for cy3, cy3.5, cy5
 %           each field contains a matrix with spot locations and intenties
 %           Columns: x, y, z, intensity, cell_number, cell_type
 %               cell_types: 0 - normal, 1 - edge, 2 - background
 %
-%
-%   [CELL_MAP, SPOT_DATA] = analyze_region( cy3file, cy3_5file, cy5file,
-%       dapifile, output_dir )
-%
-%       If output_dir is specified, transparent, enchanced projections are
-%           written to the directory for each dye.
-%
-%   [CELL_MAP, SPOT_DATA] = analyze_region( cy3file, cy3_5file, cy5file,
-%       dapifile, output_dir, algorithm )
-%
-%       algorithm is an optional parameter that determines method of intensity measurement
-%           Must be one of '3D', '2D', or '2D_local'
-%           3D - Non-parametric 3D spot intensity measurement
-%           2D - Uses 2D Gaussian mask with global background per image
-%           2D_local - 2D Gaussian mask with local background around spot
-global params 
 
 p = mfilename('fullpath');
 [pathstr] = fileparts(p);
@@ -42,11 +38,13 @@ ip.addRequired('cy3_5file',@(x)ischar(x) || isempty(x));
 ip.addRequired('cy5file',@(x)ischar(x) || isempty(x));
 ip.addRequired('dapifile',@(x)ischar(x) && exist(x, 'file'));
 ip.addOptional('output_dir','',@isdir);
-ip.addParamValue('algorithm','3D',@(x)any(strcmpi(x,algorithms)));
 ip.addParamValue('debug',false,@islogical);
+ip.addParamValue('params',struct(),@isstruct);
 ip.parse(cy3file, cy3_5file, cy5file, dapifile, varargin{:});
 
-%[PATHSTR,NAME,EXT,VERSN] = fileparts(file);
+% Get default parmaters
+parsed_params = default_parameters(ip.Results.params);
+
 
 reg_data_file = [ip.Results.output_dir filesep 'region_data.mat'];
 if ip.Results.debug && exist(reg_data_file, 'file')
@@ -61,7 +59,7 @@ else
     toc
     
     fprintf('Segmenting Cells\n');
-    cell_map_struct = segment_cells(dapi_image, [], params);
+    cell_map_struct = segment_cells(dapi_image, [], parsed_params);
     cell_map = cell_map_struct.cellMap;
     imwrite(bwperim(cell_map), [ip.Results.output_dir filesep 'cell_map.png'], 'png', 'Transparency', 0);
     
@@ -85,42 +83,42 @@ else
             toc
             fprintf(['Locating ' dye ' Spots\n']);
             tic
-            spot_locations.(dye) = find_spots(image.(dye),  params.Threshold_Contrast( d ) );
+            spot_locations.(dye) = find_spots(image.(dye),  parsed_params.Threshold_Contrast( d ) );
             toc
             
             
             % Quick Fix for running both algorithms on the same spots. It has to be cleaned/deleted
             % spot_locations.(dye) = filter_border_spots( spot_locations.(dye) );
             
-            % Measure spot intensities
-			%Algorithm = ip.Results.algorithm;  
-			Algorithm = params.algorithm; %'2D_local';
-            if (strcmpi(Algorithm, '3D'))
+            % Measure spot intensities 
+			algorithm = parsed_params.algorithm;
+            if (strcmpi(algorithm, '3D'))
                 % Measure spots using Nikolai's 3D Non-Parametric method
                 fprintf(['Using 3D algorithm to determine spot intensity for ' dye '\n']);
                 tic
                 [spot_data.(dye) sb.(dye)] = measure_spots_np(spot_locations.(dye), image.(dye));
                 toc
-            elseif (strcmpi(Algorithm, '2D'))
-                % Measure spots using D Larson's 2D Gaussian Mask algorithm
+            elseif (strcmpi(algorithm, '2D'))
+                % Measure spots using D Larson's 2D Gaussian Mask
+                % algorithm, with global (image) background
                 fprintf(['Using 2D algorithm with global image background to determine spot intensity for ' dye '\n']);
                 tic
                 spot_data.(dye) = measure_spots(spot_locations.(dye), image.(dye), 'global');
                 toc
-            elseif (strcmpi(Algorithm, '2D_local'))
-                % Measure spots using D Larson's 2D Gaussian Mask algorithm
+            elseif (strcmpi(algorithm, '2D_local'))
+                % Measure spots using D Larson's 2D Gaussian Mask
+                % algorithm, with local background
                 fprintf(['Using 2D algorithm with local background to determine spot intensity for ' dye '\n']);
                 tic
                 spot_data.(dye) = measure_spots(spot_locations.(dye), image.(dye), 'local');
                 toc
             else
-                errormsg = ['Algorithm "' Algorithm '" not recognized.  Must be one of: ' sprintf('%s, ',algorithms{:});];
+                errormsg = ['Algorithm "' algorithm '" not recognized.  Must be one of: ' sprintf('%s, ',algorithms{:});];
                 error(errormsg)
             end
             
             % Merge nearby spots
-            duplicate_threshold = 5;
-            spot_data.(dye) = merge_spots(spot_data.(dye), duplicate_threshold);
+            spot_data.(dye) = merge_spots(spot_data.(dye), parsed_params.spot_merge_distance);
         end
         
         % Spot to cell mapping
@@ -141,28 +139,24 @@ else
         layers_around_focus = 3;
         
         max_dapi_image_adj = projected_image(dapi_image.max, dapi_image.layers, layers_around_focus);
-        %[PATHSTR,NAME,EXT,VERSN] = fileparts(ip.Results.dapifile);
         B = cat(3,zeros(size(max_dapi_image_adj)),zeros(size(max_dapi_image_adj)),ones(size(max_dapi_image_adj)));
         imwrite(B, [ip.Results.output_dir filesep  'dapi_projection.png'], 'png', 'Alpha', max_dapi_image_adj);
         
         if (~isempty(image.cy3)); max_cy3_image_adj = projected_image(image.cy3.max, image.cy3.layers, Inf);
         else max_cy3_image_adj = zeros(size(max_dapi_image_adj));
         end
-        %[PATHSTR,NAME,EXT,VERSN] = fileparts(ip.Results.cy3file);
         G = cat(3,zeros(size(max_cy3_image_adj)),ones(size(max_cy3_image_adj)),zeros(size(max_cy3_image_adj)));
         imwrite(G, [ip.Results.output_dir filesep 'cy3_projection.png'], 'png', 'Alpha', max_cy3_image_adj);
         
         if (~isempty(image.cy3_5)); max_cy3_5_image_adj = projected_image(image.cy3_5.max, image.cy3_5.layers, Inf);
         else max_cy3_5_image_adj = zeros(size(max_dapi_image_adj));
         end
-        %[PATHSTR,NAME,EXT,VERSN] = fileparts(ip.Results.cy3_5file);
         R = cat(3,ones(size(max_cy3_5_image_adj)),zeros(size(max_cy3_5_image_adj)),zeros(size(max_cy3_5_image_adj)));
         imwrite(R, [ip.Results.output_dir filesep 'cy3_5_projection.png'], 'png', 'Alpha', max_cy3_5_image_adj);
         
         if (~isempty(image.cy5)); max_cy5_image_adj = projected_image(image.cy5.max, image.cy5.layers, Inf);
         else max_cy5_image_adj = zeros(size(max_dapi_image_adj));
         end
-        %[PATHSTR,NAME,EXT,VERSN] = fileparts(ip.Results.cy5file);
         imwrite(ones(size(max_cy5_image_adj)), [ip.Results.output_dir filesep 'cy5_projection.png'], 'png', 'Alpha', max_cy5_image_adj);
     end
     toc

@@ -4,7 +4,7 @@ function [ new_spot_data ] = merge_spots( varargin )
 ip = inputParser;
 ip.FunctionName = 'main';
 ip.addRequired('spot_data',@isnumeric);
-ip.addOptional('duplicateThreshold', 5 ,@isnumeric);
+ip.addRequired('duplicateThreshold', @isnumeric);
 ip.parse(varargin{:});
 spot_data = ip.Results.spot_data;
 duplicateThreshold = ip.Results.duplicateThreshold;

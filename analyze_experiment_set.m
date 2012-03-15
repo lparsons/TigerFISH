@@ -1,27 +1,34 @@
 function experiment_counts = analyze_experiment_set( experiment_list, output_dir, varargin )
-global params 
 % analyze_experiment_set performs FISH image analysis to determine cell boundaries
 %   and determine number of signals in each cell
 %
-%   experiment_set_data = analyze_experiment_set( input_dir, output_dir, [algorithm], [load_results]) 
-%       finds experiments in input_dir
+%   experiment_set_data = analyze_experiment_set( experiment_list, output_dir, 'ParamName', ParamValue, ... ) 
 %
-%   algorithm - optional parameter that determines method of intensity measurement
-%       Must be one of '3D', '2D', or '2D_local'
-%       3D - Non-parametric 3D spot intensity measurement
-%       2D - Uses 2D Gaussian mask with global background per image
-%       2D_local - 2D Gaussian mask with local background around spot
+%   INPUT
+%       experiment_list - list of experiment data structures
+%           experiment.name - name of experiment
+%           experiment.regions - list of experiment regions
+%           experiment.region_files - list of files used for each region
+%               (,1) = Cy3_file
+%               (,2) = Cy3.5_file
+%               (,3) = Cy5_file
+%               (,4) = DAPI_file	
 %
-%   load_results - optional parameter, if true load previous cell map and
-%       spot intensity data (if it exists).  Off be default
-%
-%   thresholds - optional parameter that defines thresholds for spot intensity
-%       Cell array with three values, for cy3, cy3.5, and cy5
-%       Default is to determine these using spots inside vs. outside of
-%           cells and an FDR of 0.05
+%       output_dir - Output directory used to save results, intermediate
+%           data, etc.
 %
 %
-%   experiment_set_data - struct with the following fields
+%   OPTIONAL PARAMETERS
+%       params - optional struct containing parameter values for analysis
+%           See default_parameters.m for list of parameters and
+%           documentation
+%
+%       load_results - optional parameter, if true load previous cell map and
+%           spot intensity data (if it exists).  Off be default
+%
+%
+%   OUTPUT
+%       experiment_set_data - struct with the following fields
 %
 %           name - experiment name
 %           regions - list of regions
@@ -40,16 +47,16 @@ p = mfilename('fullpath');
 addpath([pathstr filesep 'bin'])
 
 %% Parse Arguments
-algorithms = {'3D', '2D', '2D_local'};
-
 ip = inputParser;
 ip.FunctionName = 'analyze_experiment_set';
 ip.addRequired('experiment_list',@isstruct);
 ip.addRequired('output_dir',@isdir);
-ip.addParamValue('algorithm','2D_local',@(x)any(strcmpi(x,algorithms)));
-ip.addParamValue('thresholds',{},@iscell);
+ip.addParamValue('params',struct(),@isstruct);
 ip.addParamValue('load_results',false,@islogical);
 ip.parse(experiment_list, output_dir, varargin{:});
+
+% Get default parmaters
+parsed_params = default_parameters(ip.Results.params);
 
 %% Loop through experiments
 %experiment_set_data = [];
@@ -58,11 +65,10 @@ for e=1:size(ip.Results.experiment_list,2)
     experiment = ip.Results.experiment_list(e);
     fprintf('Analyzing Experiment: %s\n', experiment.name);
     exp_output_dir = [ip.Results.output_dir filesep experiment.name];
-    [s,mess,messid] = mkdir(exp_output_dir);
+    [s,mess,messid] = mkdir(exp_output_dir); %#ok<NASGU,ASGLU>
     [experiment.spot_data experiment.cell_maps experiment.counts] = ...
         analyze_experiment(experiment.region_files, exp_output_dir, ...
-        'algorithm', ip.Results.algorithm, ...
-        'thresholds', ip.Results.thresholds, ...
+        'params', parsed_params, ...
         'load_results', ip.Results.load_results, ...
         'dye_labels', experiment.dye_labels);
     %experiment_set_data = [experiment_set_data, experiment];

@@ -1,5 +1,4 @@
 function generate_experiment_list( path, varargin )
-global params
 % wrapper function identifies images in 'path' with specified experiment
 %    numbers and outputs a tab delimited file of experiment names, dye
 %    labels and file paths.
@@ -25,34 +24,8 @@ ip.addOptional('experiment_numbers',1:1000,@isnumeric);
 ip.addOptional('output_filename','experiment_list.txt',@ischar);
 ip.addOptional('filemask','*',@ischar);
 ip.addOptional('load_results',false,@islogical);
+ip.addParamValue('nmiss',0,@isnumeric);
 ip.parse(varargin{:});
-filemask = ip.Results.filemask;
-
-if isfield( params, 'nmiss' )
-    nmiss  = params.nmiss;
-else
-    nmiss = 0;
-end
-
-% Convience cases for use during testing
-if isfield( params, 'images' )
-    path = params.images.path;
-    filemask = params.images.mask;
-else
-    if isempty( path ), path = 1; end
-    if isnumeric( path )
-        switch path
-            case{ 1, 'nslavov' }
-                path = '/home/nslavov/data-fish/';
-                filemask = 'N*';
-            case{ 2, 'sandy' }
-                %path = '/Genomics/grid/users/nslavov/locSpot/fish_img/';
-                path = '/home/nslavov/data-fish/';
-                filemask = 'E*';
-        end
-    end
-end
-
 
 exp_expression = ...
     '(?<experiment_letters>[a-zA-Z]+)(?<experiment_number>\d+)_+(?<cy3>[a-zA-Z0-9]+)_+(?<cy3p5>[a-zA-Z0-9]+)_+(?<cy5>[a-zA-Z0-9]+)_*(?<condition>.*)*';
@@ -63,7 +36,7 @@ output_file = fopen(output_filename, 'w');
 
 
 %% Loop through files in directory
-main_dir_list = dir( [path filesep filemask] );
+main_dir_list = dir( [path filesep ip.Results.filemask] );
 for I = 1: size(main_dir_list,1)
     if   strcmp( main_dir_list(I).name(1),  '.' )
         continue
@@ -125,16 +98,16 @@ for I = 1: size(main_dir_list,1)
     fprintf('\n%s\n', Set );
     %fprintf( 'Number of Files: %d\n', File_Num );
     
-    if sum(File_Num==0) > nmiss,
+    if sum(File_Num==0) > ip.Results.nmiss,
         warning( 'FISHIA:experiment_list:missingFile', 'Missing file! I will skip the field !!!' );
         continue
     end
     
-    if isfield( params, 'Region_num' )
-        Region_num = params.Region_num;
-    else
+%    if isfield( params, 'Region_num' )
+%        Region_num = params.Region_num;
+%    else
         Region_num = mode(File_Num);
-    end
+%    end
     for reg=1: Region_num
         
         %fprintf( '\nWorking on field: %d\n', reg );
@@ -147,7 +120,7 @@ for I = 1: size(main_dir_list,1)
         rNum(2) = str2double( cy4_file{reg}(rPos_1:rPos_2) );
         rNum(3) = str2double( cy5_file{reg}(rPos_1:rPos_2) );
         rNum(4) = str2double( dapi_file{reg}(rPos_1:rPos_2) );
-        if sum(  rNum==rNum(1)  ) < (4-nmiss)
+        if sum(  rNum==rNum(1)  ) < (4-ip.Results.nmiss)
             warning( 'FISHIA:experiment_list:nonMatchingRegions', 'Skipping files from non corresponding regions !!!' );
             continue
         end
@@ -160,7 +133,7 @@ for I = 1: size(main_dir_list,1)
         fprintf( output_file, '%s\t', [path filesep Set filesep cy3_file{reg}]  );
         fprintf( output_file, '%s\t', Segments{3}  );
         fprintf( output_file, '%s\t', [path filesep Set filesep cy4_file{reg}]  );
-        if  sum(  rNum==rNum(1)  ) >= (4-nmiss)
+        if  sum(  rNum==rNum(1)  ) >= (4-ip.Results.nmiss)
             fprintf( output_file, '%s\t', Segments{4}  );
             fprintf( output_file, '%s\t', [path filesep Set filesep cy5_file{reg}]  );
         end
