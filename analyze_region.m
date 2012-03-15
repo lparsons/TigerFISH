@@ -118,12 +118,9 @@ else
                 error(errormsg)
             end
             
-            % Merge spots
-            % Use original (not modified) spot locations for consistency between
-            % algorithms
-            % TODO Consider reimplementing?
-            %duplicate_threshold = 5;
-            %spot_data.(dye) = merge_spots(replace_locations(spot_locations.(dye), spot_data.(dye)), duplicate_threshold);
+            % Merge nearby spots
+            duplicate_threshold = 5;
+            spot_data.(dye) = merge_spots(spot_data.(dye), duplicate_threshold);
         end
         
         % Spot to cell mapping
@@ -178,12 +175,6 @@ end
 end
 
 %% Subfunctions
-
-function original_spot_locs = replace_locations(spot_locations, spot_data)
-% Replace spot locations in spot_data with original locations
-[x y z] = ind2sub( size(spot_locations), find( spot_locations ) );
-original_spot_locs = [y x z spot_data(:,4:end)];
-end
 
 function max_image_adj = projected_image(image_max_project, image_layers, num_layers)
 % max_image_adj - Return projection of infocus region of image, enhanced to
