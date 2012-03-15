@@ -1,9 +1,5 @@
 function spots = find_spots(image_input, Contrast_Treshold, Rsq_Treshold)
 
-%[pathstr, name, ext, versn] = fileparts(image_file);
-
-%image_input = '/Volumes/BotLabShare/FIDO/raw images/E110_pfk26_om45_yef3/E110_R5_pfk26_om45_yef3/cy3_001.tif';
-%image_input = '/Volumes/BotLabShare/FIDO/raw images/Control_Exps/Differentially Labeled Exps/E191_ssk22-16,95,250,368_ssk22-1_yef3/E191_R1_ssk22-16,95,250,368_ssk22-1_yef3/Image_Cy3_001.tif'
 
 %% Read Image File
 % Load image file if not already loaded
@@ -122,7 +118,7 @@ for i=1:num_spots
     x_edge = min(x, image.info(1).Width-x);
     y_edge = min(y, image.info(1).Height-y);
 	z_edge = min(z, size(image.layers,3)-z);
-    if (x_edge <= spot_radius || y_edge <= spot_radius || z_edge <= spot_radius)
+    if (x_edge <= spot_radius || y_edge <= spot_radius ) %|| z_edge <= spot_radius)
         continue
     end
     
@@ -161,12 +157,12 @@ for i=1:num_spots
     end
     
     if valid_spot
-        %spots(y,x,z) = true;
+        spots(y,x,z) = true;
 		
-		[sl Mean Rsq] = spot_regress_fun(  image.layers(y+rg{3}, x+rg{3}, z+rg{3}), 7 ); %Rsq, pause (0.5)
-		if Rsq > Rsq_Treshold
-		  spots(y,x,z) = true;
-		end
+%  		[sl Mean Rsq] = spot_regress_fun(  image.layers(y+rg{3}, x+rg{3}, z+rg{3}), 7 ); %Rsq, pause (0.5)
+%  		if Rsq > Rsq_Treshold
+%  		  spots(y,x,z) = true;
+%  		end
     end
 	
 	
