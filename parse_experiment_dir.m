@@ -11,6 +11,7 @@ ip.addRequired('input_dir',@isdir);
 ip.addParamValue('output_filename','experiment_list.txt',@ischar);
 ip.addParamValue('filemask','*',@ischar);
 ip.addParamValue('region_marker','Position', @ischar);
+ip.addParamValue('dye_marker','C', @ischar);
 ip.addParamValue('regex', '^(?<experiment>.+?)[\s-_]+Position[\s]+(?<region>[\d]+).+DAPI\.tiff$', @ischar);
 ip.addParamValue('dyes', {'DAPI', 'CY3', 'CY3.5', 'CY5'}, @iscellstr);
 ip.parse(varargin{:});
@@ -45,7 +46,7 @@ for i=1:size(exp_name_list,2)
     experiment.name = exp_name_list{i};
     disp(experiment.name)
     experiment.regions = [];
-    exp_file_list = dir([input_dir filesep exp_name_list{i} '*C' ip.Results.dyes{1}  '.tiff']);
+    exp_file_list = dir([input_dir filesep exp_name_list{i} '*' ip.Results.dye_marker ip.Results.dyes{1}  '.tif*']);
     for r=1:size(exp_file_list,1)
         renames = regexp(exp_file_list(r).name, exp_re, 'names');
         if ~isempty(renames) && isfield(renames,'region') && ~strcmp(renames.region, '') && strcmp(renames.experiment, exp_name_list{i})
@@ -60,21 +61,21 @@ for i=1:size(exp_name_list,2)
     % For each region, get files
     for r=1:size(experiment.regions,1)
         if size(experiment.regions,1) > 1
-            exp_reg_file_list = dir([input_dir filesep exp_name_list{i} '*' region_marker ' ' experiment.regions{r} '*.tiff']);
+            exp_reg_file_list = dir([input_dir filesep exp_name_list{i} '*' region_marker experiment.regions{r} '*.tif*']);
         else
-            exp_reg_file_list = dir([input_dir filesep exp_name_list{i} '*.tiff']);
+            exp_reg_file_list = dir([input_dir filesep exp_name_list{i} '*.tif*']);
         end
         region_files = {'','','',''};
         for f=1:size(exp_reg_file_list,1)
             renames = regexp(exp_reg_file_list(f).name, exp_re, 'names');
             if ~isempty(renames) && isfield(renames, 'experiment') && strcmp(renames.experiment, exp_name_list{i})
-                if  ~isempty(findstr(exp_reg_file_list(f).name, ['_C' ip.Results.dyes{1} '.tiff']))
+                if  ~isempty(findstr(exp_reg_file_list(f).name, ['_' ip.Results.dye_marker ip.Results.dyes{1} '.tif']))
                     region_files{4} = [input_dir filesep exp_reg_file_list(f).name];
-                elseif ~isempty(findstr(exp_reg_file_list(f).name, ['_C' ip.Results.dyes{2} '.tiff']))
+                elseif ~isempty(findstr(exp_reg_file_list(f).name, ['_' ip.Results.dye_marker ip.Results.dyes{2} '.tif']))
                     region_files{1} = [input_dir filesep exp_reg_file_list(f).name];
-                elseif  ~isempty(findstr(exp_reg_file_list(f).name, ['_C' ip.Results.dyes{3} '.tiff']))
+                elseif  ~isempty(findstr(exp_reg_file_list(f).name, ['_' ip.Results.dye_marker ip.Results.dyes{3} '.tif']))
                     region_files{2} = [input_dir filesep exp_reg_file_list(f).name];
-                elseif  ~isempty(findstr(exp_reg_file_list(f).name, ['_C' ip.Results.dyes{4} '.tiff']))
+                elseif  ~isempty(findstr(exp_reg_file_list(f).name, ['_' ip.Results.dye_marker ip.Results.dyes{4} '.tif']))
                     region_files{3} = [input_dir filesep exp_reg_file_list(f).name];
                 end
             end
