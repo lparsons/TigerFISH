@@ -10,17 +10,20 @@ ip = inputParser;
 ip.addRequired('input_dir',@isdir);
 ip.addParamValue('output_filename','experiment_list.txt',@ischar);
 ip.addParamValue('filemask','*',@ischar);
-ip.addParamValue('region_marker','Position', @ischar);
+ip.addParamValue('region_marker','Position ', @ischar);
 ip.addParamValue('dye_marker','C', @ischar);
 ip.addParamValue('regex', '^(?<experiment>.+?)[\s-_]+Position[\s]+(?<region>[\d]+).+DAPI\.tiff$', @ischar);
 ip.addParamValue('dyes', {'DAPI', 'CY3', 'CY3.5', 'CY5'}, @iscellstr);
+ip.addParamValue('permission', 'w', @ischar);
 ip.parse(varargin{:});
+
+genes = {'Cy3','Cy3.5','Cy5'};
 
 input_dir = ip.Results.input_dir;
 filemask = ip.Results.filemask;
 region_marker = ip.Results.region_marker;
 output_filename = [ip.Results.output_filename];
-[output_file fopen_message] = fopen(output_filename, 'w');
+[output_file fopen_message] = fopen(output_filename, ip.Results.permission);
 if output_file < 0
     fprintf('Unable to open file "%s"\n', output_filename)
     error(fopen_message)
@@ -52,8 +55,20 @@ for i=1:size(exp_name_list,2)
         if ~isempty(renames) && isfield(renames,'region') && ~strcmp(renames.region, '') && strcmp(renames.experiment, exp_name_list{i})
             experiment.regions = [experiment.regions, {renames.region}];
         end
+        if ~isempty(renames) && ~strcmp(renames.region, '') && strcmp(renames.experiment, exp_name_list{i})
+            if isfield(renames,'gene1')
+                genes{1} = renames.gene1;
+            end
+            if isfield(renames,'gene2')
+                genes{2} = renames.gene2;
+            end
+            if isfield(renames,'gene3')
+                genes{3} = renames.gene3;
+            end
+        end
     end
     experiment.regions = unique(experiment.regions)';
+    experiment.genes = genes;
     if isempty(experiment.regions)
         experiment.regions = [experiment.regions, {'1'}];
     end
@@ -66,6 +81,7 @@ for i=1:size(exp_name_list,2)
             exp_reg_file_list = dir([input_dir filesep exp_name_list{i} '*.tif*']);
         end
         region_files = {'','','',''};
+
         for f=1:size(exp_reg_file_list,1)
             renames = regexp(exp_reg_file_list(f).name, exp_re, 'names');
             if ~isempty(renames) && isfield(renames, 'experiment') && strcmp(renames.experiment, exp_name_list{i})
@@ -86,9 +102,9 @@ for i=1:size(exp_name_list,2)
     % Print to file
     for r=1:size(experiment.regions,1)
         fprintf(output_file, '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n', experiment.name, experiment.regions{r}, ...
-            'Cy3', experiment.region_files{r,1},...
-            'Cy3.5', experiment.region_files{r,2},...
-            'Cy5', experiment.region_files{r,3},...
+            experiment.genes{1}, experiment.region_files{r,1},...
+            experiment.genes{2}, experiment.region_files{r,2},...
+            experiment.genes{3}, experiment.region_files{r,3},...
             'DAPI', experiment.region_files{r,4});
     end
     experiment_list = [experiment_list experiment];
