@@ -27,20 +27,21 @@ yy1 = ip.Results.spot_data(ip.Results.spot_data(:,4)>ip.Results.threshold,2);
 
 % Generate figure
 spot_image = figure('Visible', 'off');
-set(spot_image, 'Units', 'pixels', 'Position', [32, 32, ip.Results.plot_size(2) / N, ip.Results.plot_size(1) / N]);
+set(spot_image, 'Units', 'pixels', 'Position', [0, 0, ip.Results.plot_size(2) / N, ip.Results.plot_size(1) / N]);
 set(gca, 'Units', 'normalized', 'Position', [0,0,1,1]);
-set(gca, 'Units', 'points');
+%set(gca, 'Units', 'points');
 
 hold on;
 plot(xx0,yy0,'o','MarkerSize',10/N, 'Color',ip.Results.bgcolor);
 plot(xx1,yy1,'o','MarkerSize',10/N, 'Color',ip.Results.fgcolor);
 %plot(xx2,yy2,'o','MarkerSize',4, 'MarkerColor',ip.Results.bgcolor);
-axis image; set(gca,'YDir','reverse');
-xlim([1 ip.Results.plot_size(2)]); ylim([1 ip.Results.plot_size(1)]);
+set(gca,'YDir','reverse');
+xlim([0 ip.Results.plot_size(2)]); ylim([0 ip.Results.plot_size(1)]);
+%axis image; 
 hold off;
 
 % Set figure options
-set(spot_image, 'Units', 'points', 'PaperUnits', 'points', 'PaperPositionMode', 'auto');
+%set(spot_image, 'Units', 'points', 'PaperUnits', 'points', 'PaperPositionMode', 'auto');
 set(spot_image,'Color','black');
 set(gca,'Color','black');
 set(spot_image,'InvertHardCopy','off');

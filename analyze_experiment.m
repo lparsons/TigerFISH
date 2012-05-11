@@ -173,8 +173,13 @@ for d=1:size(dyes,1)
             % Print figure
             reg_output_dir = [ip.Results.output_dir filesep 'region_' num2str(reg)];
             spot_overlay_filename = [reg_output_dir filesep dye '_spot_image.png'];
-            screen_DPI = get(0, 'ScreenPixelsPerInch');
-            print(spot_overlay, '-dpng', sprintf('-r%d', N * screen_DPI), spot_overlay_filename);
+            %screen_DPI = get(0, 'ScreenPixelsPerInch') / 25.4e-3;
+            %print(spot_overlay, '-dpng', sprintf('-r%d', N * screen_DPI), spot_overlay_filename);
+            img_size = size(experiment_cell_maps{reg}.cellMap);
+            h = img_size(2)/72;
+            w = img_size(1)/72;
+            set(spot_overlay, 'PaperUnits', 'inches', 'PaperPositionMode', 'manual', 'PaperPosition', [0 0 h w]);
+            print(spot_overlay, '-dpng', spot_overlay_filename, '-r0');
             % Load and save image with transparency
             tmp = imread(spot_overlay_filename);
             imwrite(tmp,spot_overlay_filename, 'png','Transparency', [0,0,0]);
