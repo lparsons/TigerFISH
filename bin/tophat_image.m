@@ -21,17 +21,17 @@ image.tophat_mid = image.tophat_layers(:,:,floor(size(image.info, 1)/2));
 %%%
     function [image, se] = parse_inputs(varargin)
         
-        iptchecknargin(1,2,nargin,mfilename)
+        narginchk(1,2)
         
         image = varargin{1};
-        iptcheckinput(image,{'struct'},{'nonempty'},mfilename,'image',1);
+        validateattributes(image,{'struct'},{'nonempty'},mfilename,'image',1);
         
         if (nargin >= 2)
             se = varargin{2};
         else
             se = strel('square',5);
         end
-        iptcheckinput(se,{'strel'},{'nonempty'},mfilename,'se',2);
+        validateattributes(se,{'strel'},{'nonempty'},mfilename,'se',2);
     end
 
 end
