@@ -23,6 +23,10 @@ function [cell_map_struct spot_data] = analyze_region(cy3file, cy3_5file, cy5fil
 %           Columns: x, y, z, intensity, cell_number, cell_type
 %               cell_types: 0 - normal, 1 - edge, 2 - background
 %
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 
 p = mfilename('fullpath');
 [pathstr] = fileparts(p);

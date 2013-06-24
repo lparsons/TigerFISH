@@ -1,3 +1,7 @@
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 % gmask_fit calculates the center of a psf using an iterative gaussian mask (Thompson et al.)
 %
 % Based on gmask_fit IDL program by Dan Larson - 8/16/00

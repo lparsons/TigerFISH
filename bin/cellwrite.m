@@ -1,3 +1,7 @@
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 % Write mixed data to csv file
 % Source: http://francisbarnhart.com/blog/2005/01/19/matlab_pain/
 function cellwrite(filename, cellarray, varargin)

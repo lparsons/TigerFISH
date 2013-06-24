@@ -1,4 +1,8 @@
 function threshold = determine_threshold(varargin)
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 
 %% Parse Arguments
 

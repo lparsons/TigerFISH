@@ -1,4 +1,8 @@
 function spot_locations = filter_border_spots( spot_locations )
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 
 
 [sz.x sz.y sz.z] = size( spot_locations );

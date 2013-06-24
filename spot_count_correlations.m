@@ -34,6 +34,10 @@ function [correlations, experiments, headers] = spot_count_correlations(spotCoun
 % MAT-files required: none
 %
 % See also: OTHER_FUNCTION_NAME1,  OTHER_FUNCTION_NAME2
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 
 % Author: Lance Parsons
 % Lewis-Sigler Institute for Integrative Genomics, Princeton University

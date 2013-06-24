@@ -1,6 +1,10 @@
 function [ new_spot_data ] = merge_spots( varargin )
 %MERGE_SPOTS Summary of this function goes here
 %   Detailed explanation goes here
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 ip = inputParser;
 ip.FunctionName = 'main';
 ip.addRequired('spot_data',@isnumeric);

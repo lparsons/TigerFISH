@@ -13,6 +13,10 @@ function num_files = combine_tiffs(input_dir,output_dir,filename_re, types)
 %
 %   OUTPUT
 %       num_files = number of combined files created
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 
 %% Config
 

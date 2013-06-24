@@ -1,4 +1,8 @@
 function cy = spot_mapping_pval( cy, Maps, Max_Projection, Image_Path_Name, Thresh )
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 
 
 if ~isfield( cy, 'intensity' )

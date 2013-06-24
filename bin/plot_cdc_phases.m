@@ -2,6 +2,10 @@ function [ f ] = plot_cdc_phases( dna_content, cdc_phases, filename )
 %PLOT_CDC_PHASES Prints distribution of DNA content and phases
 %   Prints distribution of DNA content and separation by phases
 %   Returns figure handle
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 
 % Normalize variance to avoid problems from treating pdf as pmf
 dna_content_std = std(  dna_content( ~isnan(dna_content) & ~isinf(dna_content) ) );

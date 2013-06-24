@@ -42,6 +42,10 @@ function experiment_counts = analyze_experiment_set( experiment_list, output_dir
 %           counts - matrix with 5 colums, row for each cell
 %               columns: region, cell, cy3 count, cy3.5 count, cy5 count
 %
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 p = mfilename('fullpath');
 [pathstr] = fileparts(p);
 addpath([pathstr filesep 'bin'])

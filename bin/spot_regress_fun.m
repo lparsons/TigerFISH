@@ -1,4 +1,8 @@
 function  [sl Mean Rsq] =  spot_regress_fun( p, dim)
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 clear x_7
 persistent x_7 y_7 z_7    
 persistent x_9 y_9 z_9

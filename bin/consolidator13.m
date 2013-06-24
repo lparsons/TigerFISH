@@ -127,6 +127,10 @@ function [xcon,ycon] = consolidator13(x,y,aggregation_mode,tol,tolerance_style)
 % e-mail address: woodchips@rochester.rr.com
 % Release: 3
 % Release date: 5/2/06
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 
 % is it a character array?
 if ischar(x)

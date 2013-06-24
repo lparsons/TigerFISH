@@ -39,6 +39,10 @@ function cellMap = segment_cells(image_input, second_image, params)
 % http://blogs.mathworks.com/steve/2006/06/02/cell-segmentation/
 % and in
 % Cohen et al. http://www.sciencemag.org/cgi/content/abstract/322/5907/1511
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 
 %% Configuration
 % Get default parmaters

@@ -2,6 +2,11 @@
 Created on Sep 9, 2010
 
 @author: lparsons
+
+------------------------
+Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>
+Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+------------------------
 '''
 
 import glob
@@ -12,7 +17,7 @@ class Experiment_Set(object):
     '''
     classdocs
     '''
-    
+
     def __init__(self, name, directory):
         '''
         Constructor
@@ -20,7 +25,7 @@ class Experiment_Set(object):
         self.name = name
         self.directory = directory
         self.experiments = self.find_experiments()
-        
+
     def find_experiments(self):
         experiment_list = []
         for f in os.listdir(self.directory):
@@ -29,10 +34,10 @@ class Experiment_Set(object):
                 experiment_list.append(e)
             experiment_list.sort(key=lambda x: x.number)
         return experiment_list
-    
+
     def index_file(self):
         return 'index.html'
-    
+
 
 class Experiment(object):
     '''
@@ -60,7 +65,7 @@ class Experiment(object):
                 except:
                     pass
         self.regions = self.find_regions()
-        
+
     def find_regions(self):
         region_list = []
         for f in os.listdir(self.abs_directory()):
@@ -69,13 +74,13 @@ class Experiment(object):
                 region_list.append(r)
             region_list.sort(key=lambda x: x.number)
         return region_list
-    
+
     def index_file(self):
         return os.path.join(self.directory, 'index.html')
-    
+
     def abs_directory(self):
         return os.path.join(self.root_directory, self.directory)
-    
+
     def histogram(self, dye, format='png', force=False):
         filename = ''
         if format == 'pdf':
@@ -87,7 +92,7 @@ class Experiment(object):
                 print cmd
                 os.system(cmd)
         return filename
-    
+
     def joint_distributions(self, type='prob', force=False):
         filenames = []
         file_paths = glob.glob(os.path.join(self.abs_directory(), 'joint_dist_%s_*.pdf' % type))
@@ -100,7 +105,7 @@ class Experiment(object):
             filenames.append((os.path.basename(f_png), os.path.basename(f)))
         filenames.sort(key=lambda x: x[0])
         return filenames
-            
+
     def dna_content(self, force=False):
         f_pdf = 'DNA_content.pdf'
         f_png = 'DNA_content.png'
@@ -109,13 +114,13 @@ class Experiment(object):
             print cmd
             os.system(cmd)
         return (f_png, f_pdf)
-                
+
 class Region(object):
     '''
     Create with name and directory
-    Number is set to name.split('_')[1] if that is a float, else it is name 
+    Number is set to name.split('_')[1] if that is a float, else it is name
     '''
-    
+
     def __init__(self, name, directory):
         '''
         Constructor
@@ -131,4 +136,4 @@ class Region(object):
 
     def index_file(self):
         return os.path.join(self.directory, 'index.html')
-        
+

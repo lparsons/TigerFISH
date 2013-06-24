@@ -1,4 +1,8 @@
 function [spot_data sp potSpot] = measure_spots_np( spot_locations, img, Thresh  )
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 
 
 if nargin <= 2, Thresh = 1.10; end

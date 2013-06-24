@@ -13,6 +13,10 @@ function generate_experiment_list( path, varargin )
 %
 %   writes tab delimited file with the following columns:
 %      Experiment, Region, Cy3_label, Cy3_file, Cy3.5_label, Cy3.5_file, Cy5_label, Cy5_file, DAPI_label, DAPI_file
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 
 addpath bin/
 

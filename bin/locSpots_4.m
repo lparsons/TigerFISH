@@ -1,4 +1,8 @@
 function [spb sp img] = locSpots_4( X, Thresh )
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 
 %X = '/data/spots/E191_R3_ssk22-16,95,250,368_ssk22-1_yef3/Image_Cy3_001.tif';
 if nargin <= 1, Thresh = 1.1; end 

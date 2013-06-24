@@ -6,6 +6,10 @@ function Y = probMassFnc_2D( x, y, Folder, File_Name, r )  %, Iter
 % 2) Plots a 2D matrix plot of the PMF and prints it as pdf file
 %
 % 3) Computes the Mutual Information (MI) between x and y
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 
 
 % If a single argument is passed it has to be nx2 matrix

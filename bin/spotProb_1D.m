@@ -1,6 +1,10 @@
 function prob = spotProb_1D( rna )
 % Function for computing the probability that a cell has N number of mRNAs (returned in vector prob) given the probability for each spot to be an mRNA in vector (rna)
 %  prob = spotProb( 0.5+0.5*rand(1,10) )
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 
 if nargin < 1, rna =  [ .9, .8, .7, .88, .65, .75 ]; end 
 

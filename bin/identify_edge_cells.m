@@ -1,4 +1,8 @@
 function cell_idx = identify_edge_cells(cell_map, offsets)
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 
 [cell_map_labeled,num_cells] = bwlabel(cell_map);
 

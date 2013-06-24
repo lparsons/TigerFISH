@@ -75,6 +75,10 @@ function [A] = combinator(N,K,s1,s2)
 % Date:     5/30/2009
 %
 % Reference:  http://mathworld.wolfram.com/BallPicking.html
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 
 ng = nargin;
 

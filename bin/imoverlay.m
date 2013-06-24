@@ -33,6 +33,10 @@ function out = imoverlay(in, mask, color)
 %       mask = I > 7;
 %       rgb = imoverlay(mat2gray(I), mask, [1 0 0]);
 %       imshow(rgb, 'InitialMagnification', 'fit')
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 
 %   Steven L. Eddins, The MathWorks, Inc.
 %   $Revision: 1.2 $  $Date: 2007/08/15 13:18:08 $

@@ -29,6 +29,10 @@ function [experiment_spot_data experiment_cell_maps experiment_counts] = analyze
 %
 %       experiment_counts
 %
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 
 p = mfilename('fullpath');
 [pathstr] = fileparts(p);

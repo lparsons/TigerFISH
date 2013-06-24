@@ -2,6 +2,10 @@ function Y = jointDist_probs( p_1_2,  Gene1, Gene2, Folder_File_Name)  %, Iter
 %
 % Plots a 2D matrix plot of the PMF and prints it as pdf file
 %
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 p_1_2 = p_1_2';
 % Plotting  
 MAXy = min( 40, size(p_1_2,2) );  IN.y = 1:MAXy; Y.y = MAXy;

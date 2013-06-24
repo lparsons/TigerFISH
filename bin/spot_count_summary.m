@@ -1,4 +1,8 @@
 function counts = spot_count_summary(varargin)
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 
 ip = inputParser;
 ip.FunctionName = 'determine_thresholds';

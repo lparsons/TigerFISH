@@ -1,4 +1,8 @@
 function [cdc_phases cdc_phases_p] = DNA_2_cdc_phases( DNA_Content, MaxIter )
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 
 % Set MaxIter default
 if nargin ==1 || isempty(MaxIter), MaxIter = 1e2; end 

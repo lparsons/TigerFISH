@@ -2,6 +2,10 @@ function [ in_focus_layer ] = best_focus_layer( multi_layer_image, varargin)
 %BEST_FOCUS_LAYER Find layer using one of two methods
 % variance - largest variance in intensity (default)
 % intensity - largest difference between max and min intensity
+% ------------------------
+% Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>, Nikolai Slavov <nslavov@mit.edu>
+% Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+% ------------------------
 
 
 methods = {'intensity', 'variance'};
