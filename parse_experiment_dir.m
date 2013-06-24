@@ -37,11 +37,14 @@ end
 exp_re = ip.Results.regex ; %['^(?<experiment>.+?)[\s-_]+' region_marker '[\s]+(?<region>[\d]+).+DAPI\.tiff$'];
 exp_name_list = [];
 main_dir_list = dir( [input_dir filesep filemask] );
-for i = 1: size(main_dir_list,1)
+for i = 1:size(main_dir_list,1)
     % Find DAPI files
-    renames = regexp(main_dir_list(i).name, exp_re, 'names');
-    if ~isempty(renames)
-        exp_name_list = [exp_name_list {renames.experiment}];
+    filename = main_dir_list(i).name;
+    if ~strcmp(filename(1), '.')
+        renames = regexp(filename, exp_re, 'names');
+        if ~isempty(renames)
+            exp_name_list = [exp_name_list {renames.experiment}];
+        end
     end
 end
 exp_name_list = unique(exp_name_list);
