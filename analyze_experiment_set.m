@@ -19,8 +19,8 @@ function experiment_counts = analyze_experiment_set( experiment_list, output_dir
 %
 %
 %   OPTIONAL PARAMETERS
-%       params - optional struct containing parameter values for analysis
-%           See default_parameters.m for list of parameters and
+%       ini_file - optional filename containing parameter values for analysis
+%           See default_parameters.ini for list of parameters and
 %           documentation
 %
 %       load_results - optional parameter, if true load previous cell map and
@@ -48,19 +48,20 @@ function experiment_counts = analyze_experiment_set( experiment_list, output_dir
 % ------------------------
 p = mfilename('fullpath');
 [pathstr] = fileparts(p);
-addpath([pathstr filesep 'bin'])
+addpath(genpath([pathstr filesep 'bin']))
 
 %% Parse Arguments
 ip = inputParser;
 ip.FunctionName = 'analyze_experiment_set';
 ip.addRequired('experiment_list',@isstruct);
 ip.addRequired('output_dir',@isdir);
-ip.addParamValue('params',struct(),@isstruct);
+ip.addParamValue('ini_file','',@ischar);
 ip.addParamValue('load_results',false,@islogical);
 ip.parse(experiment_list, output_dir, varargin{:});
 
 % Get default parmaters
-parsed_params = default_parameters(ip.Results.params);
+parsed_params = parse_ini(ip.Results.ini_file);
+parsed_params.WriteFile([ip.Results.output_dir filesep 'parameters.ini']);
 
 %% Loop through experiments
 %experiment_set_data = [];
@@ -70,9 +71,9 @@ for e=1:size(ip.Results.experiment_list,2)
     fprintf('Analyzing Experiment: %s\n', experiment.name);
     exp_output_dir = [ip.Results.output_dir filesep experiment.name];
     [s,mess,messid] = mkdir(exp_output_dir); %#ok<NASGU,ASGLU>
-    [experiment.spot_data experiment.cell_maps experiment.counts] = ...
+    [experiment.spot_data, experiment.cell_maps, experiment.counts] = ...
         analyze_experiment(experiment.region_files, exp_output_dir, ...
-        'params', parsed_params, ...
+        'ini_file', ip.Results.ini_file, ...
         'load_results', ip.Results.load_results, ...
         'dye_labels', experiment.dye_labels);
     %experiment_set_data = [experiment_set_data, experiment];

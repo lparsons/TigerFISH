@@ -33,13 +33,13 @@ function experiment_set_data = main( experiment_list_file, output_dir, varargin 
 %                           red - spot above thrshold
 %
 %   OPTIONAL PARAMETERS
-%       params - optional struct containing parameter values for analysis
-%           See default_parameters.m for list of parameters and
+%       params - optional ini file containing parameter values for analysis
+%           See default_parameters.ini for list of parameters and
 %           documentation
 %
 %       load_results - optional parameter, if true load previous cell map and
 %           spot intensity data (if it exists).  Off be default
-%               
+%
 %   OUTPUT
 %       EXPERIMENT_SET_DATA - list of experiment data structures
 %
@@ -50,27 +50,19 @@ function experiment_set_data = main( experiment_list_file, output_dir, varargin 
 
 ip = inputParser;
 ip.FunctionName = 'main';
-ip.addParamValue('params',struct(),@isstruct);
+ip.addParamValue('ini_file','',@ischar);
 ip.addParamValue('load_results',false,@islogical);
 ip.parse(varargin{:});
-
-% Get default parmaters
-parsed_params = default_parameters(ip.Results.params);
 
 if ~exist(output_dir, 'dir')
     mkdir(output_dir);
 end
-save( [ output_dir filesep 'parameters.mat'], 'parsed_params');
-fid = fopen( [ output_dir filesep 'parameters.txt'], 'w' );
-fprintf( fid, 'Contrast Thresholds: %1.2f %1.2f  %1.2f \n',  parsed_params.Threshold_Contrast  );
-fprintf( fid, 'Intensity Thresholds: %1.2f %1.2f  %1.2f \n',  parsed_params.Threshold_Intensity{:}  );
-fprintf( fid, 'Algorithm for quantifying spot intensity: %s\n',  parsed_params.algorithm  );
-fprintf( fid, 'DAPI was quantified in %d Dimensions\n',  parsed_params.DAPI_Dimensions  );
-fclose(fid);
 
 experiment_set = parse_experiment_list_file(experiment_list_file);
 experiment_set_data = analyze_experiment_set(experiment_set, output_dir,...
-    'params', parsed_params, 'load_results', ip.Results.load_results );
-
+    'ini_file', ip.Results.ini_file, 'load_results', ip.Results.load_results );
 
 disp('DONE');
+
+end
+

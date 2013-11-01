@@ -1,6 +1,8 @@
 syntax: glob
 
 *~
+*.DS_Store
 run.m
 *.pyc
 fish_view/tmp/*
+test/*

@@ -1,0 +1,44 @@
+TigerFISH Usage Guide
+---------------------
+
+1. Prepare a tab delimited file listing the experiments input files
+    The columns of the file should be: 
+
+        Experiment, Region, Cy3_label, Cy3_file, Cy3.5_label, Cy3.5_file, Cy5_label, Cy5_file, DAPI_label, DAPI_file
+
+    a. Use `parse_experiemnt_direcotory` when files for a given experiment are in a single directory:
+
+            EXPERIMENT_SET/
+                EXPERIMENT/
+                    EXPERIMENT_NUMBER-EXPERIMENT_NAME - Position #_CDYE.tiff
+                  
+                    DYE should be one of CY3, CY3.5, CY5, DAPI
+                    e.g. NS1-POL30_SUR4_OM45 - Position 1_CCY3.tiff
+
+       
+    b. Use `generate_experiment_list` if the files for each experiment are divided into subdirectories:
+
+            EXPERIMENT_SET/
+                EXPERIMENT/
+                    1/
+                        EXPERIMENT_NUMBER-EXPERIMENT_NAME - Position #_CDYE.tiff
+                        
+                        DYE should be one of CY3, CY3.5, CY5, DAPI
+                        e.g. NS1-POL30_SUR4_OM45 - Position 1_CCY3.tiff
+
+            generate_experiment_list(path, 
+                                     [experiment_numbers=1:1000],
+                                     [output_filename='experiment_list.txt'], 
+                                     [filemask=*])
+
+2. Analyze experiment set:
+
+        main( experiment_list_file, output_dir, [ini_file='my_parameters.ini'], [load_results=False] )
+
+    The `my_parameters.ini` file is an ini-style configuration file specifying
+    the parameters for the analysis. See `default_parameters.ini` for a list of
+    parameters and documentation.
+
+3. Run `generateFishView.py` to generate HTML pages to view the output:
+
+        python generateFishView.py path/to/results -n 'Experiment Set Name'

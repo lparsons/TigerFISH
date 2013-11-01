@@ -43,11 +43,11 @@ ip.addRequired('cy5file',@(x)ischar(x) || isempty(x));
 ip.addRequired('dapifile',@(x)ischar(x) && exist(x, 'file'));
 ip.addOptional('output_dir','',@isdir);
 ip.addParamValue('debug',false,@islogical);
-ip.addParamValue('params',struct(),@isstruct);
+ip.addParamValue('ini_file','',@ischar);
 ip.parse(cy3file, cy3_5file, cy5file, dapifile, varargin{:});
 
 % Get default parmaters
-parsed_params = default_parameters(ip.Results.params);
+parsed_params = parse_ini(ip.Results.ini_file);
 
 
 reg_data_file = [ip.Results.output_dir filesep 'region_data.mat'];
@@ -63,7 +63,7 @@ else
     toc
     
     fprintf('Segmenting Cells\n');
-    cell_map_struct = segment_cells(dapi_image, [], parsed_params);
+    cell_map_struct = segment_cells(dapi_image, [], ip.Results.ini_file);
     cell_map = cell_map_struct.cellMap;
     imwrite(bwperim(cell_map), [ip.Results.output_dir filesep 'cell_map.png'], 'png', 'Transparency', 0);
     
@@ -72,6 +72,7 @@ else
     dyes = {'cy3', 'cy3_5', 'cy5'};
     for d = 1:size(dyes,2)
         dye = dyes{d};
+    contrast_thresholds = parsed_params.GetValues('spot_detection', 'Threshold_Contrast');
         
         % Skip if no image
         if (isempty(ip.Results.([dye 'file'])))
@@ -87,7 +88,7 @@ else
             toc
             fprintf(['Locating ' dye ' Spots\n']);
             tic
-            spot_locations.(dye) = find_spots(image.(dye),  parsed_params.Threshold_Contrast( d ) );
+            spot_locations.(dye) = find_spots(image.(dye), contrast_thresholds(d));
             toc
             
             
@@ -95,7 +96,7 @@ else
             % spot_locations.(dye) = filter_border_spots( spot_locations.(dye) );
             
             % Measure spot intensities 
-			algorithm = parsed_params.algorithm;
+			algorithm = parsed_params.GetValues('spot_measurement', 'algorithm');
             if (strcmpi(algorithm, '3D'))
                 % Measure spots using Nikolai's 3D Non-Parametric method
                 fprintf(['Using 3D algorithm to determine spot intensity for ' dye '\n']);
@@ -122,7 +123,7 @@ else
             end
             
             % Merge nearby spots
-            spot_data.(dye) = merge_spots(spot_data.(dye), parsed_params.spot_merge_distance);
+            spot_data.(dye) = merge_spots(spot_data.(dye), parsed_params.GetValues('spot_detection', 'spot_merge_distance'));
         end
         
         % Spot to cell mapping

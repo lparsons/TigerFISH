@@ -103,7 +103,7 @@ for I = 1: size(main_dir_list,1)
     %fprintf( 'Number of Files: %d\n', File_Num );
     
     if sum(File_Num==0) > ip.Results.nmiss,
-        warning( 'FISHIA:experiment_list:missingFile', 'Missing file! I will skip the field !!!' );
+        warning( 'TigerFISH:experiment_list:missingFile', 'Missing file! I will skip the field !!!' );
         continue
     end
     
@@ -125,7 +125,7 @@ for I = 1: size(main_dir_list,1)
         rNum(3) = str2double( cy5_file{reg}(rPos_1:rPos_2) );
         rNum(4) = str2double( dapi_file{reg}(rPos_1:rPos_2) );
         if sum(  rNum==rNum(1)  ) < (4-ip.Results.nmiss)
-            warning( 'FISHIA:experiment_list:nonMatchingRegions', 'Skipping files from non corresponding regions !!!' );
+            warning( 'TigerFISH:experiment_list:nonMatchingRegions', 'Skipping files from non corresponding regions !!!' );
             continue
         end
         

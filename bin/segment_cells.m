@@ -31,8 +31,8 @@ function cellMap = segment_cells(image_input, second_image, params)
 %       enhance cell boundary detection (e.g. image with high
 %       autoflourescence)
 %
-%       PARAMS = Optional struct specifying parameters to use
-%           See default_paramaters.m for parameter list and default values
+%       PARAMS = Optional filename specifying parameters to use
+%           See default_paramaters.ini for parameter list and default values
 %
 %
 % Based on method described in
@@ -47,13 +47,13 @@ function cellMap = segment_cells(image_input, second_image, params)
 %% Configuration
 % Get default parmaters
 if nargin >= 3
-    parsed_params = default_parameters(params);
+    parsed_params = parse_ini(params);
 else
-    parsed_params = default_parameters();
+    parsed_params = parse_ini();
 end
 
 % Number of layers above a below the best infocus layer to use
-layers_around_focus = parsed_params.DAPI_layers_around_focus;
+layers_around_focus = parsed_params.GetValues('cell_segmentation', 'DAPI_layers_around_focus');
 
 % Morphological open structure
 morphOpenStruct = ones(5,5);
@@ -73,7 +73,7 @@ end
 %% Find best focus layer and use a few layers around that
 fprintf('DAPI Searching Best focus\n');
 tic
-DAPI_focus_layer_method = parsed_params.DAPI_focus_layer_method;
+DAPI_focus_layer_method = parsed_params.GetValues('cell_segmentation', 'DAPI_focus_layer_method');
 num_stacks = length(image.info);
 in_focus_layer = best_focus_layer(image.layers, DAPI_focus_layer_method);
 
@@ -135,7 +135,7 @@ bw3 = imopen(bw2, morphOpenStruct);
 %   Determine connected components (8 pixel neighborhood)
 %   Compute area of each component
 %   Remove those below specified value
-bw4 = bwareaopen(bw3, parsed_params.minCellSize);
+bw4 = bwareaopen(bw3, parsed_params.GetValues('cell_segmentation', 'minCellSize'));
 
 % Morphological closing (dilation followed by erosion).
 bw5 = bwmorph(bw4, 'close');
@@ -164,7 +164,7 @@ bw6 = bwmorph(bw5, 'thicken', cellBorderThicken);
 %
 % Find nuclei - extended maxima operator can be used to identify groups of
 % pixels that are significantly higher than their immediate surrounding.
-mask_em = imextendedmax(I_sc, parsed_params.DAPI_Contrast );
+mask_em = imextendedmax(I_sc, parsed_params.GetValues('cell_segmentation', 'DAPI_Contrast'));
 
 % Cleanup nuclei using morphological close, fill,  remove small objects
 % The morphological close operation is a dilation followed by an erosion,
@@ -232,7 +232,7 @@ toc
 fprintf('Computing DNA content\n')
 tic
 
-switch parsed_params.DAPI_Dimensions	
+switch parsed_params.GetValues('cell_segmentation', 'DAPI_Dimensions')
 	case{ 2, '2D' } 
 		cellMap_Layers_Cells = cellMap.cells; 
 		cellMap_Layers_Cells_5 = cellMap.cells_5;
@@ -243,7 +243,7 @@ switch parsed_params.DAPI_Dimensions
 		cellMap_Layers_Cells_5 =  repmat( cellMap.cells_5, [1 1 size(Layers,3)] );
 		cellMap_Layers_Nucs = 	  repmat( cellMap.nuc,     [1 1 size(Layers,3)] );
     otherwise
-        error('params.DAPI_Dimensions must be either 2 or 3')
+        error('DAPI_Dimensions parameter must be either 2 or 3')
 end
 
 cellMap.CytoMedian = zeros( cellMap.CellNum, 1 );

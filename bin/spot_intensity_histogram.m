@@ -19,9 +19,13 @@ ip.parse(varargin{:});
 % else
     % mx = ip.Results.max;
 % end
-
-mx = max( 3*median(ip.Results.in_spot_intensities(~isnan(ip.Results.in_spot_intensities))),...
-	      2*ip.Results.threshold 	);
+if (isnan(ip.Results.max))
+    mx = max( 4*median(ip.Results.in_spot_intensities(~isnan(ip.Results.in_spot_intensities))),...
+	      3*ip.Results.threshold);
+else
+    mx = ip.Results.max;
+end
+      
 % if numel(mx) ~= 1 || mx(1) < 0.1
  % mx = 0.1;
 % end 

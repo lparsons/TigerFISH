@@ -1,4 +1,4 @@
-function [experiment_spot_data experiment_cell_maps experiment_counts] = analyze_experiment( region_file_list, output_dir, varargin )
+function [experiment_spot_data, experiment_cell_maps, experiment_counts] = analyze_experiment( region_file_list, output_dir, varargin )
 % analyze_experiment - analyzes each region to determine cell boundaries and spot locations and intensities
 %    - determines experiment wide intensity thresholds
 %    - saves cell map, spot data
@@ -46,13 +46,13 @@ ip.FunctionName = 'analyze_experiment';
 ip.addRequired('region_file_list',@iscell);
 ip.addRequired('output_dir',@isdir);
 ip.addOptional('dye_labels',{'gene1', 'gene2', 'gene3', 'DNA'},@iscell);
-ip.addParamValue('params',struct(),@isstruct);
+ip.addParamValue('ini_file','',@ischar);
 ip.addParamValue('histogram_max',{NaN, NaN, NaN},@iscell);
 ip.addParamValue('load_results',false,@islogical);
 ip.parse(region_file_list, output_dir, varargin{:});
 
 % Get default parmaters
-parsed_params = default_parameters(ip.Results.params);
+parsed_params = parse_ini(ip.Results.ini_file);
 
 exp_data_file = [ip.Results.output_dir filesep 'experiment_data.mat'];
 
@@ -79,10 +79,10 @@ else
         [s,mess,messid] = mkdir(reg_output_dir); %#ok<ASGLU,NASGU>
         
         if exist(ip.Results.region_file_list{p,4}, 'file')
-            [cell_map spot_data] = analyze_region(ip.Results.region_file_list{p,1}, ...
+            [cell_map, spot_data] = analyze_region(ip.Results.region_file_list{p,1}, ...
                 ip.Results.region_file_list{p,2}, ip.Results.region_file_list{p,3}, ...
                 ip.Results.region_file_list{p,4}, reg_output_dir, ...
-                'params', parsed_params, 'debug', ip.Results.load_results);
+                'ini_file', ip.Results.ini_file, 'debug', ip.Results.load_results);
             experiment_cell_maps{p} = cell_map;
             experiment_spot_data.cy3 = vertcat(experiment_spot_data.cy3, horzcat(repmat(p, size(spot_data.cy3, 1),1),spot_data.cy3));
             experiment_spot_data.cy3_5 = vertcat(experiment_spot_data.cy3_5, horzcat(repmat(p, size(spot_data.cy3_5, 1),1),spot_data.cy3_5));
@@ -95,7 +95,7 @@ else
             
             % Estimates a CDC phase for each cell based on the DNA content inferred from DAPI staining
             % Save pdf of the plot of DNA content
-            [cdc.phases cdc.probs] = DNA_2_cdc_phases( DNA_content, [] );
+            [cdc.phases, cdc.probs] = DNA_2_cdc_phases( DNA_content, [] );
             cdc.DNA_content_nor = DNA_content;
             cdc.DNA_content = DNA_content1;
             cdc.Cell_Sizes = Cell_Sizes;
@@ -105,7 +105,7 @@ else
         end
     end
     
-    if parsed_params.Save_Detailed_Results
+    if strcmp('true', parsed_params.GetValues('misc', 'Save_Detailed_Results'))
         save(exp_data_file, 'experiment_spot_data', 'experiment_cell_maps', 'cdc' );
     end
     
@@ -123,7 +123,7 @@ if isfield(cdc, 'DNA_content_nor') && isfield(cdc, 'phases')
     try
         plot_cdc_phases(cdc.DNA_content_nor, cdc.phases, [ip.Results.output_dir filesep 'DNA_content.pdf']);
     catch plotError
-        warning('FISHIA:DNA_Content:plottingError', 'Error plotting CDC phases: %s\n', plotError.message)
+        warning('TigerFISH:DNA_Content:plottingError', 'Error plotting CDC phases: %s\n', plotError.message)
     end
 end
 
@@ -132,13 +132,15 @@ dyes = fields(experiment_spot_data);
 dye_color.cy3 = [0 1 0];
 dye_color.cy3_5 = [1 0 0];
 dye_color.cy5 = [.8 .8 .8];
+intensity_thresholds = parsed_params.GetValues('spot_measurement', 'Threshold_Intensity');
+null_distributions = parsed_params.GetValues('spot_measurement', 'NULL');
 
 for d=1:size(dyes,1)
     dye = dyes{d};
     dyelabel = ip.Results.dye_labels{d};
     
     % Set Thresholds
-    threshold.(dye) = parsed_params.Threshold_Intensity{ d };
+    threshold.(dye) = intensity_thresholds(d);
     
     if (~isempty(experiment_spot_data.(dye)))
         % Index for spots inside vs outside of cells
@@ -147,14 +149,14 @@ for d=1:size(dyes,1)
         spot_intensities = experiment_spot_data.(dye)(:,5);
         
         % Probabilities are always calculated using inside vs outside spots
-        mrna_probabilies = determine_mrna_probabilities(spot_intensities, out_spots_ind, in_spots_ind, parsed_params.NULL(d) );
+        mrna_probabilies = determine_mrna_probabilities(spot_intensities, out_spots_ind, in_spots_ind, null_distributions(d) );
         % Append spot probabilities to the spot data matrix
         experiment_spot_data.(dye) = [experiment_spot_data.(dye) mrna_probabilies];
         
         % Determine Thresholds if not set
-        if isnan(threshold.(dye))
+        if threshold.(dye) == 0 %isnan(threshold.(dye))
             % Using FDR and inside vs. outside spots
-            threshold.(dye) = determine_threshold(spot_intensities(in_spots_ind), mrna_probabilies(in_spots_ind), parsed_params.FDR_Threshold);
+            threshold.(dye) = determine_threshold(spot_intensities(in_spots_ind), mrna_probabilies(in_spots_ind), parsed_params.GetValues('spot_measurement', 'FDR_Threshold'));
         end
         
         % Histogram
@@ -241,13 +243,14 @@ end
 function threshold = determine_threshold(in_spots_intensities, in_spots_probabilites, fdr)
 pvals = 1 - in_spots_probabilites;
 try
-    [FDR qvals pi0] = mafdr( pvals ); %fprintf( '%1.2g\n', pi0 );
+    [FDR, qvals, pi0] = mafdr( pvals ); %fprintf( '%1.2g\n', pi0 );
     sign = find(pvals<0.05);
-    [val indT] = min( abs( qvals(sign) - fdr )  );
+    [val, indT] = min( abs( qvals(sign) - fdr )  );
     threshold = in_spots_intensities( sign(indT) );
-catch
-    warning('FISHIA:Threshold:FDRFailed', 'Unable to compute FDR using pvalues');
-    [val indT] = min( abs( pvals - 0.2 )  );
+catch err
+    warning('TigerFISH:Threshold:FDRFailed', 'Unable to compute FDR using pvalues');
+    warning(err);
+    [val, indT] = min( abs( pvals - 0.2 )  );
     threshold = in_spots_intensities( indT );
 end
 
@@ -321,7 +324,7 @@ if (~isempty(OUT_CDF.x))
         OUT_CDF.y(nondup),...
         in_spots(indDimmer) );
 else
-    warning('FISHIA:MRNA_probabilities:noOutsideSpots', 'No spots outside cells found, p values set to 0!')
+    warning('TigerFISH:MRNA_probabilities:noOutsideSpots', 'No spots outside cells found, p values set to 0!')
 end
 
 mrna_probabilities( in_spots_ind ) = prob_2be_mRNA.in;
