@@ -71,7 +71,8 @@ xlabel('Spot Intensity','FontSize', 20,'FontWeight', 'Bold')
 ylabel('Fraction','FontSize', 20,'FontWeight', 'Bold')
 title('Spot Intensity Histogram','FontSize', 22);
 set( gca, 'FontSize', 14, 'FontWeight', 'Bold' ); 
-lh = legend( ['Inside Cells: ' num2str(sum(i_n))], ['Outside Cells: '  num2str(sum(o_n))] );
+lh = legend( ['Inside Cells: ' num2str(sum(ip.Results.in_spot_intensities > ip.Results.threshold)) '/' num2str(sum(i_n))], ...
+             ['Outside Cells: '  num2str(sum(ip.Results.out_spot_intensities > ip.Results.threshold)) '/' num2str(sum(o_n))] );
 set (lh, 'FontSize', 20,'FontWeight', 'Bold');
     
 end
