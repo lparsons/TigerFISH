@@ -1,0 +1,45 @@
+<%!
+home_path_= ""
+%>
+
+<%inherit file="template.html"/>
+
+<div class="row">
+    <div class="sidebar-nav col-lg-2">
+        <h3>Experiments</h3>
+        <ul class="nav nav-pills nav-stacked">
+            % for e in experiment_set.experiments:
+            <li><a href="${e.directory}/index.html">${e.name}</a></li>
+            % endfor
+        </ul>
+    </div>
+    <div class="col-lg-10">
+        <h1>TigerFISH Results: ${experiment_set.name}</h1>
+        <h3>Spot Counts</h3>
+        <a href="spot_counts.tsv">spot_counts.tsv</a>
+        <p>Tab-delimited file with the following columns:</p>
+        <ul>
+            <li>'Experiment' - Name of experiment</li>
+            <li>'Region' - Region number</li>
+            <li>'Cell' - Cell Number (0=background)</li>
+            <li>'Cy3' - Spot count for Cy3</li>
+            <li>'Cy3.5' - Spot count for Cy3.5</li>
+            <li>'Cy5' - Spot count for Cy5</li>
+            <li>'Cell Phase' - Cell phase as determined by DAPI intensity</li>
+            <li>
+            <ul>
+                <li>-1 -&gt; No phase, background, not cell</li>
+                <li>0 -&gt; other?</li>
+                <li>1 -&gt; G1</li>
+                <li>2 -&gt; S</li>
+                <li>3 -&gt; G2</li>
+                <li>4 -&gt; other?</li>
+                <li>5 -&gt; other?</li>
+            </ul>
+            </li>
+        </ul>
+
+    </div>
+
+</div>
+

@@ -1,0 +1,69 @@
+<%!
+home_path_= "../../"
+%>
+
+<%inherit file="template.html"/>
+<!-- 
+Copyright (c) 2010-2013, Lance R. Parsons <lparsons@princeton.edu>
+Licensed under the BSD 2-Clause License: http://opensource.org/licenses/BSD-2-Clause
+-->
+<div id="region_header" style="position: fixed; z-index: 1000">
+<h1 style="background: white">${experiment.name} - ${region.name}</h1>
+<table>
+	<tr>
+		<td><a id="cy3_dye_switch"
+			class="on" href="#"
+			onclick="toggle_visibility('cy3_image','cy3_dye_switch');return false;">Cy3</a>
+		</td>
+		<td><a id="cy3_5_dye_switch"
+			class="on" href="#"
+			onclick="toggle_visibility('cy3_5_image','cy3_5_dye_switch');return false;">Cy3.5</a>
+		</td>
+		<td><a id="cy5_dye_switch"
+			class="on" href="#"
+			onclick="toggle_visibility('cy5_image','cy5_dye_switch');return false;">Cy5</a>
+		</td>
+		<td><a id="dapi_dye_switch"
+			class="on" href="#"
+			onclick="toggle_visibility('dapi_image','dapi_dye_switch');return false;">DAPI</a>
+		</td>
+	</tr>
+	<tr>
+		<td><a id="cy3_spots_switch"
+			class="off" href="#"
+			onclick="toggle_visibility('cy3_spots','cy3_spots_switch');return false;">Spots</a>
+		</td>
+		<td><a id="cy3_5_spots_switch"
+			class="off" href="#"
+			onclick="toggle_visibility('cy3_5_spots','cy3_5_spots_switch');return false;">Spots</a>
+		</td>
+		<td><a id="cy5_spots_switch"
+			class="off" href="#"
+			onclick="toggle_visibility('cy5_spots','cy5_spots_switch');return false;">Spots</a>
+		</td>
+		<td><a id="cell_outline_switch"
+			class="off" href="#"
+			onclick="toggle_visibility('cell_outline','cell_outline_switch');return false;">Cells</a>
+            (<a id="cell_outline_phases_switch"
+			class="off" href="#"
+			onclick="toggle_visibility('cell_outline_phases','cell_outline_phases_switch');return false;">Phases</a>)
+		</td>
+	</tr>
+</table>
+</div>
+
+<div id="image-container" style="background: black; display: inline-block; margin-top: 120px; top: 120px">
+	<div id="dapi_image" style="position: absolute; z-index: 100; display: block"><img src="dapi_projection.png" /></div>
+	<div id="cy3_image" style="position: absolute; z-index: 110; display: block"><img src="cy3_projection.png" /></div>
+	<div id="cy3_5_image" style="position: absolute; z-index: 120; display: block"><img src="cy3_5_projection.png" /></div>
+	<div id="cy5_image" style="position: absolute; z-index: 130; display: block"><img src="cy5_projection.png" /></div>
+	
+	<div id="cell_outline" style="position: absolute; z-index: 200; display: none"><img src="cell_map.png" /></div>
+	<div id="cell_outline_phases" style="position: absolute; z-index: 205; display: none"><img src="cell_map_phases.png" /></div>
+	<div id="cy3_spots" style="position: absolute; z-index: 210; display: none"><img src="cy3_spot_image.png" /></div>
+	<div id="cy3_5_spots" style="position: absolute; z-index: 220; display: none"><img src="cy3_5_spot_image.png" /></div>
+	<div id="cy5_spots" style="position: absolute; z-index: 230; display: none"><img src="cy5_spot_image.png" /></div>
+	
+	<div id="bg_placeholder" style="margin-top: 120px; z-index: 0; display: block; visibility: hidden"><img src="cy5_projection.png" /></div>
+
+</div>
