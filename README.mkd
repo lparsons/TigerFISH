@@ -42,3 +42,8 @@ TigerFISH Usage Guide
 3. Run `generateFishView.py` to generate HTML pages to view the output:
 
         python generateFishView.py path/to/results -n 'Experiment Set Name'
+
+Examples
+--------
+
+Example images and output are available at: http://genomics-pubs.princeton.edu/tigerfish-examples/
